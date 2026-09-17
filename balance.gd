@@ -23,10 +23,11 @@ const SPAWN_INTERVAL := 0.3
 
 # 经验与成长（U3）
 const GEM_VALUE := 1
-const PICKUP_RADIUS := 150.0
+const PICKUP_RADIUS := 260.0
 const LEVEL_UP_HEAL := 10.0  # 每次升级附带的小回复
 
 
-## 升到 level 级需要攒的经验值（曲线：1 级 8，2 级 11，3 级 14……）
+## 升到 level 级需要攒的经验：前期轻松（4/6/8……），
+## 中期稳步上涨，后期封顶稳定在 40，不再无限膨胀。
 static func xp_for_level(level: int) -> int:
-	return 5 + level * 3
+	return int(minf(2.0 + level * 2.0, 40.0))

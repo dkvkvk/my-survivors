@@ -31,7 +31,7 @@ position = Vector2(-1055, -697)
 
 [node name="GameOver" type="CanvasLayer" parent="." unique_id=880031702]
 unique_name_in_owner = true
-process_mode = 4
+process_mode = 3
 script = ExtResource("4_gameover")
 visible = false
 
@@ -161,7 +161,7 @@ text = "Lv 1"
 
 [node name="LevelUpUI" type="CanvasLayer" parent="." unique_id=880031709]
 unique_name_in_owner = true
-process_mode = 4
+process_mode = 3
 script = ExtResource("5_levelup")
 visible = false
 
