@@ -92,5 +92,5 @@ Game (game.gd, y_sort_enabled)          ← 根节点
 
 - 上游仓库：https://github.com/gdquest-demos/getting-started-with-godot-4
 - 配套免费教程（本项目的完整搭建过程）：https://www.gdquest.com/library/first_2d_game_godot4_vampire_survivor/
-- 上游完整克隆（含 3D FPS demo 和 starter files）在 `E:\_upstream\getting-started-with-godot-4`
+- 上游完整克隆（含 3D FPS demo 和 starter files）在 `E:eference\getting-started-with-godot-4`
 - 版权说明：见 [NOTICE.md](NOTICE.md)
