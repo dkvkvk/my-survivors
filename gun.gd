@@ -7,9 +7,11 @@ func _ready():
 
 func _process(_delta):
 	var enemies_in_range = get_overlapping_bodies()
-	if enemies_in_range.size() > 0:
-		var target_enemy = enemies_in_range.front()
-		look_at(target_enemy.global_position)
+	for enemy in enemies_in_range:
+		# 防护：跳过坐标异常（NaN/inf）的目标，避免枪朝向被污染
+		if is_finite(enemy.global_position.x) and is_finite(enemy.global_position.y):
+			look_at(enemy.global_position)
+			break
 
 
 func shoot():
