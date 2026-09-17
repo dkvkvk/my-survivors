@@ -19,20 +19,27 @@ func _physics_process(_delta):
 	move_and_slide()
 
 
-func take_damage():
+func take_damage(amount := 1):
 	%Slime.play_hurt()
 	Audio.play("res://sounds/hit.wav", false, randf_range(0.9, 1.1), 0.3)
 	Juice.flash(%Slime)
-	Juice.damage_number(get_parent(), global_position + Vector2(0, -48), 1)
-	health -= 1
+	Juice.damage_number(get_parent(), global_position + Vector2(0, -48), amount)
+	health -= amount
 
 	if health == 0:
 		died.emit()
 		Audio.play("res://sounds/enemy-die.wav", true, randf_range(0.9, 1.1), 0.15)
 		Juice.shake(player.get_node("Camera2D"), 0.35)
 		Juice.hitstop(0.05)
+		drop_xp_gem()
 		var smoke_scene = preload("res://smoke_explosion/smoke_explosion.tscn")
 		var smoke = smoke_scene.instantiate()
 		get_parent().add_child(smoke)
 		smoke.global_position = global_position
 		queue_free()
+
+
+func drop_xp_gem():
+	var gem = preload("res://xp_gem.tscn").instantiate()
+	get_parent().add_child(gem)
+	gem.global_position = global_position

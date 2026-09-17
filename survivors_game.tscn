@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://dsw8raqgacxsc" path="res://player.tscn" id="2_a7q7f"]
 [ext_resource type="PackedScene" uid="uid://c2qg1nuvfnd4q" path="res://trees/pine_tree.tscn" id="3_6h7ij"]
 [ext_resource type="Script" path="res://game_over.gd" id="4_gameover"]
+[ext_resource type="Script" path="res://level_up_ui.gd" id="5_levelup"]
 
 [sub_resource type="Curve2D" id="Curve2D_cp6e5"]
 _data = {
@@ -141,6 +142,103 @@ offset_bottom = 100.0
 theme_override_font_sizes/font_size = 32
 text = "存活 0:00"
 
+[node name="XPBar" type="ProgressBar" parent="HUD" unique_id=880031707]
+unique_name_in_owner = true
+offset_left = 24.0
+offset_top = 108.0
+offset_right = 424.0
+offset_bottom = 132.0
+show_percentage = false
+
+[node name="LevelLabel" type="Label" parent="HUD" unique_id=880031708]
+unique_name_in_owner = true
+offset_left = 24.0
+offset_top = 138.0
+offset_right = 424.0
+offset_bottom = 178.0
+theme_override_font_sizes/font_size = 32
+text = "Lv 1"
+
+[node name="LevelUpUI" type="CanvasLayer" parent="." unique_id=880031709]
+unique_name_in_owner = true
+process_mode = 4
+script = ExtResource("5_levelup")
+visible = false
+
+[node name="Dim" type="ColorRect" parent="LevelUpUI" unique_id=880031710]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.501961)
+
+[node name="Title" type="Label" parent="LevelUpUI" unique_id=880031711]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -280.0
+offset_right = 500.0
+offset_bottom = -180.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 56
+text = "★ 升级！选一张强化 ★"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card0" type="Button" parent="LevelUpUI" unique_id=880031712]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -680.0
+offset_top = -60.0
+offset_right = -240.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 40
+text = "卡"
+
+[node name="Card1" type="Button" parent="LevelUpUI" unique_id=880031713]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -60.0
+offset_right = 220.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 40
+text = "卡"
+
+[node name="Card2" type="Button" parent="LevelUpUI" unique_id=880031714]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 240.0
+offset_top = -60.0
+offset_right = 680.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 40
+text = "卡"
+
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="health_depleted" from="Player" to="." method="_on_player_health_depleted"]
 [connection signal="pressed" from="GameOver/RestartButton" to="GameOver" method="_on_restart_button_pressed"]
+[connection signal="pressed" from="LevelUpUI/Card0" to="LevelUpUI" method="_on_card_0_pressed"]
+[connection signal="pressed" from="LevelUpUI/Card1" to="LevelUpUI" method="_on_card_1_pressed"]
+[connection signal="pressed" from="LevelUpUI/Card2" to="LevelUpUI" method="_on_card_2_pressed"]

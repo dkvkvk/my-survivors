@@ -3,14 +3,20 @@ extends Node2D
 var kill_count := 0
 var run_time := 0.0
 
+@onready var player = $Player
+
 
 func _ready():
 	$Timer.wait_time = Balance.SPAWN_INTERVAL
+	player.leveled_up.connect(_on_player_leveled_up)
 
 
 func _process(delta):
 	run_time += delta
 	%TimeLabel.text = "存活 %d:%02d" % [int(run_time) / 60, int(run_time) % 60]
+	%XPBar.max_value = player.xp_to_next
+	%XPBar.value = player.xp
+	%LevelLabel.text = "Lv %d" % player.level
 
 
 func spawn_mob():
@@ -28,6 +34,10 @@ func _on_mob_died():
 
 func _on_timer_timeout():
 	spawn_mob()
+
+
+func _on_player_leveled_up():
+	%LevelUpUI.present(player)
 
 
 func _on_player_health_depleted():

@@ -23,5 +23,5 @@
 | 素材/模块 | 来源 | 许可证 |
 |---|---|---|
 | `audio.gd`（音效池） | Kenney Starter Kit Match-3（改编自 KidsCanCode 代码） | MIT |
-| `sounds/*.wav`（射击/命中/敌人死亡/受伤/结束，共 5 个） | [The Essential Retro Video Game Sound Effects [512 sounds] by Juhani Junkala (SubspaceAudio)](https://opengameart.org/content/512-sound-effects-8-bit-style) | CC0 |
+| `sounds/*.wav`（射击/命中/敌人死亡/受伤/结束/拾取，共 6 个） | [The Essential Retro Video Game Sound Effects [512 sounds] by Juhani Junkala (SubspaceAudio)](https://opengameart.org/content/512-sound-effects-8-bit-style) | CC0 |
 | `addons/saltmire_juice/`（打击感套件：震屏/闪白/hit-stop/伤害数字） | [Saltmire Juice](https://github.com/saltmire/saltmire-juice) | MIT |

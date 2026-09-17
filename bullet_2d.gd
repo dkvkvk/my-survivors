@@ -2,6 +2,7 @@ extends Area2D
 
 
 var travelled_distance = 0
+var damage := 1  # 由枪在生成时写入，吃升级加成
 
 
 func _physics_process(delta):
@@ -15,4 +16,4 @@ func _physics_process(delta):
 func _on_body_entered(body):
 	queue_free()
 	if body.has_method("take_damage"):
-		body.take_damage()
+		body.take_damage(damage)

@@ -1,18 +1,33 @@
 extends CharacterBody2D
 
 signal health_depleted
+signal leveled_up
 
+var max_health = Balance.PLAYER_MAX_HEALTH
 var health = Balance.PLAYER_MAX_HEALTH
+
+# 经验与成长（U3）：升级三选一会改这些字段，战斗逻辑从这里读
+var xp := 0
+var level := 1
+var xp_to_next: int = Balance.xp_for_level(1)
+var speed_mult := 1.0
+var fire_rate_mult := 1.0
+var bullet_damage := 1
+var pickup_radius := Balance.PICKUP_RADIUS
 
 # 受伤音效节流：被怪围着时每 0.6 秒最多响一次，不然太吵
 var hurt_sound_cooldown := 0.0
+
+
+func _ready():
+	%HealthBar.max_value = max_health
 
 
 func _physics_process(delta):
 	hurt_sound_cooldown = maxf(0.0, hurt_sound_cooldown - delta)
 
 	var direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	velocity = direction * Balance.PLAYER_SPEED
+	velocity = direction * Balance.PLAYER_SPEED * speed_mult
 
 	move_and_slide()
 
@@ -33,3 +48,36 @@ func _physics_process(delta):
 			hurt_sound_cooldown = 0.6
 		if health <= 0.0:
 			health_depleted.emit()
+
+
+## 收取经验。够一级就升级并发出信号，游戏主逻辑收到后弹出三选一。
+## 连升多级时一次结算经验，只弹一次卡（略有优惠，简化处理）。
+func add_xp(amount: int) -> void:
+	xp += amount
+	if xp < xp_to_next:
+		return
+	while xp >= xp_to_next:
+		xp -= xp_to_next
+		level += 1
+		xp_to_next = Balance.xp_for_level(level)
+	health = minf(health + Balance.LEVEL_UP_HEAL, max_health)
+	%HealthBar.value = health
+	leveled_up.emit()
+
+
+## 应用一张强化卡的效果。id 与 upgrades.gd 的卡池对应。
+func apply_upgrade(id: String) -> void:
+	match id:
+		"speed":
+			speed_mult += 0.12
+		"fire_rate":
+			fire_rate_mult += 0.15
+		"damage":
+			bullet_damage += 1
+		"max_health":
+			max_health += 25.0
+			health = minf(health + 25.0, max_health)
+			%HealthBar.max_value = max_health
+		"magnet":
+			pickup_radius *= 1.35
+	%HealthBar.value = health
