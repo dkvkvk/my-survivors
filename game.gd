@@ -7,7 +7,6 @@ var run_time := 0.0
 
 
 func _ready():
-	$Timer.wait_time = Balance.SPAWN_INTERVAL
 	player.leveled_up.connect(_on_player_leveled_up)
 
 
@@ -34,6 +33,8 @@ func _on_mob_died():
 
 func _on_timer_timeout():
 	spawn_mob()
+	# 每次刷怪后按存活时间调整下一次间隔（难度曲线）
+	$Timer.wait_time = Balance.spawn_interval(run_time)
 
 
 func _on_player_leveled_up():

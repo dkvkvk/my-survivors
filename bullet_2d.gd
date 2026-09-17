@@ -17,6 +17,8 @@ func _physics_process(delta):
 
 
 func _on_body_entered(body):
+	# body_entered 在物理刷新中触发，节点增删必须延迟执行，
+	# 否则会破坏物理空间状态（Godot 会报 flushing queries 错误）
 	queue_free()
 	if body.has_method("take_damage"):
-		body.take_damage(damage)
+		body.call_deferred("take_damage", damage)

@@ -20,10 +20,14 @@ func _physics_process(delta):
 		# 进入磁吸范围后越飞越快
 		magnet_speed = maxf(magnet_speed + 1400.0 * delta, 400.0)
 		position += to_player.normalized() * magnet_speed * delta
+	else:
+		# 磁吸范围外也缓慢滚向玩家，不用专门跑图去捡
+		position += to_player.limit_length(1.0) * Balance.GEM_DRIFT_SPEED * delta
 
 
 func _on_body_entered(body):
 	if body == player:
-		player.add_xp(value)
-		Audio.play("res://sounds/pickup.wav", false, randf_range(1.1, 1.35), 0.2)
 		queue_free()
+		Audio.play("res://sounds/pickup.wav", false, randf_range(1.1, 1.35), 0.2)
+		# 加经验可能触发升级暂停，延迟到物理刷新外执行
+		player.call_deferred("add_xp", value)
