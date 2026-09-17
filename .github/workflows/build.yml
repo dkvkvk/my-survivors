@@ -28,6 +28,7 @@ jobs:
       - name: 导入资源并导出游戏
         run: |
           godot/Godot_v4.7.2-stable_linux.x86_64 --headless --path . --import
+          mkdir -p build
           godot/Godot_v4.7.2-stable_linux.x86_64 --headless --path . --export-release "Windows Desktop"
 
       - name: 上传成品
