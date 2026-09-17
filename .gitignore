@@ -1,0 +1,13 @@
+# Godot 4 生成的缓存目录，不应纳入版本控制
+.godot/
+*.translation
+
+# 导出的构建产物
+/build/
+*.exe
+*.pck
+*.zip
+
+# 操作系统杂项
+.DS_Store
+Thumbs.db
