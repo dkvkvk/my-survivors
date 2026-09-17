@@ -28,6 +28,8 @@ func _physics_process(delta):
 		%HealthBar.value = health
 		if hurt_sound_cooldown <= 0.0:
 			Audio.play("res://sounds/hurt.wav", false, 1.0, 0.35)
+			Juice.flash(self, Color(4, 0.8, 0.8))
+			Juice.shake($Camera2D, 0.2)
 			hurt_sound_cooldown = 0.6
 		if health <= 0.0:
 			health_depleted.emit()

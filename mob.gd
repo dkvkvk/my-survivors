@@ -22,11 +22,15 @@ func _physics_process(_delta):
 func take_damage():
 	%Slime.play_hurt()
 	Audio.play("res://sounds/hit.wav", false, randf_range(0.9, 1.1), 0.3)
+	Juice.flash(%Slime)
+	Juice.damage_number(get_parent(), global_position + Vector2(0, -48), 1)
 	health -= 1
 
 	if health == 0:
 		died.emit()
 		Audio.play("res://sounds/enemy-die.wav", true, 1.0, 0.4)
+		Juice.shake(player.get_node("Camera2D"), 0.35)
+		Juice.hitstop(0.05)
 		var smoke_scene = preload("res://smoke_explosion/smoke_explosion.tscn")
 		var smoke = smoke_scene.instantiate()
 		get_parent().add_child(smoke)

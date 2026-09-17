@@ -86,6 +86,7 @@ config/icon="res://icon.png"
 [autoload]
 
 Audio="*res://audio.gd"
+Juice="*res://addons/saltmire_juice/juice.gd"
 
 [display]
 
@@ -99,7 +100,7 @@ project/assembly_name="Getting started with Godot 4"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/colorpicker_presets/plugin.cfg")
+enabled=PackedStringArray("res://addons/colorpicker_presets/plugin.cfg", "res://addons/saltmire_juice/plugin.cfg")
 
 [input]
 
