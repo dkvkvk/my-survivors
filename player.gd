@@ -36,10 +36,14 @@ func _physics_process(delta):
 	else:
 		%HappyBoo.play_idle_animation()
 
-	# Taking damage
+	# Taking damage（不同怪物的接触伤害倍率不同，见 balance.gd 的 MOB_VARIANTS）
 	var overlapping_mobs = %HurtBox.get_overlapping_bodies()
 	if overlapping_mobs:
-		health -= Balance.PLAYER_DAMAGE_RATE * overlapping_mobs.size() * delta
+		var contact_total := 0.0
+		for mob in overlapping_mobs:
+			if "contact_damage" in mob:
+				contact_total += mob.contact_damage
+		health -= Balance.PLAYER_DAMAGE_RATE * contact_total * delta
 		%HealthBar.value = health
 		if hurt_sound_cooldown <= 0.0:
 			Audio.play("res://sounds/hurt.wav", false, 1.0, 0.35)

@@ -2,6 +2,7 @@ extends Node2D
 
 var kill_count := 0
 var run_time := 0.0
+var current_wave: Dictionary = Balance.WAVES[0]
 
 @onready var player = $Player
 
@@ -16,25 +17,29 @@ func _process(delta):
 	%XPBar.max_value = player.xp_to_next
 	%XPBar.value = player.xp
 	%LevelLabel.text = "Lv %d" % player.level
+	# 无限草地：地面按贴图尺寸的整数倍跟随玩家，花纹无缝衔接
+	$Ground.global_position = player.global_position.snapped(Vector2(1024, 1024))
 
 
 func spawn_mob():
 	%PathFollow2D.progress_ratio = randf()
 	var new_mob = preload("res://mob.tscn").instantiate()
 	new_mob.global_position = %PathFollow2D.global_position
-	new_mob.died.connect(_on_mob_died)
 	add_child(new_mob)
+	new_mob.setup(Balance.pick_variant(current_wave))
+	new_mob.died.connect(_on_mob_died)
+
+
+func _on_timer_timeout():
+	spawn_mob()
+	# 每次刷怪后按存活时间刷新波次（难度与怪物组合）
+	current_wave = Balance.current_wave(run_time)
+	$Timer.wait_time = current_wave["spawn"]
 
 
 func _on_mob_died():
 	kill_count += 1
 	%KillLabel.text = "击杀 %d" % kill_count
-
-
-func _on_timer_timeout():
-	spawn_mob()
-	# 每次刷怪后按存活时间调整下一次间隔（难度曲线）
-	$Timer.wait_time = Balance.spawn_interval(run_time)
 
 
 func _on_player_leveled_up():
