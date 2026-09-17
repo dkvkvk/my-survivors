@@ -1,0 +1,37 @@
+name: 构建Windows版
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  windows:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 下载 Godot 引擎
+        run: |
+          wget -q https://downloads.godotengine.org/4.7.2/Godot_v4.7.2-stable_linux.x86_64.zip
+          unzip -q Godot_v4.7.2-stable_linux.x86_64.zip -d godot
+          chmod +x godot/Godot_v4.7.2-stable_linux.x86_64
+
+      - name: 下载导出模板
+        run: |
+          wget -q https://downloads.godotengine.org/export_templates/4.7.2/Godot_v4.7.2-stable_export_templates.tpz
+          mkdir -p ~/.local/share/godot/export_templates/4.7.2.stable
+          unzip -q Godot_v4.7.2-stable_export_templates.tpz -d tpz
+          mv tpz/templates/* ~/.local/share/godot/export_templates/4.7.2.stable/
+
+      - name: 导入资源并导出游戏
+        run: |
+          godot/Godot_v4.7.2-stable_linux.x86_64 --headless --path . --import
+          godot/Godot_v4.7.2-stable_linux.x86_64 --headless --path . --export-release "Windows Desktop"
+
+      - name: 上传成品
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-survivors-windows
+          path: build/
