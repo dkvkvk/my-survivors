@@ -28,7 +28,7 @@ func take_damage():
 
 	if health == 0:
 		died.emit()
-		Audio.play("res://sounds/enemy-die.wav", true, 1.0, 0.4)
+		Audio.play("res://sounds/enemy-die.wav", true, randf_range(0.9, 1.1), 0.15)
 		Juice.shake(player.get_node("Camera2D"), 0.35)
 		Juice.hitstop(0.05)
 		var smoke_scene = preload("res://smoke_explosion/smoke_explosion.tscn")
