@@ -14,7 +14,7 @@ func _process(_delta):
 
 func shoot():
 	const BULLET = preload("res://bullet_2d.tscn")
-	Audio.play("res://sounds/shoot.wav", false, randf_range(0.9, 1.1), 0.12)
+	Audio.play("res://sounds/shoot.wav", false, randf_range(0.9, 1.1), 0.07)
 	var new_bullet = BULLET.instantiate()
 	new_bullet.global_transform = %ShootingPoint.global_transform
 	%ShootingPoint.add_child(new_bullet)
