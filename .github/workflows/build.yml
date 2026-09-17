@@ -14,13 +14,13 @@ jobs:
 
       - name: 下载 Godot 引擎
         run: |
-          wget -q https://downloads.godotengine.org/4.7.2/Godot_v4.7.2-stable_linux.x86_64.zip
+          wget -q https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
           unzip -q Godot_v4.7.2-stable_linux.x86_64.zip -d godot
           chmod +x godot/Godot_v4.7.2-stable_linux.x86_64
 
       - name: 下载导出模板
         run: |
-          wget -q https://downloads.godotengine.org/export_templates/4.7.2/Godot_v4.7.2-stable_export_templates.tpz
+          wget -q https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz
           mkdir -p ~/.local/share/godot/export_templates/4.7.2.stable
           unzip -q Godot_v4.7.2-stable_export_templates.tpz -d tpz
           mv tpz/templates/* ~/.local/share/godot/export_templates/4.7.2.stable/
