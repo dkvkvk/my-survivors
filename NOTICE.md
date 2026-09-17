@@ -17,3 +17,10 @@
 
 - **学习、练习、发布免费游戏**：直接用即可，无任何问题。
 - **想商用（卖游戏）**：必须替换上述目录中的全部美术素材（可用 CC0 素材库如 Kenney、itch.io 上的商用许可素材，或自制），代码部分可继续保留。
+
+## U1 阶段新增素材与模块登记
+
+| 素材/模块 | 来源 | 许可证 |
+|---|---|---|
+| `audio.gd`（音效池） | Kenney Starter Kit Match-3（改编自 KidsCanCode 代码） | MIT |
+| `sounds/*.wav`（射击/命中/敌人死亡/受伤/结束，共 5 个） | [The Essential Retro Video Game Sound Effects [512 sounds] by Juhani Junkala (SubspaceAudio)](https://opengameart.org/content/512-sound-effects-8-bit-style) | CC0 |

@@ -3,8 +3,8 @@ extends CharacterBody2D
 signal died
 
 
-var speed = randf_range(200, 300)
-var health = 3
+var speed = randf_range(Balance.MOB_MIN_SPEED, Balance.MOB_MAX_SPEED)
+var health = Balance.MOB_HEALTH
 
 @onready var player = get_node("/root/Game/Player")
 
@@ -21,9 +21,12 @@ func _physics_process(_delta):
 
 func take_damage():
 	%Slime.play_hurt()
+	Audio.play("res://sounds/hit.wav", false, randf_range(0.9, 1.1), 0.3)
 	health -= 1
 
 	if health == 0:
+		died.emit()
+		Audio.play("res://sounds/enemy-die.wav", true, 1.0, 0.4)
 		var smoke_scene = preload("res://smoke_explosion/smoke_explosion.tscn")
 		var smoke = smoke_scene.instantiate()
 		get_parent().add_child(smoke)

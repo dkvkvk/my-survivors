@@ -1,6 +1,10 @@
 extends Area2D
 
 
+func _ready():
+	$Timer.wait_time = Balance.GUN_FIRE_INTERVAL
+
+
 func _process(_delta):
 	var enemies_in_range = get_overlapping_bodies()
 	if enemies_in_range.size() > 0:
@@ -10,6 +14,7 @@ func _process(_delta):
 
 func shoot():
 	const BULLET = preload("res://bullet_2d.tscn")
+	Audio.play("res://sounds/shoot.wav", false, randf_range(0.9, 1.1), 0.25)
 	var new_bullet = BULLET.instantiate()
 	new_bullet.global_transform = %ShootingPoint.global_transform
 	%ShootingPoint.add_child(new_bullet)
