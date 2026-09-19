@@ -64,13 +64,14 @@ func take_damage(amount := 1, knockback := Vector2.ZERO):
 		_knockback = _knockback.normalized() * Balance.KNOCKBACK_MAX
 
 	# 注意用 <=：升伤害卡后可能一枪从 1 血打到 -1，用 == 判断会永远杀不死
-	if health <= 0:
-		died.emit()
-		Audio.play("res://sounds/enemy-die.wav", true, randf_range(0.9, 1.1), 0.15)
-		Juice.shake(player.get_node("Camera2D"), 0.35)
-		Juice.hitstop(0.05)
-		drop_xp_gem()
-		_burst_debris()
+		if health <= 0:
+			died.emit()
+			Audio.play("res://sounds/enemy-die.wav", true, randf_range(0.9, 1.1), 0.15)
+			Juice.shake(player.get_node("Camera2D"), 0.35)
+			Juice.hitstop(0.05)
+			drop_xp_gem()
+			drop_coins()
+			_burst_debris()
 		var smoke_scene = preload("res://smoke_explosion/smoke_explosion.tscn")
 		var smoke = smoke_scene.instantiate()
 		get_parent().add_child(smoke)
@@ -85,6 +86,18 @@ func drop_xp_gem():
 		gem.scale = Vector2(1.3, 1.3)  # 大额经验宝石更大只
 	get_parent().add_child(gem)
 	gem.global_position = global_position
+
+
+## 按变体概率掉金币（P2 局外经济），散落成小圈避免叠成一枚
+func drop_coins():
+	var drop: Dictionary = Balance.COIN_DROPS[variant]
+	if randf() > drop["chance"]:
+		return
+	for i in int(drop["amount"]):
+		var coin = preload("res://coin.tscn").instantiate()
+		get_parent().add_child(coin)
+		var offset := Vector2.from_angle(randf() * TAU) * randf_range(4.0, 20.0)
+		coin.global_position = global_position + offset
 
 
 ## 死亡时爆一圈同色碎片（一次性粒子，纯代码创建，播完自毁）

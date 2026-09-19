@@ -25,7 +25,17 @@ var hurt_sound_cooldown := 0.0
 
 
 func _ready():
+	_apply_shop_upgrades()
 	%HealthBar.max_value = max_health
+
+
+## 应用商店局外强化（P2）：改的是初始面板，局内卡牌照常叠加
+func _apply_shop_upgrades() -> void:
+	max_health += Balance.SHOP_HP_PER_LEVEL * SaveGame.get_upgrade_level("hp")
+	health = max_health
+	bullet_damage += Balance.SHOP_DMG_PER_LEVEL * SaveGame.get_upgrade_level("dmg")
+	speed_mult += Balance.SHOP_SPD_PER_LEVEL * SaveGame.get_upgrade_level("spd")
+	pickup_radius *= 1.0 + Balance.SHOP_MAG_PER_LEVEL * SaveGame.get_upgrade_level("mag")
 
 
 func _physics_process(delta):

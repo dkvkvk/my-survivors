@@ -2,6 +2,7 @@ extends Node2D
 
 var kill_count := 0
 var run_time := 0.0
+var run_coins := 0  # 本局拾取的金币，死亡时结算入存档余额
 var current_wave: Dictionary = Balance.WAVES[0]
 
 @onready var player = $Player
@@ -58,11 +59,17 @@ func _on_mob_died():
 	%KillLabel.text = "击杀 %d" % kill_count
 
 
+## 金币拾取入口（coin.gd 延迟调用）
+func add_run_coins(amount: int) -> void:
+	run_coins += amount
+	%CoinLabel.text = "金币 %d" % run_coins
+
+
 func _on_player_leveled_up():
 	%LevelUpUI.present(player)
 
 
 func _on_player_health_depleted():
 	Audio.play("res://sounds/game-over.wav", false, 1.0, 0.5)
-	%GameOver.show_results(kill_count, run_time, player.level)
+	%GameOver.show_results(kill_count, run_time, player.level, run_coins)
 	get_tree().paused = true

@@ -84,6 +84,27 @@ const PICKUP_RADIUS := 260.0
 const GEM_DRIFT_SPEED := 24.0  # 宝石缓慢滚向玩家的速度
 const LEVEL_UP_HEAL := 10.0  # 每次升级附带的小回复
 
+# 金币掉落（P2 局外经济）：每变体的掉落概率与数量
+const COIN_DROPS := {
+	"slime": {"chance": 0.18, "amount": 1},
+	"runner": {"chance": 0.25, "amount": 1},
+	"tank": {"chance": 1.0, "amount": 3},
+	"elite": {"chance": 1.0, "amount": 8},
+}
+const COIN_VALUE := 1  # 单枚金币面值（掉落数量已按变体折算）
+
+# 商店（P2 局外永久强化）：花费 = cost ×（当前等级+1），效果在 player._ready 应用
+const SHOP := [
+	{"id": "hp", "name": "体质锻炼", "desc": "初始生命 +20/级", "max": 5, "cost": 15},
+	{"id": "dmg", "name": "锋利手里剑", "desc": "初始伤害 +1/级", "max": 5, "cost": 25},
+	{"id": "spd", "name": "疾行忍靴", "desc": "移动速度 +6%/级", "max": 3, "cost": 20},
+	{"id": "mag", "name": "磁力卷轴", "desc": "拾取范围 +25%/级", "max": 3, "cost": 15},
+]
+const SHOP_HP_PER_LEVEL := 20.0
+const SHOP_DMG_PER_LEVEL := 1
+const SHOP_SPD_PER_LEVEL := 0.06
+const SHOP_MAG_PER_LEVEL := 0.25
+
 
 ## 升到 level 级需要攒的经验：前期轻松（5/7/9……），
 ## 中期稳步上涨，11 级后封顶稳定在 25。

@@ -186,6 +186,15 @@ offset_bottom = 178.0
 theme_override_font_sizes/font_size = 36
 text = "Lv 1"
 
+[node name="CoinLabel" type="Label" parent="HUD" unique_id=971100011]
+unique_name_in_owner = true
+offset_left = 24.0
+offset_top = 178.0
+offset_right = 424.0
+offset_bottom = 218.0
+theme_override_font_sizes/font_size = 36
+text = "金币 0"
+
 [node name="LowHpWarning" type="ColorRect" parent="HUD" unique_id=971100010]
 unique_name_in_owner = true
 anchors_preset = 15

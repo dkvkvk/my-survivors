@@ -7,11 +7,12 @@ extends CanvasLayer
 func _ready():
 	Audio.play_music("res://sounds/bgm_menu.wav")
 	var records := SaveGame.load_records()
-	%RecordsLabel.text = "最高纪录　存活 %d:%02d　击杀 %d　Lv %d" % [
+	%RecordsLabel.text = "最高纪录　存活 %d:%02d　击杀 %d　Lv %d\n金币 %d（忍具商店可花）" % [
 		int(records["best_time"]) / 60,
 		int(records["best_time"]) % 60,
 		records["best_kills"],
 		records["best_level"],
+		int(records["coins"]),
 	]
 	# Web 版跑在浏览器里没有窗口可关，隐藏退出按钮
 	if OS.has_feature("web"):
@@ -21,6 +22,11 @@ func _ready():
 func _on_start_button_pressed():
 	Audio.play("res://sounds/pickup.wav", false, 1.6, 0.25)
 	Fader.fade_to_scene("res://survivors_game.tscn")
+
+
+func _on_shop_button_pressed():
+	Audio.play("res://sounds/pickup.wav", false, 1.6, 0.25)
+	Fader.fade_to_scene("res://shop.tscn")
 
 
 func _on_quit_button_pressed():

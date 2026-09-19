@@ -78,10 +78,11 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
-config/name="My Survivors"
+config/name="忍者今天也在割韭菜"
 run/main_scene="res://main_menu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.png"
+config/custom_user_dir_name="my-survivors"
 
 [autoload]
 
