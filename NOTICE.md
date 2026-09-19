@@ -1,28 +1,33 @@
 # 项目来源与版权说明
 
-本项目基于 GDQuest 的开源教学项目二次开发。
+本项目基于 GDQuest 的开源教学项目二次开发，美术已在 U7 阶段全部替换为 CC0 素材（见下表），**当前已具备商用条件**。
 
 - 上游仓库：https://github.com/gdquest-demos/getting-started-with-godot-4
 - 配套免费教程：https://www.gdquest.com/library/first_2d_game_godot4_vampire_survivor/
 - 上游原始许可证全文见 [UPSTREAM_LICENSE](UPSTREAM_LICENSE.md)
 
-## 许可证要点（重要）
+## 上游许可证要点
 
 上游项目采用双许可证：
 
-1. **代码**（`.gd` 脚本、`.tscn` 场景、着色器等 Godot 资源）：**MIT** —— 可以自由修改、发布、商用，只需保留版权声明。
-2. **美术素材**（PNG 图片、3D 模型，即 `characters/`、`trees/`、`smoke_explosion/`、`pistol/` 等目录下的图片资源）：**CC-BY-NC-SA 4.0** —— 仅限非商业用途，且衍生作品须以相同协议共享并注明出处。
+1. **代码**（`.gd` 脚本、场景、着色器等）：**MIT** —— 可自由修改、发布、商用，保留版权声明即可。本项目继续沿用。
+2. **美术素材**：原 **CC-BY-NC-SA 4.0**（非商用）——**已全部移除并替换**（原 `characters/`、`trees/`、`pistol/` 目录已删除，见 git 历史）。
 
-## 对二次开发的影响
-
-- **学习、练习、发布免费游戏**：直接用即可，无任何问题。
-- **想商用（卖游戏）**：必须替换上述目录中的全部美术素材（可用 CC0 素材库如 Kenney、itch.io 上的商用许可素材，或自制），代码部分可继续保留。
-
-## U1 阶段新增素材与模块登记
+## 当前素材清单（全部可商用）
 
 | 素材/模块 | 来源 | 许可证 |
 |---|---|---|
-| `audio.gd`（音效池） | Kenney Starter Kit Match-3（改编自 KidsCanCode 代码） | MIT |
-| `sounds/*.wav`（射击/命中/敌人死亡/受伤/结束/拾取，共 6 个） | [The Essential Retro Video Game Sound Effects [512 sounds] by Juhani Junkala (SubspaceAudio)](https://opengameart.org/content/512-sound-effects-8-bit-style) | CC0 |
-| `addons/saltmire_juice/`（打击感套件：震屏/闪白/hit-stop/伤害数字） | [Saltmire Juice](https://github.com/saltmire/saltmire-juice) | MIT |
-| `backgrounds/grass-ground.png`（无缝草地地面） | [Seamless Grass Texture II](https://opengameart.org/content/seamless-grass-texture-ii) | CC0 |
+| 代码（上游继承 + 二开） | GDQuest / 本项目 | MIT |
+| `assets/hero/` 忍者角色与影子 | [Ninja Adventure by pixel-boy](https://pixel-boy.itch.io/ninja-adventure)（[GitHub 镜像](https://github.com/pixel-boy/NinjaAdventure)） | CC0 |
+| `assets/mobs/` 史莱姆/蝙蝠/重甲/野兽（各两帧） | [Kenney Pixel Platformer](https://kenney.nl/assets/pixel-platformer) | CC0 |
+| `assets/tiles/` 瓦片集（墙/货箱/服务器/天线/水晶/灌木） | 本项目脚本生成像素图 | CC0（自制） |
+| `addons/saltmire_juice/` 打击感套件 | [Saltmire Juice](https://github.com/saltmire/saltmire-juice) | MIT |
+| `sounds/*.wav` 6 个音效 | [Juhani Junkala 8-bit 音效包](https://opengameart.org/content/512-sound-effects-8-bit-style) | CC0 |
+| `sounds/bgm_*.wav` 两首循环 BGM | 本项目脚本合成（`synth_bgm.py` 思路，见提交历史） | CC0（自制） |
+| `backgrounds/grass-ground-soft.png` 草地地面 | [Seamless Grass II](https://opengameart.org/content/seamless-grass-texture-ii) | CC0 |
+| `fonts/` 中文像素字体 + OFL.txt | [Fusion Pixel（缝合像素）by TakWolf](https://github.com/TakWolf/fusion-pixel-font) | SIL OFL 1.1 |
+| 代码绘制的视觉（经验宝石/飞刀/光环/手里剑/伤害数字） | 本项目 | 随项目 MIT |
+
+Kenney 包随附的许可原文见 `assets/Kenney-License.txt`。
+
+> 提示：OFL 1.1 对字体保留名称"缝合像素/Fusion Pixel"，未修改的原文件分发不受影响。

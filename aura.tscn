@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://aura.gd" id="1_aura"]
+
+[node name="Aura" type="Area2D"]
+script = ExtResource("1_aura")

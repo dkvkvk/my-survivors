@@ -15,6 +15,11 @@ var fire_rate_mult := 1.0
 var bullet_damage := 1
 var pickup_radius := Balance.PICKUP_RADIUS
 
+# 武器卡（U6）：环形刀刃数量 / 灼热光环等级 / 手枪额外弹丸
+var orbit_blade_count := 0
+var aura_level := 0
+var extra_bullets := 0
+
 # 受伤音效节流：被怪围着时每 0.6 秒最多响一次，不然太吵
 var hurt_sound_cooldown := 0.0
 
@@ -30,11 +35,7 @@ func _physics_process(delta):
 	velocity = direction * Balance.PLAYER_SPEED * speed_mult
 
 	move_and_slide()
-
-	if velocity.length() > 0.0:
-		%HappyBoo.play_walk_animation()
-	else:
-		%HappyBoo.play_idle_animation()
+	# 角色外观动画由 hero.gd 按速度自动驱动
 
 	# Taking damage（不同怪物的接触伤害倍率不同，见 balance.gd 的 MOB_VARIANTS）
 	var overlapping_mobs = %HurtBox.get_overlapping_bodies()
@@ -84,4 +85,12 @@ func apply_upgrade(id: String) -> void:
 			%HealthBar.max_value = max_health
 		"magnet":
 			pickup_radius *= 1.35
+		"orbit_blade":
+			orbit_blade_count += 1
+			%OrbitBlades.set_blade_count(orbit_blade_count)
+		"aura":
+			aura_level += 1
+			%Aura.configure(aura_level)
+		"split_shot":
+			extra_bullets += 1
 	%HealthBar.value = health

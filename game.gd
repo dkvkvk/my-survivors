@@ -6,9 +6,16 @@ var current_wave: Dictionary = Balance.WAVES[0]
 
 @onready var player = $Player
 
+# 分块地图（chunk_map.gd）：预设计小地图随机拼接，碰撞挂在瓦片上。
+# 看得见的墙才撞得上，从根源消灭空气墙。
+var _chunk_map: Node2D
+
 
 func _ready():
+	Audio.play_music("res://sounds/bgm_battle.wav")
 	player.leveled_up.connect(_on_player_leveled_up)
+	_chunk_map = preload("res://chunk_map.gd").new()
+	add_child(_chunk_map)
 
 
 func _process(delta):
@@ -19,6 +26,15 @@ func _process(delta):
 	%LevelLabel.text = "Lv %d" % player.level
 	# 无限草地：地面按贴图尺寸的整数倍跟随玩家，花纹无缝衔接
 	$Ground.global_position = player.global_position.snapped(Vector2(1024, 1024))
+	# 环境光尘：发射区跟随玩家，粒子本体留在世界坐标，走动时视野内始终有浮尘
+	$Ambient.global_position = player.global_position
+	# 低血量警告：低于 30% 出现红色脉冲，血量越低越急促
+	var hp_ratio: float = player.health / player.max_health
+	if hp_ratio < 0.3 and hp_ratio > 0.0:
+		var urgency: float = (0.3 - hp_ratio) / 0.3
+		%LowHpWarning.color.a = urgency * (0.14 + 0.12 * absf(sin(Time.get_ticks_msec() / (160.0 - 60.0 * urgency))))
+	else:
+		%LowHpWarning.color.a = 0.0
 
 
 func spawn_mob():
@@ -48,5 +64,5 @@ func _on_player_leveled_up():
 
 func _on_player_health_depleted():
 	Audio.play("res://sounds/game-over.wav", false, 1.0, 0.5)
-	%GameOver.show()
+	%GameOver.show_results(kill_count, run_time, player.level)
 	get_tree().paused = true

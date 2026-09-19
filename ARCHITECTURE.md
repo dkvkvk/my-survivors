@@ -1,96 +1,121 @@
 # 项目架构导览（中文）
 
-本项目的玩法：类《吸血鬼幸存者》——玩家移动躲避，手枪自动瞄准开火，史莱姆不断从四周涌入，撑到血量耗尽为止。
+本项目的玩法：类《吸血鬼幸存者》——玩家移动躲避，手枪自动瞄准开火，敌人按波次从四周涌入；击杀掉落经验宝石，升级时三选一强化（含三种可叠加的武器卡），撑到血量耗尽为止，最高纪录自动存入本地。
 
 ## 一、文件总览
 
 | 文件/目录 | 职责 |
 |---|---|
-| `project.godot` | 项目配置。要求 Godot **4.6**，主场景 `survivors_game.tscn`，视口 1920×1080 |
-| `survivors_game.tscn` + `game.gd` | 主场景：敌人刷怪计时器、刷怪路径、Game Over 界面、松树、背景 |
-| `player.tscn` + `player.gd` | 玩家：移动、血量、受伤判定、镜头 |
-| `gun.tscn` + `gun.gd` | 手枪：索敌转向、定时开火 |
+| `project.godot` | 项目配置。要求 Godot **4.7**，主场景 `main_menu.tscn`，视口 1920×1080 |
+| `main_menu.tscn` + `main_menu.gd` | 主菜单（项目启动场景）：开始游戏、最高纪录展示、退出（Web 版自动隐藏退出按钮） |
+| `survivors_game.tscn` + `game.gd` | 战斗场景：刷怪计时器、波次切换、HUD、升级/暂停/结算流程 |
+| `player.tscn` + `player.gd` | 玩家：移动、血量、经验等级、强化卡应用（含武器卡的挂载与激活） |
+| `gun.tscn` + `gun.gd` | 手枪：索敌转向、定时开火、分裂弹头多发散射 |
+| `orbit_blades.tscn` + `orbit_blades.gd` | 武器卡"环形刀刃"：刀刃绕玩家公转撞击伤害（纯代码绘制） |
+| `aura.tscn` + `aura.gd` | 武器卡"灼热光环"：周期性灼烧范围内敌人（碰撞与外观代码生成） |
 | `bullet_2d.tscn` + `bullet_2d.gd` | 子弹：直线飞行、超程销毁、命中回调 |
-| `mob.tscn` + `mob.gd` | 史莱姆敌人：追击玩家、受击、死亡烟雾 |
-| `characters/happy_boo/` | 玩家角色（方块小幽灵）的美术与动画 |
-| `characters/slime/` | 史莱姆的美术与动画 |
-| `pistol/` | 手枪贴图、枪口火光 `muzzle_flash/`、命中特效 `impact/` |
-| `smoke_explosion/` | 敌人死亡烟雾特效（含 `.gdshader` 着色器） |
-| `trees/` | 松树场景，用于地图装饰与 Y 排序演示 |
-| `addons/colorpicker_presets/` | GDQuest 的取色器预设插件（开发辅助，非游戏逻辑） |
+| `mob.tscn` + `mob.gd` | 敌人：四种变体、追击与软分离围圈、受击、死亡烟雾、掉经验宝石 |
+| `xp_gem.tscn` + `xp_gem.gd` | 经验宝石：磁吸 + 缓慢滚动（外观代码绘制菱形） |
+| `level_up_ui.gd` | 升级三选一界面（暂停 + 弹 3 张卡） |
+| `pause_ui.gd` | 暂停菜单（Esc 开关：继续/重开/回主菜单） |
+| `game_over.gd` | 结算界面：本局战绩、新纪录提示、重开/回主菜单 |
+| `save.gd` | ★ 最高纪录存档：`class_name SaveGame` 纯静态，读写 `user://records.json` |
+| `balance.gd` | ★ 全部数值：玩家/敌人变体/波次表/经验曲线/三种武器的常量 |
+| `upgrades.gd` | ★ 强化卡池：8 张卡（5 张属性卡 + 3 张武器卡） |
+| `audio.gd` | 音效池 autoload（12 播放器，防重叠、变调随机）+ `play_music()` 循环 BGM |
+| `fader.gd` | 全局过渡 autoload：场景切换黑场淡入淡出 + 全屏暗角后期 |
+| `theme.tres` + `fonts/` | ★ 全局主题：Fusion Pixel 中文像素字体（SIL OFL 1.1）与按钮/进度条统一样式 |
+| `vignette.gdshader` | 暗角屏幕后期（透明黑径向叠加，兼容性渲染器友好） |
+| `addons/saltmire_juice/` | 打击感插件 autoload：震屏、闪白、hit-stop、伤害数字 |
+| `hero.tscn` + `hero.gd` | 忍者主角外观：四方向待机/行走动画（素材在 `assets/hero/`，Ninja Adventure CC0） |
+| `chunk_map.gd` | ★ 分块无限地图：9 种预设计 16x16 小地图模板随机旋转镜像拼接，碰撞挂瓦片（看得见才撞得上），玩家周围 5x5 块流式加载 |
+| `enemy_sprite.gd` | 敌人外观适配器：两帧走路 + 受击压扁（`mob.gd` 沿用 `%Slime` 接口） |
+| `assets/` | ★ CC0 素材库：忍者（Ninja Adventure）+ 怪物两帧/装饰（Kenney），许可见 NOTICE.md |
+| `smoke_explosion/`、`assets/ground/`、`sounds/` | 死亡烟雾特效、无缝科技地板（自制）、音效与 BGM（均 CC0） |
+| `.github/workflows/build.yml` | CI：推送 main 自动导出 Windows 单文件 exe 与 Web 版（部署 GitHub Pages） |
 
 ## 二、场景树结构
 
+主菜单（启动场景）：
+
 ```
-Game (game.gd, y_sort_enabled)          ← 根节点
-├─ Timer (0.3s 循环)                     → timeout 信号调用 game.gd 的刷怪
+MainMenu (main_menu.gd)
+├─ Background / Title / Subtitle        深色背景与标题
+├─ RecordsLabel                          _ready 时从 SaveGame 读最高纪录
+├─ StartButton                           → change_scene_to_file 切到 survivors_game.tscn
+├─ QuitButton                            Web 版（OS.has_feature("web")）自动隐藏
+└─ HintLabel                             操作提示
+```
+
+战斗场景：
+
+```
+Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
+├─ Ground (Sprite2D, z=-100)             无限科技地板：256px 无缝贴图×4 缩放，每帧按 1024px 网格吸附到玩家位置
+├─ Timer                                 刷怪计时器，wait_time 每次刷怪后按波次表改写
 ├─ Player (player.tscn 实例)
-│   ├─ HappyBoo        角色外观与动画
-│   ├─ CollisionShape2D
-│   ├─ Camera2D        镜头跟随玩家
-│   ├─ Gun (gun.tscn)  自动索敌开火
-│   ├─ HurtBox (Area2D) 玩家受击范围
-│   └─ HealthBar       血条 UI
-│       └─ Path2D / PathFollow2D        刷怪环（挂在 Player 下，跟随玩家移动）
-├─ GameOver (CanvasLayer)                游戏结束遮罩，默认隐藏
+│   ├─ Hero (hero.tscn)                   忍者外观：四方向待机/行走动画自动驱动
+│   ├─ CollisionShape2D / Camera2D
+│   ├─ Gun (gun.tscn)                    自动索敌发射（隐形），读玩家的射速/伤害/额外弹丸
+│   ├─ Aura (aura.tscn, z=-1)            灼热光环：默认隐藏，抽卡后 configure() 激活
+│   ├─ OrbitBlades (orbit_blades.tscn)   环绕飞刀：默认 0 把，抽卡加数量
+│   ├─ HurtBox (Area2D) / HealthBar      受击范围与头顶血条
+│   └─ Path2D / PathFollow2D             刷怪环（挂在 Player 下，跟随玩家移动）
+├─ GameOver (CanvasLayer, process_mode=3)  结算遮罩：战绩/新纪录/重开(R)/回主菜单
 ├─ CanvasLayer (layer=-32)               背景纯色
-└─ PineTree × 11                         地图装饰
+├─ ChunkMap（game.gd 代码挂载）           分块无限地图：瓦片障碍+碰撞，5x5 流式加载
+├─ HUD (CanvasLayer, layer=10)           击杀数 / 存活时间 / 经验条 / 等级
+├─ LevelUpUI (CanvasLayer, process_mode=3) 升级三选一
+└─ PauseUI (CanvasLayer, process_mode=3)   暂停菜单（Esc）
 ```
 
 ## 三、核心循环与数据流
 
-1. **刷怪**：`Timer` 每 0.3 秒触发 `game.gd:spawn_mob()` → 在 `PathFollow2D` 环上取随机点（环跟随玩家，保证敌人总从屏幕外刷出）→ 实例化 `mob.tscn` 加入场景树。
-2. **敌人 AI**：`mob.gd:_physics_process()` 每物理帧计算朝向玩家的方向，以 200~300 随机速度 `move_and_slide()` 追击。血量 3，无碰撞伤害判定（伤害靠玩家的 HurtBox 反向结算）。
-3. **索敌开火**：`gun.gd:_process()` 用 Area2D 的 `get_overlapping_bodies()` 取第一个敌人 `look_at()` 转向；枪内 Timer 到点调 `shoot()`，从 `%ShootingPoint` 生成子弹。
-4. **子弹**：`bullet_2d.gd` 沿自身旋转方向 1000px/s 直线飞，累计飞行 1200px 后自毁；`body_entered` 时自毁并调用对方 `take_damage()`（用 `has_method` 鸭子类型判断，解耦）。
-5. **受击/死亡**：`mob.gd:take_damage()` 播放受击动画、扣 1 血；归零时在原地生成 `smoke_explosion` 特效并自毁。
-6. **玩家受伤**：`player.gd` 检查 `%HurtBox` 内重叠的敌人数量，按 **每敌 6.0/秒** 持续掉血并同步血条；血量归零发 `health_depleted` 信号。
-7. **游戏结束**：`game.gd` 收到信号 → 显示 Game Over 遮罩 → `get_tree().paused = true`。
+1. **启动**：`main_menu.tscn` 展示最高纪录 → 开始游戏切到战斗场景；Esc 随时打开暂停菜单（升级/结算界面打开时忽略，避免状态叠加）。
+2. **刷怪**：`Timer` 触发 `game.gd:spawn_mob()` → 在跟随玩家的 `PathFollow2D` 环上取随机点（敌人总从屏幕外刷出）→ `mob.setup()` 按波次权重选变体；刷怪间隔由 `Balance.current_wave(run_time)` 从五档波次表动态改写。
+3. **敌人 AI**：`mob.gd` 按变体速度追击 `玩家位置 + 环形偏移`（软分离，不会叠成一点），进入攻击距离后停下贴身。
+4. **索敌开火**：`gun.gd` 对 Area2D 内第一个敌人 `look_at()`；开火时按 `1 + 玩家额外弹丸` 生成扇形散射子弹（分裂弹头卡）。
+5. **伤害汇入口**：子弹 `body_entered`、飞刀 `body_entered`、光环 Timer 周期扫描，最终都调 `mob.take_damage()`（`has_method` 鸭子类型判断，完全解耦——新武器不需要动敌人代码）。飞刀伤害额外吃"重装弹药"加成。
+6. **受击/死亡**：`take_damage()` 播放受击动画、伤害数字（Juice 插件）、扣血；归零时发 `died` 信号（game.gd 计击杀数）、掉经验宝石、生成烟雾特效并自毁。
+7. **成长**：宝石被磁吸拾取 → `player.add_xp()` → 升级发 `leveled_up` → `LevelUpUI.present()` 暂停弹 3 张卡 → `player.apply_upgrade(id)` 按卡池 match 应用（武器卡激活/强化对应武器节点）。
+8. **玩家受伤**：`%HurtBox` 内重叠敌人的接触伤害倍率求和，按 9.0/秒·倍率持续掉血（贴身很痛，站桩必死）；血量归零发 `health_depleted`，低于 30% 触发全屏红光脉冲。
+9. **游戏结束**：`game.gd` 播放音效 → `GameOver.show_results(击杀, 存活, 等级)` 展示战绩并经 `SaveGame.submit_run()` 刷新 `user://records.json` → 暂停。破纪录时显示"★ 新纪录！ ★"。
 
 ## 四、代码约定（二开前先了解）
 
-- **`%UniqueName`**：`%XXX` 语法访问场景内勾选了“唯一名称”的节点，重构子树时不用改路径。
-- **信号解耦**：跨场景通信用信号（如 `health_depleted`），连接在 `.tscn` 的 `[connection]` 里。
-- **数值全硬编码**：移动速度 600、射速、子弹速度 1000、射程 1200、DPS 6.0 都是脚本常量——适合先抄后改成 `@export` 变量。
-- **Y 排序**：根节点开了 `y_sort_enabled`，角色与树的遮挡关系按 Y 坐标自动处理。
-- **无任何音频文件**：`default_bus_layout.tres` 只是默认总线布局。
+- **`%UniqueName`**：`%XXX` 访问场景内勾选"唯一名称"的节点，重构子树时不用改路径。
+- **信号解耦**：跨场景通信用信号（如 `died`、`health_depleted`、`leveled_up`），连接在 `.tscn` 的 `[connection]` 里。
+- **数值集中**：全部可调参数在 `balance.gd`（`class_name Balance` 静态常量），卡池在 `upgrades.gd`。**加一张卡 = upgrades.gd 加一行 + player.apply_upgrade 加一个分支**，武器卡再让对应武器节点提供 configure/set 方法即可。
+- **暂停覆盖层模式**：所有弹出界面（升级/暂停/结算）都是 `CanvasLayer + process_mode=3(ALWAYS) + get_tree().paused`，遮罩用全屏半透明 ColorRect。
+- **伤害单一入口**：一切武器最终调 `mob.take_damage(n)`，新武器零改动接入。
+- **纯代码绘制**：经验宝石菱形、飞刀、光环均不依赖美术素材（新增内容避开上游 CC-BY-NC-SA 素材的商用限制）。
+- **存档**：`SaveGame` 纯静态类读写 `user://records.json`（Web 导出走 IndexedDB，同样可用）。
+- **Y 排序**：根节点开 `y_sort_enabled`，角色与树的遮挡按 Y 坐标自动处理。
+- **音频**：`Audio.play(路径, 可重叠, 音调, 音量)`，autoload 12 播放器池。
+- **全局视觉**：`project.godot` 挂 `theme.tres`（像素字体 + 按钮样式），切场景统一走 `Fader.fade_to_scene()`（黑场过渡 + 暗角随 autoload 常驻）；新 UI 字号取 12 的倍数（像素字体在整数倍下最锐）。
 
 ## 五、与完整幸存者游戏的差距 = 你的二开空间
 
 目前**没有**的东西（按重要性）：
 
-1. **经验/升级循环**——没有经验掉落、没有升级、没有三选一强化，这是幸存者类游戏的灵魂
-2. **敌人多样性**——只有一种史莱姆，无波次曲线
-3. **武器成长**——只有一把固定手枪
-4. **重开一局**——Game Over 后只能暂停退出，没有重开按钮
-5. **战斗反馈**——无击杀数/存活时间 UI、无伤害跳字、无音效
-6. **存档/局外成长**——无任何持久化
+1. **武器进化/合成**——已有手枪+飞刀+光环+散射，但没有武器满级进化、组合合成
+2. **主题换皮**——美术沿用上游素材（非商用许可，商业化前需全部替换，见 NOTICE.md）
+3. **局外成长**——没有永久解锁/货币，存档目前只记三项最高纪录
+4. **发布页**——已有 Pages 在线版与 CI 构建，缺正式发布页（itch.io/Steam）
 
-## 六、二开路线图（按性价比排序）
+## 六、二开路线图（已完成 U1~U6）
 
-### 阶段 1：快速上手（每项 0.5~2 小时，适合熟悉代码）
-1. **Game Over 重开**：遮罩上加按钮或按 R 键 → `get_tree().reload_current_scene()` + 取消暂停
-2. **计分 UI**：击杀数、存活时长（`mob.gd` 死亡处发信号回 `game.gd` 计数）
-3. **数值调参**：把各脚本里的常量改成 `@export`，在编辑器里直接调平衡
-
-### 阶段 2：核心肉鸽循环（本阶段做完才算"幸存者类"）
-4. **经验宝石**：敌人死亡掉落吸引式经验粒子 → 玩家吸取涨经验条
-5. **升级三选一**：满级暂停 + 弹出 3 个随机强化（移速/射速/伤害/血量上限/子弹数），用 UI + `paused` 实现
-6. **武器数据驱动**：定义 `WeaponStats` 自定义 Resource（.tres），枪从资源读参数——为多武器打地基
-
-### 阶段 3：内容扩展
-7. **新敌人**：抽象出 `MobStats` 资源（速度/血量/伤害/经验），做出快慢、肉脆、精英等变体
-8. **波次时间表**：按存活时间切换敌人组合与刷新密度（难度曲线）
-9. **第二武器**：环绕弹幕（whip/光环类）或穿透弹，复用 bullet 模式
-
-### 阶段 4：打磨与商业化准备
-10. **音频**：Kenney / freesound 找 CC0 音效（注意替换全部原美术素材才能商用，见 NOTICE.md）
-11. **打击感**：受击闪白、屏幕震动、伤害跳字
-12. **存档**：`user://` 目录 + `FileAccess` 保存最高纪录或局外解锁
+- [x] **U1** 重开按钮、击杀/时间 HUD、8-bit 音效
+- [x] **U2** 打击感：震屏、闪白、hit-stop、伤害数字（Saltmire Juice 插件）
+- [x] **U3** 经验宝石 + 升级三选一（卡池数据驱动）
+- [x] **U4** 四种敌人变体 + 五档波次难度曲线（balance.gd 两张表）
+- [x] **U5** 主菜单、Esc 暂停菜单、最高纪录存档（user://records.json）
+- [x] **U6** 更多武器：环绕飞刀 / 灼热光环 / 分裂弹头（可叠加卡）
+- [ ] 主题换皮（替换全部非商用美术）、正式发布页
 
 ## 七、参考资料
 
 - 上游仓库：https://github.com/gdquest-demos/getting-started-with-godot-4
 - 配套免费教程（本项目的完整搭建过程）：https://www.gdquest.com/library/first_2d_game_godot4_vampire_survivor/
-- 上游完整克隆（含 3D FPS demo 和 starter files）在 `E:eference\getting-started-with-godot-4`
+- 上游完整克隆（含 3D FPS demo 和 starter files）在 `E:\reference\getting-started-with-godot-4`
 - 版权说明：见 [NOTICE.md](NOTICE.md)

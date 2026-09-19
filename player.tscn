@@ -1,14 +1,16 @@
 [gd_scene format=3 uid="uid://dsw8raqgacxsc"]
 
 [ext_resource type="Script" uid="uid://bjpua3hfywlnl" path="res://player.gd" id="1_73bic"]
-[ext_resource type="PackedScene" uid="uid://pbmyh1qru7p" path="res://characters/happy_boo/happy_boo.tscn" id="2_bl5ih"]
 [ext_resource type="PackedScene" uid="uid://cphcr81upg72i" path="res://gun.tscn" id="3_bt0kc"]
+[ext_resource type="PackedScene" path="res://hero.tscn" id="4_hero"]
+[ext_resource type="PackedScene" path="res://orbit_blades.tscn" id="4_orbit"]
+[ext_resource type="PackedScene" path="res://aura.tscn" id="5_aura"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_csncd"]
-size = Vector2(66, 38)
+size = Vector2(36, 22)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kfffa"]
-size = Vector2(84, 54)
+size = Vector2(110, 82)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a5sny"]
 bg_color = Color(0.623529, 0.866667, 0.317647, 1)
@@ -17,10 +19,11 @@ bg_color = Color(0.623529, 0.866667, 0.317647, 1)
 motion_mode = 1
 script = ExtResource("1_73bic")
 
-[node name="HappyBoo" parent="." unique_id=984748070 instance=ExtResource("2_bl5ih")]
+[node name="Hero" parent="." instance=ExtResource("4_hero")]
 unique_name_in_owner = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2129353866]
+position = Vector2(0, 12)
 shape = SubResource("RectangleShape2D_csncd")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=473099899]
@@ -29,10 +32,18 @@ shape = SubResource("RectangleShape2D_csncd")
 position = Vector2(0, -40)
 z_index = 10
 
+[node name="Aura" parent="." instance=ExtResource("5_aura")]
+unique_name_in_owner = true
+z_index = -1
+
+[node name="OrbitBlades" parent="." instance=ExtResource("4_orbit")]
+unique_name_in_owner = true
+z_index = 5
+
 [node name="HurtBox" type="Area2D" parent="." unique_id=698633368]
 unique_name_in_owner = true
 collision_layer = 0
-collision_mask = 0
+collision_mask = 2
 monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox" unique_id=440365805]

@@ -10,6 +10,10 @@ var queue = []
 
 var active_sounds = {}
 
+# 背景音乐：独立播放器循环播放，不占音效池
+var _music_player: AudioStreamPlayer
+var _music_path := ""
+
 func _ready():
 	for i in num_players:
 		var p = AudioStreamPlayer.new()
@@ -27,6 +31,28 @@ func _on_stream_finished(player):
 				active_sounds.erase(path)
 			break
 	available.append(player)
+
+## 播放循环 BGM；同曲在播直接忽略，换曲平滑替换。
+func play_music(sound_path: String) -> void:
+	if _music_player == null:
+		_music_player = AudioStreamPlayer.new()
+		add_child(_music_player)
+		_music_player.volume_db = -16
+		_music_player.bus = bus
+		# WAV 播完自动重播实现循环
+		_music_player.finished.connect(func(): _music_player.play())
+	if _music_path == sound_path and _music_player.playing:
+		return
+	_music_path = sound_path
+	_music_player.stream = load(sound_path)
+	_music_player.play()
+
+
+func stop_music() -> void:
+	_music_path = ""
+	if _music_player != null:
+		_music_player.stop()
+
 
 func play(sound_path: String, allow_overlap: bool = false, pitch: float = 1.0, volume: float = 1.0):
 	if allow_overlap:
