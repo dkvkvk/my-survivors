@@ -86,6 +86,26 @@ const AURA_EVOLVE_DAMAGE_BONUS := 2
 const GUN_EVOLVE_EXTRA_BULLETS := 2
 const GUN_EVOLVE_FIRE_RATE_MULT := 1.2
 
+# 首领（P4）：每 BOSS_INTERVAL 秒来袭一只，血量按来过几只递增。
+# 三段循环 AI：追击 3s → 蓄力 0.7s（闪白预示）→ 冲锋 0.8s（3.2 倍速直线）。
+const BOSS_INTERVAL := 180.0
+const BOSS_FIRST_DELAY := 120.0  # 首只首领出现时间
+const BOSS_BASE_HP := 150
+const BOSS_HP_PER_KILL := 120  # 每击杀一只，下一只更肉
+const BOSS_SPEED := 170.0
+const BOSS_CHARGE_SPEED_MULT := 3.2
+const BOSS_CHARGE_PHASE := {"chase": 3.0, "windup": 0.7, "dash": 0.8}
+const BOSS_SCALE := 3.4
+const BOSS_COLOR := Color(1.6, 0.45, 0.45)
+const BOSS_XP := 50
+const BOSS_CONTACT := 3.0
+const BOSS_KNOCKBACK_RESIST := 0.2  # 吃击退的比率
+
+# 宝箱（P4）：首领必掉，走过去开启，随机奖励
+const CHEST_COIN_MIN := 15
+const CHEST_COIN_MAX := 25
+const CHEST_WEAPON_CHANCE := 0.5  # 一半概率直接升一级随机已持有武器
+
 # 击退（P1 打磨）：命中把敌人推开，数值为初速度（px/s），摩擦衰减见 mob.gd
 const KNOCKBACK_BULLET := 220.0
 const KNOCKBACK_BLADE := 160.0

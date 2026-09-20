@@ -19,6 +19,7 @@
 | `level_up_ui.gd` | 升级三选一界面（暂停 + 弹 3 张卡） |
 | `pause_ui.gd` | 暂停菜单（Esc 开关：继续/重开/回主菜单） |
 | `game_over.gd` | 结算界面：本局战绩、新纪录提示、重开/回主菜单 |
+| `chest.tscn` + `chest.gd` | 宝箱（P4）：首领必掉，走过去开启，随机开武器升级（含进化）或金币 |
 | `coin.tscn` + `coin.gd` | 金币掉落物（P2）：磁吸拾取，死亡时入账存档余额 |
 | `shop.tscn` + `shop.gd` | 忍具商店（P2）：四种永久强化，数据在 `balance.gd` 的 SHOP 表 |
 | `save.gd` | ★ 存档：`class_name SaveGame` 纯静态，读写 `user://records.json`（最高纪录 + 金币 + 强化等级） |
@@ -81,7 +82,8 @@ Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
 6. **受击/死亡**：`take_damage()` 播放受击动画、伤害数字（Juice 插件）、扣血；归零时发 `died` 信号（game.gd 计击杀数）、掉经验宝石、生成烟雾特效并自毁。
 7. **成长**：宝石被磁吸拾取 → `player.add_xp()` → 升级发 `leveled_up` → `LevelUpUI.present()` 暂停弹 3 张卡（已进化的武器卡自动移出卡池）→ `player.apply_upgrade(id)` 应用（武器卡满 5 级后第 6 张触发进化：刃风暴/烈日领域/手里剑大师，见 balance.gd 的 *_EVOLVE_* 常量）。
 8. **玩家受伤**：`%HurtBox` 内重叠敌人的接触伤害倍率求和，按 9.0/秒·倍率持续掉血（贴身很痛，站桩必死）；血量归零发 `health_depleted`，低于 30% 触发全屏红光脉冲。
-9. **游戏结束**：`game.gd` 播放音效 → `GameOver.show_results(击杀, 存活, 等级)` 展示战绩并经 `SaveGame.submit_run()` 刷新 `user://records.json` → 暂停。破纪录时显示"★ 新纪录！ ★"。
+9. **游戏结束**：`game.gd` 播放音效 → `GameOver.show_results(击杀, 存活, 等级, 金币)` 展示战绩并经 `SaveGame.submit_run()` 把金币存入余额 → 暂停。破纪录时显示"★ 新纪录！ ★"。
+10. **首领（P4）**：倒计时到点 `game.gd:_spawn_boss()` → `mob.setup_boss()` 升格（三段 AI：追击→蓄力闪白→直线冲锋，血量随击杀数递增，击退抗性，头顶血条）→ 击杀必掉宝箱 → 走过去开启随机奖励。
 
 ## 四、代码约定（二开前先了解）
 

@@ -219,6 +219,8 @@ func _build_tile_set() -> void:
 	var src := TileSetAtlasSource.new()
 	src.texture = load("res://assets/tiles/tileset.png")
 	src.texture_region_size = Vector2(TILE, TILE)
+	# 注意：先把图块源挂到 TileSet（物理层数据此生效），再创建图块与碰撞
+	_tile_set.add_source(src, 0)
 	for i in TILES.size():
 		var coords := Vector2i(i, 0)
 		src.create_tile(coords)
@@ -236,7 +238,6 @@ func _build_tile_set() -> void:
 			var td: TileData = src.get_tile_data(coords, 0)
 			td.add_collision_polygon(0)
 			td.set_collision_polygon_points(0, 0, pts)
-	_tile_set.add_source(src, 0)
 
 
 func _ensure_around(pos: Vector2) -> void:

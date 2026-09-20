@@ -4,6 +4,8 @@ var kill_count := 0
 var run_time := 0.0
 var run_coins := 0  # 本局拾取的金币，死亡时结算入存档余额
 var current_wave: Dictionary = Balance.WAVES[0]
+var boss_kill_count := 0  # 击杀首领数，决定下一只的血量
+var _boss_timer := 0.0
 
 @onready var player = $Player
 
@@ -17,6 +19,7 @@ func _ready():
 	player.leveled_up.connect(_on_player_leveled_up)
 	_chunk_map = preload("res://chunk_map.gd").new()
 	add_child(_chunk_map)
+	_boss_timer = Balance.BOSS_FIRST_DELAY  # 首领倒计时（P4）
 
 
 func _process(delta):
@@ -36,6 +39,11 @@ func _process(delta):
 		%LowHpWarning.color.a = urgency * (0.14 + 0.12 * absf(sin(Time.get_ticks_msec() / (160.0 - 60.0 * urgency))))
 	else:
 		%LowHpWarning.color.a = 0.0
+	# 首领倒计时（P4）：到点且上一只已被击杀才刷新
+	if _boss_timer > 0.0:
+		_boss_timer -= delta
+		if _boss_timer <= 0.0:
+			_spawn_boss()
 
 
 func spawn_mob():
@@ -63,6 +71,31 @@ func _on_mob_died():
 func add_run_coins(amount: int) -> void:
 	run_coins += amount
 	%CoinLabel.text = "金币 %d" % run_coins
+
+
+## 刷新一只首领（P4）：血量随击杀数递增，三段冲锋 AI，死后掉宝箱
+func _spawn_boss() -> void:
+	%PathFollow2D.progress_ratio = randf()
+	var boss = preload("res://mob.tscn").instantiate()
+	boss.global_position = %PathFollow2D.global_position
+	add_child(boss)
+	boss.setup_boss(boss_kill_count * Balance.BOSS_HP_PER_KILL)
+	boss.died.connect(_on_boss_died)
+	_show_boss_warn()
+
+
+func _on_boss_died() -> void:
+	boss_kill_count += 1
+	_boss_timer = Balance.BOSS_INTERVAL  # 下一只开始倒计时
+
+
+func _show_boss_warn() -> void:
+	Audio.play("res://sounds/game-over.wav", false, 1.4, 0.3)
+	%BossWarnLabel.modulate.a = 1.0
+	%BossWarnLabel.show()
+	var tw := create_tween()
+	tw.tween_interval(1.6)
+	tw.tween_property(%BossWarnLabel, "modulate:a", 0.0, 0.8)
 
 
 func _on_player_leveled_up():

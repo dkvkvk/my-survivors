@@ -6,6 +6,9 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_ypitm"]
 radius = 40.0
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_boss"]
+bg_color = Color(0.85, 0.2, 0.16, 1)
+
 [node name="Mob" type="CharacterBody2D" unique_id=1758012314]
 collision_layer = 2
 collision_mask = 0
@@ -16,6 +19,17 @@ unique_name_in_owner = true
 position = Vector2(0, -24)
 scale = Vector2(3, 3)
 script = ExtResource("2_esprite")
+
+[node name="BossBar" type="ProgressBar" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 100
+offset_left = -50.0
+offset_top = -90.0
+offset_right = 50.0
+offset_bottom = -74.0
+theme_override_styles/fill = SubResource("StyleBoxFlat_boss")
+show_percentage = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=469449182]
 position = Vector2(0, -24)
