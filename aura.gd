@@ -6,6 +6,7 @@ extends Area2D
 
 
 var level := 0
+var evolved := false  # 烈日领域形态
 var radius := 0.0
 var damage := 0
 
@@ -15,6 +16,13 @@ var _timer: Timer
 
 
 func _ready():
+	_setup()
+
+
+## 构建碰撞与计时器（幂等）：_ready 即刻执行；极早期调用 configure/evolve 时惰性兜底
+func _setup() -> void:
+	if _shape != null:
+		return
 	hide()
 	collision_layer = 0
 	collision_mask = 2  # 只碰敌人层
@@ -34,6 +42,7 @@ func _ready():
 
 ## 按等级配置半径/伤害并激活。level 从 1 开始，重复抽卡按公式叠加。
 func configure(p_level: int) -> void:
+	_setup()
 	level = p_level
 	radius = Balance.AURA_BASE_RADIUS + Balance.AURA_RADIUS_STEP * (level - 1)
 	damage = Balance.AURA_BASE_DAMAGE + Balance.AURA_DAMAGE_STEP * (level - 1)
@@ -45,10 +54,28 @@ func configure(p_level: int) -> void:
 	_timer.start()
 
 
+## 进化：烈日领域——灼烧间隔减半、伤害提升、变炽黄
+func evolve() -> void:
+	if evolved:
+		return
+	_setup()
+	evolved = true
+	damage += Balance.AURA_EVOLVE_DAMAGE_BONUS
+	_timer.wait_time = Balance.AURA_EVOLVE_INTERVAL
+	_timer.start()
+	queue_redraw()
+	Juice.pop(self, 1.5, 0.4)
+
+
 func _draw():
-	# 半透明橙色圆盘加一圈描边，纯代码绘制
-	draw_circle(Vector2.ZERO, radius, Color(1.0, 0.55, 0.25, 0.1))
-	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 64, Color(1.0, 0.55, 0.25, 0.45), 4.0)
+	# 半透明圆盘加一圈描边，纯代码绘制；进化后转为炽黄
+	var fill := Color(1.0, 0.55, 0.25, 0.1)
+	var edge := Color(1.0, 0.55, 0.25, 0.45)
+	if evolved:
+		fill = Color(1.0, 0.85, 0.3, 0.13)
+		edge = Color(1.0, 0.9, 0.45, 0.6)
+	draw_circle(Vector2.ZERO, radius, fill)
+	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 64, edge, 4.0)
 
 
 func _on_timer_timeout():

@@ -72,6 +72,20 @@ const AURA_INTERVAL := 1.0  # 灼烧周期（秒）
 # 分裂弹头（U6）：手枪额外弹丸围绕瞄准方向的散射间隔
 const BULLET_SPREAD_DEG := 12.0
 
+# 武器进化（P3）：同名武器卡抽满 EVOLVE_LEVEL 级后，再来一张触发进化。
+# 进化后该卡从三选一卡池移除。
+const EVOLVE_LEVEL := 5
+# 环形刀刃 → 刃风暴
+const BLADE_EVOLVE_ROT_MULT := 2.2  # 转速倍率
+const BLADE_EVOLVE_RADIUS_BONUS := 60.0
+const BLADE_EVOLVE_DAMAGE_BONUS := 3
+# 灼热光环 → 烈日领域
+const AURA_EVOLVE_INTERVAL := 0.5  # 灼烧间隔减半
+const AURA_EVOLVE_DAMAGE_BONUS := 2
+# 分裂弹头 → 手里剑大师
+const GUN_EVOLVE_EXTRA_BULLETS := 2
+const GUN_EVOLVE_FIRE_RATE_MULT := 1.2
+
 # 击退（P1 打磨）：命中把敌人推开，数值为初速度（px/s），摩擦衰减见 mob.gd
 const KNOCKBACK_BULLET := 220.0
 const KNOCKBACK_BLADE := 160.0

@@ -19,6 +19,8 @@ var pickup_radius := Balance.PICKUP_RADIUS
 var orbit_blade_count := 0
 var aura_level := 0
 var extra_bullets := 0
+# 武器进化（P3）：同名卡抽满 5 级后第 6 张触发进化，进化后从卡池移除
+var evolved_weapons := {}
 
 # 受伤音效节流：被怪围着时每 0.6 秒最多响一次，不然太吵
 var hurt_sound_cooldown := 0.0
@@ -96,11 +98,43 @@ func apply_upgrade(id: String) -> void:
 		"magnet":
 			pickup_radius *= 1.35
 		"orbit_blade":
-			orbit_blade_count += 1
-			%OrbitBlades.set_blade_count(orbit_blade_count)
+			if _try_evolve("orbit_blade"):
+				%OrbitBlades.evolve()
+			else:
+				orbit_blade_count += 1
+				%OrbitBlades.set_blade_count(orbit_blade_count)
 		"aura":
-			aura_level += 1
-			%Aura.configure(aura_level)
+			if _try_evolve("aura"):
+				%Aura.evolve()
+			else:
+				aura_level += 1
+				%Aura.configure(aura_level)
 		"split_shot":
-			extra_bullets += 1
+			if _try_evolve("split_shot"):
+				$Gun.evolve()
+			else:
+				extra_bullets += 1
 	%HealthBar.value = health
+
+
+## 武器满级后再抽一张同名卡时触发进化（返回 true）。计数封顶在 EVOLVE_LEVEL。
+func _try_evolve(id: String) -> bool:
+	var count := 0
+	match id:
+		"orbit_blade":
+			count = orbit_blade_count
+		"aura":
+			count = aura_level
+		"split_shot":
+			count = extra_bullets
+	if count >= Balance.EVOLVE_LEVEL and not evolved_weapons.has(id):
+		evolved_weapons[id] = true
+		Audio.play("res://sounds/pickup.wav", false, 2.0, 0.4)
+		Juice.damage_number(get_parent(), global_position + Vector2(0, -120), "★ 进化 ★", {"color": Color(1.0, 0.85, 0.3), "scale": 2.0})
+		return true
+	return false
+
+
+## 卡池过滤：已进化的武器卡不再出现（供 level_up_ui 调用）
+func is_card_unavailable(id: String) -> bool:
+	return evolved_weapons.has(id)

@@ -79,7 +79,7 @@ Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
 4. **索敌开火**：`gun.gd` 对 Area2D 内第一个敌人 `look_at()`；开火时按 `1 + 玩家额外弹丸` 生成扇形散射子弹（分裂弹头卡）。
 5. **伤害汇入口**：子弹 `body_entered`、飞刀 `body_entered`、光环 Timer 周期扫描，最终都调 `mob.take_damage()`（`has_method` 鸭子类型判断，完全解耦——新武器不需要动敌人代码）。飞刀伤害额外吃"重装弹药"加成。
 6. **受击/死亡**：`take_damage()` 播放受击动画、伤害数字（Juice 插件）、扣血；归零时发 `died` 信号（game.gd 计击杀数）、掉经验宝石、生成烟雾特效并自毁。
-7. **成长**：宝石被磁吸拾取 → `player.add_xp()` → 升级发 `leveled_up` → `LevelUpUI.present()` 暂停弹 3 张卡 → `player.apply_upgrade(id)` 按卡池 match 应用（武器卡激活/强化对应武器节点）。
+7. **成长**：宝石被磁吸拾取 → `player.add_xp()` → 升级发 `leveled_up` → `LevelUpUI.present()` 暂停弹 3 张卡（已进化的武器卡自动移出卡池）→ `player.apply_upgrade(id)` 应用（武器卡满 5 级后第 6 张触发进化：刃风暴/烈日领域/手里剑大师，见 balance.gd 的 *_EVOLVE_* 常量）。
 8. **玩家受伤**：`%HurtBox` 内重叠敌人的接触伤害倍率求和，按 9.0/秒·倍率持续掉血（贴身很痛，站桩必死）；血量归零发 `health_depleted`，低于 30% 触发全屏红光脉冲。
 9. **游戏结束**：`game.gd` 播放音效 → `GameOver.show_results(击杀, 存活, 等级)` 展示战绩并经 `SaveGame.submit_run()` 刷新 `user://records.json` → 暂停。破纪录时显示"★ 新纪录！ ★"。
 

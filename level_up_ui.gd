@@ -11,6 +11,8 @@ var choices: Array = []
 func present(p_player: CharacterBody2D) -> void:
 	player = p_player
 	var pool = Upgrades.LIST.duplicate()
+	# 已进化的武器卡不再出现（P3）
+	pool = pool.filter(func(card): return not player.is_card_unavailable(card["id"]))
 	pool.shuffle()
 	choices = pool.slice(0, 3)
 	%Title.text = "★ 升级！选一张强化 ★"

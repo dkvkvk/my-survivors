@@ -9,7 +9,7 @@ const LIST := [
 	{"id": "damage", "name": "重装弹药", "desc": "子弹伤害 +1"},
 	{"id": "max_health", "name": "生命祝福", "desc": "最大生命 +25\n并立即恢复 25"},
 	{"id": "magnet", "name": "磁力护符", "desc": "经验拾取范围 +35%"},
-	{"id": "orbit_blade", "name": "环形刀刃", "desc": "一把刀刃环绕自身旋转\n再次获得数量 +1"},
-	{"id": "aura", "name": "灼热光环", "desc": "周期灼烧周围敌人\n再次获得范围与伤害提升"},
-	{"id": "split_shot", "name": "分裂弹头", "desc": "手枪额外发射一发扇形\n散射子弹，可叠加"},
+	{"id": "orbit_blade", "name": "环形刀刃", "desc": "一把刀刃环绕自身旋转\n满 5 级后进化为刃风暴"},
+	{"id": "aura", "name": "灼热光环", "desc": "周期灼烧周围敌人\n满 5 级后进化为烈日领域"},
+	{"id": "split_shot", "name": "分裂弹头", "desc": "手枪额外一发扇形散射\n满 5 级后进化为手里剑大师"},
 ]
