@@ -21,12 +21,38 @@ var _charge_timer := 0.0
 var _charge_dir := Vector2.ZERO
 
 @onready var player: CharacterBody2D = get_node("/root/Game/Player")
+# 受击/接触判定圆：随变体体型缩放，保证"看得见的身体才打得到"
+@onready var _body_shape: CollisionShape2D = $CollisionShape2D
 
 
 func _ready():
 	# 供链式闪电等 AoE 武器快速索敌
 	add_to_group("mobs")
 	%Slime.play_walk()
+
+
+## 把精灵"脚底"对齐到判定圆心（y=0）。
+## 素材高矮不一（史莱姆 24px、首领 32px，还各自乘变体缩放），
+## 用固定偏移会让大个子悬空、小个子陷地，所以按实际贴图高度算。
+func _ground_sprite() -> void:
+	var tex: Texture2D = %Slime.sprite_frames.get_frame_texture(%Slime.animation, 0)
+	if tex == null:
+		return
+	var tex_h: float = float(tex.get_height())
+	# 贴图脚底相对精灵中心的偏移（正 = 偏上）
+	var foot_off: float = (%Slime.offset.y + tex_h / 2.0) * scale.y
+	%Slime.position.y = -foot_off
+	# 头顶血条跟着个子走
+	%BossBar.offset_top = -foot_off - tex_h * scale.y - 12.0
+	%BossBar.offset_bottom = %BossBar.offset_top + 16.0
+
+
+## 设置判定圆半径。必须 duplicate：mob.tscn 里 CircleShape2D 是共享资源，
+## 直接改 radius 会让所有怪一起变（后生成的覆盖先生成的）。
+func _set_hit_radius(r: float) -> void:
+	var circle: CircleShape2D = _body_shape.shape.duplicate()
+	circle.radius = r
+	_body_shape.shape = circle
 
 
 ## 按变体名应用属性（数值定义在 balance.gd 的 MOB_VARIANTS）
@@ -38,8 +64,14 @@ func setup(variant_name: String) -> void:
 	xp_value = def["xp"]
 	contact_damage = def["contact"]
 	scale = Vector2.ONE * def["scale"]
+	# 碰撞圆按"身体"尺寸给，不跟整张精灵缩放：
+	# 新素材很宽（蝙蝠展翼 54px、野兽 48px），若按包围盒缩放，
+	# 判定圆会比看得见的身体大一圈——"没碰到却掉血"。
+	_body_shape.scale = Vector2.ONE
+	_set_hit_radius(def.get("hit_radius", 40.0))
 	%Slime.modulate = def["color"]
 	%Slime.set_variant(def["sprites"])
+	_ground_sprite()
 
 
 ## 升格为首领（P4）：属性覆盖 + 头顶血条。hp_bonus 为按击杀数递增的血量。
@@ -51,11 +83,14 @@ func setup_boss(hp_bonus: int) -> void:
 	xp_value = Balance.BOSS_XP
 	contact_damage = Balance.BOSS_CONTACT
 	scale = Vector2.ONE * Balance.BOSS_SCALE
+	_body_shape.scale = Vector2.ONE
+	_set_hit_radius(Balance.BOSS_HIT_RADIUS)
 	%Slime.modulate = Balance.BOSS_COLOR
 	if ResourceLoader.exists(Balance.BOSS_SPRITES[0]):
 		var paths: Array = Balance.BOSS_SPRITES
 		%Slime.set_variant(paths)
 		%Slime.modulate = Color(1, 1, 1)
+	_ground_sprite()
 	_charge_timer = Balance.BOSS_CHARGE_PHASE["chase"]
 	%BossBar.max_value = health
 	%BossBar.value = health

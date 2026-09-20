@@ -9,7 +9,8 @@ const SHADOW := preload("res://assets/hero/shadow.png")
 const FRAME := 16
 # 精灵表列 = 朝向（与素材源码一致：下0 上1 左2 右3；行 0=待机帧，0-3=走路循环）
 const DIR_COL := {"down": 0, "up": 1, "left": 2, "right": 3}
-const SPRITE_SCALE := 4.0
+# 6.0：新敌人素材比旧素材高大，主角同步放大才不会显得是"小不点"
+const SPRITE_SCALE := 6.0
 
 var _sprite: AnimatedSprite2D
 var _last_dir := "down"
@@ -19,14 +20,14 @@ func _ready():
 	_sprite = AnimatedSprite2D.new()
 	_sprite.sprite_frames = _build_frames()
 	_sprite.scale = Vector2.ONE * SPRITE_SCALE
-	_sprite.position = Vector2(0, -12)
+	_sprite.position = Vector2(0, -22)
 	add_child(_sprite)
 	_sprite.play("idle_down")
 
 	var shadow := Sprite2D.new()
 	shadow.texture = SHADOW
-	shadow.scale = Vector2.ONE * 3.0
-	shadow.position = Vector2(0, 12)
+	shadow.scale = Vector2.ONE * 4.5
+	shadow.position = Vector2(0, 14)
 	shadow.modulate = Color(0, 0, 0, 0.35)
 	shadow.show_behind_parent = true
 	add_child(shadow)
