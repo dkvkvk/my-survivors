@@ -4,7 +4,7 @@ extends Node2D
 ## 自动读取父节点（Player）的速度，按主轴方向播放四向走路/待机动画。
 ## 物理与碰撞仍在 player.tscn 上，这里只负责外观。
 
-const SHEET := preload("res://assets/hero/ninja_sheet.png")
+const SHEET := preload("res://assets/hero/ninja_blue.png")
 const SHADOW := preload("res://assets/hero/shadow.png")
 const FRAME := 16
 # 精灵表列 = 朝向（与素材源码一致：下0 上1 左2 右3；行 0=待机帧，0-3=走路循环）

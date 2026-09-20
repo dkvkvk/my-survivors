@@ -16,9 +16,17 @@ func present(p_player: CharacterBody2D) -> void:
 	pool.shuffle()
 	choices = pool.slice(0, 3)
 	%Title.text = "★ 升级！选一张强化 ★"
-	$Card0.text = "%s\n%s" % [choices[0]["name"], choices[0]["desc"]]
-	$Card1.text = "%s\n%s" % [choices[1]["name"], choices[1]["desc"]]
-	$Card2.text = "%s\n%s" % [choices[2]["name"], choices[2]["desc"]]
+	for i in 3:
+		var card: Button = get_node("Card%d" % i)
+		card.text = "%s\n%s" % [choices[i]["name"], choices[i]["desc"]]
+		# 卡片图标（P5）：无贴图时隐藏图标槽
+		var icon_slot: TextureRect = get_node("Card%d/Card%dIcon" % [i, i])
+		var icon_path: String = choices[i].get("icon", "")
+		if icon_path != "" and ResourceLoader.exists(icon_path):
+			icon_slot.texture = load(icon_path)
+			icon_slot.show()
+		else:
+			icon_slot.hide()
 	get_tree().paused = true
 	show()
 

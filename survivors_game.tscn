@@ -284,6 +284,33 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 36
 text = "卡"
+[node name="Card2Icon" type="TextureRect" parent="LevelUpUI/Card2" unique_id=97110022]
+modulate = Color(1, 1, 1, 1)
+offset_left = 192.0
+offset_top = 10.0
+offset_right = 248.0
+offset_bottom = 66.0
+mouse_filter = 2
+stretch_mode = 5
+
+[node name="Card1Icon" type="TextureRect" parent="LevelUpUI/Card1" unique_id=97110021]
+modulate = Color(1, 1, 1, 1)
+offset_left = 192.0
+offset_top = 10.0
+offset_right = 248.0
+offset_bottom = 66.0
+mouse_filter = 2
+stretch_mode = 5
+
+[node name="Card0Icon" type="TextureRect" parent="LevelUpUI/Card0" unique_id=97110020]
+modulate = Color(1, 1, 1, 1)
+offset_left = 192.0
+offset_top = 10.0
+offset_right = 248.0
+offset_bottom = 66.0
+mouse_filter = 2
+stretch_mode = 5
+
 
 [node name="Card1" type="Button" parent="LevelUpUI" unique_id=880031713]
 anchors_preset = 8
