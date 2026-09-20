@@ -30,4 +30,6 @@
 
 Kenney 包随附的许可原文见 `assets/Kenney-License.txt`。
 
+| `assets/ui/` 主菜单背景、金币/宝箱/宝石/手里剑图标；`assets/mobs/mech_bat_*` 机械蝙蝠 | AI 生成（Google Gemini 图像模型/Nano Banana，提示词见提交历史），经像素化与抠底处理 | 遵循 [Gemini API 商用条款](https://ai.google.dev/gemini-api/terms)（允许商用，不得主张生成物为独立版权作品） |
+
 > 提示：OFL 1.1 对字体保留名称"缝合像素/Fusion Pixel"，未修改的原文件分发不受影响。
