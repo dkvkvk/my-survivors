@@ -24,6 +24,8 @@ var _charge_dir := Vector2.ZERO
 
 
 func _ready():
+	# 供链式闪电等 AoE 武器快速索敌
+	add_to_group("mobs")
 	%Slime.play_walk()
 
 

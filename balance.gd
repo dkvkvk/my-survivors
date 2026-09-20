@@ -72,6 +72,18 @@ const AURA_INTERVAL := 1.0  # 灼烧周期（秒）
 # 分裂弹头（U6）：手枪额外弹丸围绕瞄准方向的散射间隔
 const BULLET_SPREAD_DEG := 12.0
 
+# 链式闪电（P5）：命中敌人后在附近敌人之间跳跃，逐跳衰减。
+# 触发源是"任何一次命中"（子弹/飞刀），所以它吃现有武器的频率，不单独占一个开火节奏。
+const CHAIN_TRIGGER_CD := 0.25  # 触发冷却，防止连发时每颗子弹都拉一次电弧
+const CHAIN_RANGE := 220.0  # 跳向下一只敌人的最大距离
+const CHAIN_BASE_JUMPS := 2  # 1 级时跳跃次数
+const CHAIN_JUMP_STEP := 1  # 每升 1 级的跳跃次数增量
+const CHAIN_BASE_DAMAGE := 1  # 第一跳伤害
+const CHAIN_DAMAGE_STEP := 1  # 每升 1 级的伤害增量
+const CHAIN_FALLOFF := 0.5  # 每跳伤害衰减比例（0.5 = 每跳减半）
+const CHAIN_LINE_LIFE := 0.18  # 电弧残留时间（秒）
+const CHAIN_LINE_JITTER := 9.0  # 电弧抖动幅度（像素）
+
 # 武器进化（P3）：同名武器卡抽满 EVOLVE_LEVEL 级后，再来一张触发进化。
 # 进化后该卡从三选一卡池移除。
 const EVOLVE_LEVEL := 5
@@ -85,6 +97,9 @@ const AURA_EVOLVE_DAMAGE_BONUS := 2
 # 分裂弹头 → 手里剑大师
 const GUN_EVOLVE_EXTRA_BULLETS := 2
 const GUN_EVOLVE_FIRE_RATE_MULT := 1.2
+# 链式闪电 → 雷神之怒
+const CHAIN_EVOLVE_EXTRA_JUMPS := 2  # 跳跃次数 +2
+const CHAIN_EVOLVE_FALLOFF := 0.3  # 衰减放缓（0.3 = 每跳只减三成）
 
 # 首领（P4）：每 BOSS_INTERVAL 秒来袭一只，血量按来过几只递增。
 # 三段循环 AI：追击 3s → 蓄力 0.7s（闪白预示）→ 冲锋 0.8s（3.2 倍速直线）。

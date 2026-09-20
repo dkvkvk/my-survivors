@@ -12,4 +12,5 @@ const LIST := [
 	{"id": "orbit_blade", "icon": "res://assets/ui/card_orbit_blade.png", "name": "环形刀刃", "desc": "一把刀刃环绕自身旋转\n满 5 级后进化为刃风暴"},
 	{"id": "aura", "icon": "res://assets/ui/card_aura.png", "name": "灼热光环", "desc": "周期灼烧周围敌人\n满 5 级后进化为烈日领域"},
 	{"id": "split_shot", "icon": "res://assets/ui/card_split_shot.png", "name": "分裂弹头", "desc": "手枪额外一发扇形散射\n满 5 级后进化为手里剑大师"},
+	{"id": "chain_lightning", "icon": "res://assets/ui/card_chain_lightning.png", "name": "链式闪电", "desc": "命中后在敌人之间跳跃\n逐跳衰减，满 5 级后进化为雷神之怒"},
 ]

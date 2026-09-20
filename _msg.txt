@@ -1,0 +1,23 @@
+新增武器卡「链式闪电」：命中后在敌人间跳跃（P5）
+
+玩法：任意一次命中（子弹/飞刀）作为触发源，从命中点开始，在 220px 内
+依次跳向最近的敌人，逐跳伤害衰减，电弧纯代码绘制（不依赖美术素材）。
+满 5 级后第 6 张同名卡进化为「雷神之怒」：跳跃 +2、衰减放缓。
+
+实现：
+- chain_lightning.gd/.tscn：新武器节点，挂在 Player 下（%ChainLightning）
+  索敌走 get_tree().get_nodes_in_group("mobs")，mob.gd 加 mobs 分组
+- balance.gd：CHAIN_* 与 CHAIN_EVOLVE_* 数值集中定义
+- upgrades.gd：卡池加一行（第 9 张卡）
+- player.gd：chain_level 字段 + apply_upgrade 分支 + _try_evolve 分支 + on_weapon_hit 入口
+- bullet_2d.gd / orbit_blades.gd：命中时把事件喂给 on_weapon_hit（无此卡时空操作）
+
+视觉：四层叠绘（柔光→中光→青色电芯→近白芯）+ 每跳落点爆闪，
+段数与抖动随距离变化，做出电的毛刺感。
+
+验证：
+- headless 运行时 SCRIPT ERROR 0
+- 断言测试：level5 进化后 5 跳、索敌 4/5 只怪均命中，伤害 5→2→1→1→1（符合衰减公式）
+- viewport 截图确认电弧渲染正常
+
+文档：新增 ART_PROMPTS.md（待生成素材的逐张提示词）与 ROADMAP.md（分批路线图）

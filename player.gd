@@ -15,10 +15,11 @@ var fire_rate_mult := 1.0
 var bullet_damage := 1
 var pickup_radius := Balance.PICKUP_RADIUS
 
-# 武器卡（U6）：环形刀刃数量 / 灼热光环等级 / 手枪额外弹丸
+# 武器卡（U6）：环形刀刃数量 / 灼热光环等级 / 手枪额外弹丸 / 链式闪电等级
 var orbit_blade_count := 0
 var aura_level := 0
 var extra_bullets := 0
+var chain_level := 0
 # 武器进化（P3）：同名卡抽满 5 级后第 6 张触发进化，进化后从卡池移除
 var evolved_weapons := {}
 
@@ -114,6 +115,12 @@ func apply_upgrade(id: String) -> void:
 				$Gun.evolve()
 			else:
 				extra_bullets += 1
+		"chain_lightning":
+			if _try_evolve("chain_lightning"):
+				%ChainLightning.evolve()
+			else:
+				chain_level += 1
+				%ChainLightning.configure(chain_level)
 	%HealthBar.value = health
 
 
@@ -127,6 +134,8 @@ func _try_evolve(id: String) -> bool:
 			count = aura_level
 		"split_shot":
 			count = extra_bullets
+		"chain_lightning":
+			count = chain_level
 	if count >= Balance.EVOLVE_LEVEL and not evolved_weapons.has(id):
 		evolved_weapons[id] = true
 		Audio.play("res://sounds/pickup.wav", false, 2.0, 0.4)
@@ -138,3 +147,9 @@ func _try_evolve(id: String) -> bool:
 ## 卡池过滤：已进化的武器卡不再出现（供 level_up_ui 调用）
 func is_card_unavailable(id: String) -> bool:
 	return evolved_weapons.has(id)
+
+
+## 任意武器命中敌人时调用（bullet_2d / orbit_blades），
+## 由链式闪电自己判断等级与冷却——没有这张卡时这里等于空操作。
+func on_weapon_hit(pos: Vector2) -> void:
+	%ChainLightning.on_hit(pos)
