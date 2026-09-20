@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dcur5d2w4vre1"
-path="res://.godot/imported/ninja_blue.png-1b9cdad7baa4d97231a82f39ae8f4211.ctex"
+uid="uid://b7g2q2davibnf"
+path="res://.godot/imported/card_split_shot.png-160c0cfbec0eabd6f3c9602eb0fc066c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/hero/ninja_blue.png"
-dest_files=["res://.godot/imported/ninja_blue.png-1b9cdad7baa4d97231a82f39ae8f4211.ctex"]
+source_file="res://assets/ui/card_split_shot.png"
+dest_files=["res://.godot/imported/card_split_shot.png-160c0cfbec0eabd6f3c9602eb0fc066c.ctex"]
 
 [params]
 
