@@ -5,17 +5,12 @@ extends Area2D
 
 var travelled_distance = 0
 var damage := 1  # 由枪在生成时写入，吃升级加成
-var _star: Polygon2D
+var _star: Sprite2D
 
 
 func _ready():
-	_star = Polygon2D.new()
-	var pts := PackedVector2Array()
-	for i in 8:
-		var r := 9.0 if i % 2 == 0 else 4.0
-		pts.append(Vector2.RIGHT.rotated(TAU * i / 8.0) * r)
-	_star.polygon = pts
-	_star.color = Color(0.85, 0.88, 0.95)
+	_star = Sprite2D.new()
+	_star.texture = load("res://assets/ui/icon_shuriken.png")
 	add_child(_star)
 
 

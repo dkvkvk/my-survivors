@@ -20,33 +20,10 @@ func _ready():
 	circle.radius = 30.0
 	shape.shape = circle
 	add_child(shape)
-	var body := Polygon2D.new()
-	body.polygon = PackedVector2Array([
-		Vector2(-20, -12), Vector2(20, -12), Vector2(24, 14),
-		Vector2(-24, 14),
-	])
-	body.color = Color(0.55, 0.36, 0.18)
-	add_child(body)
-	var lid := Polygon2D.new()
-	lid.polygon = PackedVector2Array([
-		Vector2(-22, -24), Vector2(22, -24), Vector2(20, -12), Vector2(-20, -12),
-	])
-	lid.color = Color(0.68, 0.46, 0.22)
-	add_child(lid)
-	for trim_y in [-24.0, -12.0, 14.0]:
-		var trim := Polygon2D.new()
-		trim.polygon = PackedVector2Array([
-			Vector2(-22, trim_y - 1.5), Vector2(22, trim_y - 1.5),
-			Vector2(22, trim_y + 1.5), Vector2(-22, trim_y + 1.5),
-		])
-		trim.color = Color(0.95, 0.78, 0.25)
-		add_child(trim)
-	var lock := Polygon2D.new()
-	lock.polygon = PackedVector2Array([
-		Vector2(-3, -16), Vector2(3, -16), Vector2(3, -8), Vector2(-3, -8),
-	])
-	lock.color = Color(1.0, 0.88, 0.4)
-	add_child(lock)
+	var sprite := Sprite2D.new()
+	sprite.texture = load("res://assets/ui/icon_chest.png")
+	sprite.scale = Vector2.ONE * 1.5
+	add_child(sprite)
 	Juice.pop(self, 1.4)
 
 

@@ -12,20 +12,10 @@ var magnet_speed := 0.0
 
 
 func _ready():
-	var octagon := Polygon2D.new()
-	var pts := PackedVector2Array()
-	for i in 8:
-		var r := 11.0 if i % 2 == 0 else 7.0
-		pts.append(Vector2.RIGHT.rotated(TAU * i / 8.0 + PI / 8.0) * r)
-	octagon.polygon = pts
-	octagon.color = Color(1.0, 0.78, 0.2)
-	add_child(octagon)
-	var shine := Polygon2D.new()
-	shine.polygon = PackedVector2Array([
-		Vector2(-3, -5), Vector2(3, -5), Vector2(0, 2),
-	])
-	shine.color = Color(1.0, 0.95, 0.6)
-	add_child(shine)
+	var sprite := Sprite2D.new()
+	sprite.texture = load("res://assets/ui/icon_coin.png")
+	sprite.scale = Vector2.ONE * 0.9
+	add_child(sprite)
 	Juice.pop(self, 1.3)
 
 

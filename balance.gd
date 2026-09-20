@@ -12,7 +12,7 @@ const PLAYER_DAMAGE_RATE := 9.0  # 每个重叠敌人每秒掉的血：贴身必
 # sprites：两帧走路贴图（assets/mobs/，Kenney CC0）；color 为白色时用贴图原色
 const MOB_VARIANTS := {
 	"slime": {"hp": 3, "speed": [200.0, 300.0], "scale": 1.0, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "sprites": ["res://assets/mobs/slime_0.png", "res://assets/mobs/slime_1.png"]},
-	"runner": {"hp": 1, "speed": [380.0, 460.0], "scale": 0.8, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "sprites": ["res://assets/mobs/bat_0.png", "res://assets/mobs/bat_1.png"]},
+	"runner": {"hp": 1, "speed": [380.0, 460.0], "scale": 0.8, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "sprites": ["res://assets/mobs/mech_bat_0.png", "res://assets/mobs/mech_bat_1.png"]},
 	"tank": {"hp": 10, "speed": [110.0, 150.0], "scale": 1.7, "color": Color(1, 1, 1), "xp": 5, "contact": 1.5, "sprites": ["res://assets/mobs/knight_0.png", "res://assets/mobs/knight_1.png"]},
 	"elite": {"hp": 20, "speed": [240.0, 280.0], "scale": 2.1, "color": Color(1.4, 0.55, 0.55), "xp": 15, "contact": 2.5, "sprites": ["res://assets/mobs/beast_0.png", "res://assets/mobs/beast_1.png"]},
 }
