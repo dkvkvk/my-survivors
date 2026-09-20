@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b34wwtsfpb1vk"
-path="res://.godot/imported/beast_1.png-c62344781df662d76dacdb7ac691e09a.ctex"
+uid="uid://dqxrye22th3om"
+path="res://.godot/imported/gameover_bg.png-49ea570f52da36762b942ceac0425718.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/mobs/beast_1.png"
-dest_files=["res://.godot/imported/beast_1.png-c62344781df662d76dacdb7ac691e09a.ctex"]
+source_file="res://assets/ui/gameover_bg.png"
+dest_files=["res://.godot/imported/gameover_bg.png-49ea570f52da36762b942ceac0425718.ctex"]
 
 [params]
 

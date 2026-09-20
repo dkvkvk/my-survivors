@@ -43,13 +43,17 @@ func setup(variant_name: String) -> void:
 ## 升格为首领（P4）：属性覆盖 + 头顶血条。hp_bonus 为按击杀数递增的血量。
 func setup_boss(hp_bonus: int) -> void:
 	is_boss = true
-	setup("tank")  # 复用重甲兵贴图，放大染色
+	setup("tank")  # 回退贴图：重甲兵放大染色
 	health = Balance.BOSS_BASE_HP + hp_bonus
 	speed = Balance.BOSS_SPEED
 	xp_value = Balance.BOSS_XP
 	contact_damage = Balance.BOSS_CONTACT
 	scale = Vector2.ONE * Balance.BOSS_SCALE
 	%Slime.modulate = Balance.BOSS_COLOR
+	if ResourceLoader.exists(Balance.BOSS_SPRITES[0]):
+		var paths: Array = Balance.BOSS_SPRITES
+		%Slime.set_variant(paths)
+		%Slime.modulate = Color(1, 1, 1)
 	_charge_timer = Balance.BOSS_CHARGE_PHASE["chase"]
 	%BossBar.max_value = health
 	%BossBar.value = health

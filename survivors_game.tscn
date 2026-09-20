@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://chvmhsdaox08k" path="res://level_up_ui.gd" id="5_levelup"]
 [ext_resource type="Texture2D" uid="uid://dlqas1jal36sy" path="res://assets/ground/tech_floor.png" id="6_ground"]
 [ext_resource type="Script" uid="uid://ddvickkrmyjq0" path="res://pause_ui.gd" id="7_pause"]
+[ext_resource type="Texture2D" path="res://assets/ui/gameover_bg.png" id="8_gobg"]
 
 [sub_resource type="Curve2D" id="Curve2D_cp6e5"]
 _data = {
@@ -44,12 +45,22 @@ process_mode = 3
 visible = false
 script = ExtResource("4_gameover")
 
+[node name="Bg" type="TextureRect" parent="GameOver" unique_id=1711581987]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("8_gobg")
+
 [node name="ColorRect" type="ColorRect" parent="GameOver" unique_id=1711581986]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0, 0, 0, 0.439216)
 
 [node name="Label" type="Label" parent="GameOver/ColorRect" unique_id=970741770]

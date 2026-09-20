@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://r5m2sh82xobp"
-path="res://.godot/imported/knight_0.png-7935d344d7f2a6223deaa7958a11c8ec.ctex"
+uid="uid://besdgtphvrg8t"
+path="res://.godot/imported/ninja_sheet.png-181446c31e9817db871ca00a257c0e73.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/mobs/knight_0.png"
-dest_files=["res://.godot/imported/knight_0.png-7935d344d7f2a6223deaa7958a11c8ec.ctex"]
+source_file="res://assets/hero/ninja_sheet.png"
+dest_files=["res://.godot/imported/ninja_sheet.png-181446c31e9817db871ca00a257c0e73.ctex"]
 
 [params]
 

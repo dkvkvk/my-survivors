@@ -11,10 +11,10 @@ const PLAYER_DAMAGE_RATE := 9.0  # 每个重叠敌人每秒掉的血：贴身必
 # 敌人变体（U4）：血量/速度区间/体型/色调/经验/接触伤害倍率
 # sprites：两帧走路贴图（assets/mobs/，Kenney CC0）；color 为白色时用贴图原色
 const MOB_VARIANTS := {
-	"slime": {"hp": 3, "speed": [200.0, 300.0], "scale": 1.0, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "sprites": ["res://assets/mobs/slime_0.png", "res://assets/mobs/slime_1.png"]},
+	"slime": {"hp": 3, "speed": [200.0, 300.0], "scale": 1.0, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "sprites": ["res://assets/mobs/mech_slime_0.png", "res://assets/mobs/mech_slime_1.png"]},
 	"runner": {"hp": 1, "speed": [380.0, 460.0], "scale": 0.8, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "sprites": ["res://assets/mobs/mech_bat_0.png", "res://assets/mobs/mech_bat_1.png"]},
-	"tank": {"hp": 10, "speed": [110.0, 150.0], "scale": 1.7, "color": Color(1, 1, 1), "xp": 5, "contact": 1.5, "sprites": ["res://assets/mobs/knight_0.png", "res://assets/mobs/knight_1.png"]},
-	"elite": {"hp": 20, "speed": [240.0, 280.0], "scale": 2.1, "color": Color(1.4, 0.55, 0.55), "xp": 15, "contact": 2.5, "sprites": ["res://assets/mobs/beast_0.png", "res://assets/mobs/beast_1.png"]},
+	"tank": {"hp": 10, "speed": [110.0, 150.0], "scale": 1.7, "color": Color(1, 1, 1), "xp": 5, "contact": 1.5, "sprites": ["res://assets/mobs/mech_knight_0.png", "res://assets/mobs/mech_knight_1.png"]},
+	"elite": {"hp": 20, "speed": [240.0, 280.0], "scale": 2.1, "color": Color(1.4, 0.55, 0.55), "xp": 15, "contact": 2.5, "sprites": ["res://assets/mobs/mech_beast_0.png", "res://assets/mobs/mech_beast_1.png"]},
 }
 
 # 波次表：t=生效时间（秒），spawn=刷怪间隔，weights=各变体出现权重。
@@ -100,6 +100,8 @@ const BOSS_COLOR := Color(1.6, 0.45, 0.45)
 const BOSS_XP := 50
 const BOSS_CONTACT := 3.0
 const BOSS_KNOCKBACK_RESIST := 0.2  # 吃击退的比率
+# 首领专属贴图（AI 生成后放入 assets/mobs/；缺失时回退用坦克贴图染色）
+const BOSS_SPRITES := ["res://assets/mobs/boss_0.png", "res://assets/mobs/boss_1.png"]
 
 # 宝箱（P4）：首领必掉，走过去开启，随机奖励
 const CHEST_COIN_MIN := 15
