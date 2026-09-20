@@ -103,6 +103,10 @@ const GUN_EVOLVE_FIRE_RATE_MULT := 1.2
 const CHAIN_EVOLVE_EXTRA_JUMPS := 2  # 跳跃次数 +2
 const CHAIN_EVOLVE_FALLOFF := 0.3  # 衰减放缓（0.3 = 每跳只减三成）
 
+# 胜利条件（P5）：活满 SURVIVE_WIN_TIME 秒，或击杀 VICTORY_BOSS_KILLS 只首领，任一达成即胜利。
+const SURVIVE_WIN_TIME := 900.0  # 15 分钟
+const VICTORY_BOSS_KILLS := 3
+
 # 首领（P4）：每 BOSS_INTERVAL 秒来袭一只，血量按来过几只递增。
 # 三段循环 AI：追击 3s → 蓄力 0.7s（闪白预示）→ 冲锋 0.8s（3.2 倍速直线）。
 const BOSS_INTERVAL := 180.0

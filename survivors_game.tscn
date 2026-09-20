@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://dlqas1jal36sy" path="res://assets/ground/tech_floor.png" id="6_ground"]
 [ext_resource type="Script" uid="uid://ddvickkrmyjq0" path="res://pause_ui.gd" id="7_pause"]
 [ext_resource type="Texture2D" path="res://assets/ui/gameover_bg.png" id="8_gobg"]
+[ext_resource type="Script" path="res://victory_ui.gd" id="9_victory"]
 
 [sub_resource type="Curve2D" id="Curve2D_cp6e5"]
 _data = {
@@ -142,6 +143,114 @@ grow_vertical = 2
 theme_override_font_sizes/font_size = 48
 text = "回到主菜单"
 
+[node name="VictoryUI" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+process_mode = 3
+visible = false
+script = ExtResource("9_victory")
+
+[node name="Bg" type="TextureRect" parent="VictoryUI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("8_gobg")
+
+[node name="Tint" type="ColorRect" parent="VictoryUI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.12, 0.1, 0.55)
+
+[node name="ResultLabel" type="Label" parent="VictoryUI"]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -600.0
+offset_top = -420.0
+offset_right = 600.0
+offset_bottom = -220.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.55, 1)
+theme_override_font_sizes/font_size = 150
+text = "胜 利"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ReasonLabel" type="Label" parent="VictoryUI"]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -600.0
+offset_top = -190.0
+offset_right = 600.0
+offset_bottom = -120.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.75, 0.95, 0.8, 1)
+theme_override_font_sizes/font_size = 42
+text = "★"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VictoryStatsLabel" type="Label" parent="VictoryUI"]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -450.0
+offset_top = 130.0
+offset_right = 450.0
+offset_bottom = 310.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 36
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RestartButton" type="Button" parent="VictoryUI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = 340.0
+offset_right = 200.0
+offset_bottom = 420.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 48
+text = "再来一局 (R)"
+
+[node name="MenuButton" type="Button" parent="VictoryUI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = 450.0
+offset_right = 200.0
+offset_bottom = 530.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 48
+text = "回到主菜单"
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=980385255]
 anchors_preset = 15
 anchor_right = 1.0
@@ -154,45 +263,53 @@ unique_name_in_owner = true
 offset_left = 24.0
 offset_top = 16.0
 offset_right = 424.0
-offset_bottom = 56.0
+offset_bottom = 64.0
 theme_override_font_sizes/font_size = 36
 text = "击杀 0"
 
 [node name="TimeLabel" type="Label" parent="HUD" unique_id=880031706]
 unique_name_in_owner = true
 offset_left = 24.0
-offset_top = 60.0
-offset_right = 424.0
-offset_bottom = 100.0
+offset_top = 72.0
+offset_right = 700.0
+offset_bottom = 120.0
 theme_override_font_sizes/font_size = 36
 text = "存活 0:00"
 
 [node name="XPBar" type="ProgressBar" parent="HUD" unique_id=880031707]
 unique_name_in_owner = true
 offset_left = 24.0
-offset_top = 108.0
+offset_top = 134.0
 offset_right = 424.0
-offset_bottom = 132.0
+offset_bottom = 158.0
 show_percentage = false
 
 [node name="LevelLabel" type="Label" parent="HUD" unique_id=880031708]
 unique_name_in_owner = true
 offset_left = 24.0
-offset_top = 138.0
+offset_top = 168.0
 offset_right = 424.0
-offset_bottom = 178.0
+offset_bottom = 216.0
 theme_override_font_sizes/font_size = 36
 text = "Lv 1"
 
 [node name="CoinLabel" type="Label" parent="HUD" unique_id=971100011]
 unique_name_in_owner = true
 offset_left = 24.0
-offset_top = 178.0
+offset_top = 280.0
 offset_right = 424.0
-offset_bottom = 218.0
+offset_bottom = 328.0
 theme_override_font_sizes/font_size = 36
 text = "金币 0"
 
+[node name="BossProgressLabel" type="Label" parent="HUD"]
+unique_name_in_owner = true
+offset_left = 24.0
+offset_top = 224.0
+offset_right = 424.0
+offset_bottom = 272.0
+theme_override_font_sizes/font_size = 36
+text = "首领 0/3"
 [node name="BossWarnLabel" type="Label" parent="HUD" unique_id=971100012]
 unique_name_in_owner = true
 visible = false
@@ -428,3 +545,5 @@ stretch_mode = 5
 [connection signal="pressed" from="PauseUI/ResumeButton" to="PauseUI" method="_on_resume_button_pressed"]
 [connection signal="pressed" from="PauseUI/RestartButton" to="PauseUI" method="_on_restart_button_pressed"]
 [connection signal="pressed" from="PauseUI/MenuButton" to="PauseUI" method="_on_menu_button_pressed"]
+[connection signal="pressed" from="VictoryUI/RestartButton" to="VictoryUI" method="_on_restart_button_pressed"]
+[connection signal="pressed" from="VictoryUI/MenuButton" to="VictoryUI" method="_on_menu_button_pressed"]

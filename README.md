@@ -1,6 +1,8 @@
-# 忍者今天也在割韭菜 🥬
+# 不退（NO RETREAT）
 
-一款用 **Godot 4 + GDScript** 开发的 2D 割草幸存者游戏。操控像素小忍者在被怪物淹没的科技基地里求生：自动投掷手里剑、收集经验与金币、升级三选一、死亡后在忍具商店购买永久强化，看你能活多久。**全部美术素材为 CC0/OFL 可商用**。
+一款用 **Godot 4 + GDScript** 开发的 2D 割草幸存者游戏。操控像素小忍者在被机械虫群淹没的**和风忍者村**里求生：自动投掷手里剑、收集经验与金币、升级三选一、死亡后在忍具商店购买永久强化。
+
+**胜利条件**：活满 **15 分钟**，或击破 **3 只首领**——站着不退才是活路。**全部美术素材为 CC0/OFL 可商用**。
 
 > 基于 [GDQuest](https://www.gdquest.com/) 的开源教学项目 [getting-started-with-godot-4](https://github.com/gdquest-demos/getting-started-with-godot-4) 二次开发。
 

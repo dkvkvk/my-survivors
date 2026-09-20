@@ -1,6 +1,7 @@
 # 交接文档（HANDOVER）
 
-> 《忍者今天也在割韭菜》（repo 名 my-survivors）——Godot 4.7 割草幸存者游戏。
+> 《不退》（NO RETREAT，repo 名 my-survivors）——Godot 4.7 割草幸存者游戏。
+> 世界观：和风忍者村 + 科技入侵。胜利条件：活满 15 分钟或击破 3 只首领。
 > 本文写给接手的 AI agent / 开发者：环境、架构、约定、坑、验证与发布流程、待办。
 
 ## 0. 快速上手
@@ -41,6 +42,7 @@
 | `coin.gd` / `chest.gd` / `xp_gem` | 掉落物（磁吸拾取 / 走近开启随机奖励） |
 | `save.gd` | `class_name SaveGame` 纯静态：records+coins+upgrades 存 `user://records.json` |
 | `main_menu/shop/level_up_ui/pause_ui/game_over` | 各 UI（CanvasLayer + process_mode=3 暂停模式） |
+| `victory_ui.gd` | 胜利结算（P5）：活满 `SURVIVE_WIN_TIME` 或击破 `VICTORY_BOSS_KILLS` 只首领触发 |
 | `fader.gd` | autoload：黑场过渡 + 暗角后期（切场景统一走 `Fader.fade_to_scene()`） |
 | `audio.gd` | autoload：12 池音效 + `play_music()` 循环 BGM |
 | `theme.tres` + `fonts/` | 全局像素主题；字号取 12 的倍数 |
@@ -101,7 +103,7 @@ func _process(_delta) -> bool:  # 必须有返回值，否则 Parse Error
 6. TileSet 物理：必须先 `add_source` 再给 TileData 加碰撞多边形（顺序反了碰撞静默失效）。
 7. 怪物碰撞圆/受击框几何要保证"攻击环最远停点 + 碰撞半径 > 受击框半宽"，否则掉血链路断（HurtBox mask 必须=2）。
 8. 项目改名会改 user:// 目录——已设 `custom_user_dir_name="my-survivors"` 固定，再改名存档不丢。
-9. 窗口标题=project.godot 的 config/name（忍者今天也在割韭菜）；仓库名未改。
+9. 窗口标题=project.godot 的 config/name（**不退**）；仓库名/导出文件名仍是 my-survivors。
 10. **贴图放错文件**：曾有"道具在乱跑"——AI 生成的是 3×3 升级卡图标九宫格，却被写进了 `assets/hero/ninja_sheet.png`，`hero.gd` 按 16px 切成 4×4 方向表，于是玩家身上显示的是图标碎片（同时 2c39948 那版提交的这张表 sha=1f5e0af1…，是坏的那张）。`ninja_sheet.png` 必须是 64×64 的 4×4 忍者行走表（Ninja Adventure CC0），已从 `97e93c6` 恢复，正确 sha256=`ea03e60f906dbab72a5be39bba04a8ad0d23854a9b6af8df48df45abf306bcb6`。**教训**：接入素材后必须实机截图核对"是谁在用这张图"，别只看文件名。
 11. **左右列映射别乱改**：上面那张坏图标表曾让人以为"新表左右列相反"，于是 `hero.gd` 的 `DIR_COL` 被改成 `left:3, right:2`——结果向左走时人是倒着走的。恢复正版表后已改回标准顺序 `{"down":0,"up":1,"left":2,"right":3}`（col2 面朝左、col3 面朝右，已验证）。**换方向表后必须重新核对左右**：把该朝向的行走帧渲染出来看脸朝哪边，不要凭围巾位置猜。
 12. **一整批素材互相错位**（2c39948 那批 AI 生成）：
