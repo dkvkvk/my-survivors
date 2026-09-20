@@ -8,7 +8,7 @@ const SHEET := preload("res://assets/hero/ninja_sheet.png")
 const SHADOW := preload("res://assets/hero/shadow.png")
 const FRAME := 16
 # 精灵表列 = 朝向（与素材源码一致：下0 上1 左2 右3；行 0=待机帧，0-3=走路循环）
-const DIR_COL := {"down": 0, "up": 1, "left": 2, "right": 3}
+const DIR_COL := {"down": 0, "up": 1, "left": 3, "right": 2}  # 新表左右列与直觉相反，实测校准
 const SPRITE_SCALE := 4.0
 
 var _sprite: AnimatedSprite2D
