@@ -32,18 +32,50 @@ autostart = true
 
 [node name="Player" parent="." unique_id=1174028023 instance=ExtResource("2_a7q7f")]
 
-[node name="Path2D" type="Path2D" parent="Player" unique_id=1949369106]
-curve = SubResource("Curve2D_cp6e5")
-
-[node name="PathFollow2D" type="PathFollow2D" parent="Player/Path2D" unique_id=949713007]
-unique_name_in_owner = true
-position = Vector2(-1055, -697)
-
 [node name="GameOver" type="CanvasLayer" parent="." unique_id=880031702]
 unique_name_in_owner = true
 process_mode = 3
 visible = false
 script = ExtResource("4_gameover")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1066809076]
+layer = -32
+
+[node name="Ambient" type="CPUParticles2D" parent="." unique_id=971100009]
+unique_name_in_owner = true
+z_index = -50
+texture_filter = 1
+amount = 48
+lifetime = 7.0
+preprocess = 7.0
+emission_shape = 3
+emission_rect_extents = Vector2(1, 1)
+direction = Vector2(0, -1)
+spread = 180.0
+gravity = Vector2(0, -8)
+initial_velocity_min = 8.0
+initial_velocity_max = 24.0
+scale_amount_min = 2.0
+scale_amount_max = 3.0
+color = Color(0.45, 0.95, 1, 0.3)
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=880031704]
+layer = 10
+
+[node name="LevelUpUI" type="CanvasLayer" parent="." unique_id=880031709]
+unique_name_in_owner = true
+process_mode = 3
+visible = false
+script = ExtResource("5_levelup")
+
+[node name="PauseUI" type="CanvasLayer" parent="." unique_id=971100003]
+unique_name_in_owner = true
+process_mode = 3
+visible = false
+script = ExtResource("7_pause")
+
+[node name="Path2D" type="Path2D" parent="Player" unique_id=1949369106]
+curve = SubResource("Curve2D_cp6e5")
 
 [node name="Bg" type="TextureRect" parent="GameOver" unique_id=1711581987]
 anchors_preset = 15
@@ -62,25 +94,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0.439216)
-
-[node name="Label" type="Label" parent="GameOver/ColorRect" unique_id=970741770]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -358.0
-offset_top = -107.0
-offset_right = 358.0
-offset_bottom = 107.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 120
-text = "Game Over"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="StatsLabel" type="Label" parent="GameOver" unique_id=971100001]
 unique_name_in_owner = true
@@ -129,36 +142,12 @@ grow_vertical = 2
 theme_override_font_sizes/font_size = 48
 text = "回到主菜单"
 
-[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1066809076]
-layer = -32
-
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=980385255]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Ambient" type="CPUParticles2D" parent="." unique_id=971100009]
-unique_name_in_owner = true
-z_index = -50
-texture_filter = 1
-amount = 48
-lifetime = 7.0
-preprocess = 7.0
-emission_shape = 3
-emission_rect_extents = Vector2(1, 1)
-direction = Vector2(0, -1)
-spread = 180.0
-gravity = Vector2(0, -8)
-initial_velocity_min = 8.0
-initial_velocity_max = 24.0
-scale_amount_min = 2.0
-scale_amount_max = 3.0
-color = Color(0.45, 0.95, 1, 0.3)
-
-[node name="HUD" type="CanvasLayer" parent="." unique_id=880031704]
-layer = 10
 
 [node name="KillLabel" type="Label" parent="HUD" unique_id=880031705]
 unique_name_in_owner = true
@@ -238,12 +227,6 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(1, 0.12, 0.08, 0)
 
-[node name="LevelUpUI" type="CanvasLayer" parent="." unique_id=880031709]
-unique_name_in_owner = true
-process_mode = 3
-visible = false
-script = ExtResource("5_levelup")
-
 [node name="Dim" type="ColorRect" parent="LevelUpUI" unique_id=880031710]
 anchors_preset = 15
 anchor_right = 1.0
@@ -284,33 +267,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 36
 text = "卡"
-[node name="Card2Icon" type="TextureRect" parent="LevelUpUI/Card2" unique_id=97110022]
-modulate = Color(1, 1, 1, 1)
-offset_left = 192.0
-offset_top = 10.0
-offset_right = 248.0
-offset_bottom = 66.0
-mouse_filter = 2
-stretch_mode = 5
-
-[node name="Card1Icon" type="TextureRect" parent="LevelUpUI/Card1" unique_id=97110021]
-modulate = Color(1, 1, 1, 1)
-offset_left = 192.0
-offset_top = 10.0
-offset_right = 248.0
-offset_bottom = 66.0
-mouse_filter = 2
-stretch_mode = 5
-
-[node name="Card0Icon" type="TextureRect" parent="LevelUpUI/Card0" unique_id=97110020]
-modulate = Color(1, 1, 1, 1)
-offset_left = 192.0
-offset_top = 10.0
-offset_right = 248.0
-offset_bottom = 66.0
-mouse_filter = 2
-stretch_mode = 5
-
 
 [node name="Card1" type="Button" parent="LevelUpUI" unique_id=880031713]
 anchors_preset = 8
@@ -341,12 +297,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 36
 text = "卡"
-
-[node name="PauseUI" type="CanvasLayer" parent="." unique_id=971100003]
-unique_name_in_owner = true
-process_mode = 3
-visible = false
-script = ExtResource("7_pause")
 
 [node name="Dim" type="ColorRect" parent="PauseUI" unique_id=971100004]
 anchors_preset = 15
@@ -417,6 +367,56 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 36
 text = "回到主菜单"
+
+[node name="PathFollow2D" type="PathFollow2D" parent="Player/Path2D" unique_id=949713007]
+unique_name_in_owner = true
+position = Vector2(-1055, -697)
+
+[node name="Label" type="Label" parent="GameOver/ColorRect" unique_id=970741770]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -358.0
+offset_top = -107.0
+offset_right = 358.0
+offset_bottom = 107.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 120
+text = "Game Over"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card0Icon" type="TextureRect" parent="LevelUpUI/Card0" unique_id=97110020]
+modulate = Color(1, 1, 1, 1)
+offset_left = 192.0
+offset_top = 10.0
+offset_right = 248.0
+offset_bottom = 66.0
+mouse_filter = 2
+stretch_mode = 5
+
+[node name="Card1Icon" type="TextureRect" parent="LevelUpUI/Card1" unique_id=97110021]
+modulate = Color(1, 1, 1, 1)
+offset_left = 192.0
+offset_top = 10.0
+offset_right = 248.0
+offset_bottom = 66.0
+mouse_filter = 2
+stretch_mode = 5
+
+[node name="Card2Icon" type="TextureRect" parent="LevelUpUI/Card2" unique_id=97110022]
+modulate = Color(1, 1, 1, 1)
+offset_left = 192.0
+offset_top = 10.0
+offset_right = 248.0
+offset_bottom = 66.0
+mouse_filter = 2
+stretch_mode = 5
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="health_depleted" from="Player" to="." method="_on_player_health_depleted"]
