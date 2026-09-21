@@ -100,35 +100,64 @@ Seamless tileable pixel art ground texture, 256x256, top-down view. Japanese sto
 
 ---
 
-## 四、视频清单（先只做 1 个，验证技术可行性）
+## 四、视频清单
 
 > **重要**：Godot 的 `gl_compatibility` 渲染器 + Web 版对视频支持有限。
 > 所以**先只做 `menu_loop` 一个**，我验证在 Windows / Web 都能播之后，再批量做其余两个。
 > 如果播不了，我会改用**序列帧（PNG 序列）**或代码动画替代。
+
+### ⚠️ 安全区更正（之前写错了）
+
+游戏主菜单的标题和按钮是**居中**的（不是靠左）。所以：
+
+- **画面正中 1/3 要相对暗、相对静**（标题和小字压在这里）
+- 动效放在**左右两侧**（鸟居、竹林、飘落樱花）
+- 整体**偏暗、低对比**，否则文字再清楚也压不住运动
 
 ### 1. `menu_loop.mp4` — 主菜单循环背景（**先做这个**）
 
 | 项 | 要求 |
 |---|---|
 | 时长 | 8~15 秒 |
-| 分辨率 | 1920×1080 |
+| 分辨率 | 1920×1080（16:9） |
 | 格式 | MP4 / H.264 |
-| 循环 | **首尾帧必须能无缝衔接**（结尾 = 开头） |
-| 内容 | 基于 `menu_bg` 的镜头缓慢横移 + 樱花飘落 + 霓虹闪烁 + 机械虫爬动 |
-| 构图 | **左侧 1/3 保持暗且空旷**（标题按钮压在上面） |
+| 循环 | **首尾帧必须完全一致**，否则循环会跳 |
+| 内容 | 镜头极缓慢横移 + 樱花飘落 + 霓虹脉动 + 机械虫爬行 |
+| 安全区 | **正中 1/3 保持暗且平静** |
 
 ```
-Pixel art animated loop, Japanese ninja village at night invaded by technology, slow horizontal camera pan from left to right, cherry blossom petals drifting across the frame, cyan neon cables pulsing softly, small mechanical insect drones crawling slowly over wooden buildings and a large red torii gate. Dark navy and black palette with cyan neon glow and pink sakura accents. The left third of the frame stays dark and empty. Seamless loop, first and last frame must match exactly. Crisp pixels, pixel art aesthetic, no text, no watermark, no characters in the foreground, 16:9.
+Pixel art animated loop, Japanese ninja village at night invaded by technology. Extremely slow horizontal camera drift, cherry blossom petals drifting gently across the frame, cyan neon cables pulsing softly, small mechanical insect drones crawling slowly over wooden buildings and a large red torii gate on the right side. The CENTER THIRD of the frame stays dark, calm and low-contrast so UI text can be read over it. Overall dark, moody and low contrast. Dark navy and black palette with cyan neon glow and pink sakura accents. Seamless loop: the first frame and the last frame must be identical. No camera cuts, no zoom, no text, no watermark, no characters in the foreground. 1920x1080, 16:9, 10 seconds, crisp pixel art aesthetic.
 ```
+
+> 💡 循环小技巧：如果模型做不到首尾一致，就让它**多生成几秒**，我从中截取一段能接上的。
 
 ### 2. `logo_intro.mp4` — 开场 Logo 动画（**验证通过后再做**）
-- 3~5 秒，1920×1080
-- 结尾定格在标题；背景纯黑（方便叠加）
-- 内容：忍者刀光划开画面 → 霓虹裂纹蔓延 → 标题浮现
+
+| 项 | 要求 |
+|---|---|
+| 时长 | 3~5 秒 |
+| 分辨率 | 1920×1080 |
+| 格式 | MP4 / H.264 |
+| 内容 | 刀光划开画面 → 霓虹裂纹蔓延 → 收束到中央暗场 |
+| 关键 | **不要出现文字**（标题由游戏渲染）；**结尾要收在暗背景**，方便我把标题叠上去 |
+
+```
+Pixel art animated logo reveal background, no text. A single sharp blade flash sweeps diagonally across a black screen, leaving a glowing cyan neon crack that spreads outward like circuit veins, cherry blossom petals burst and scatter, then everything settles and fades into a dark calm center with a faint cyan glow. Dramatic and fast at the start, calm at the end. Dark navy and black palette with cyan neon and pink sakura accents. Ends on a dark, low-contrast frame with the center clear. No text, no watermark, no characters. 1920x1080, 16:9, 4 seconds, crisp pixel art aesthetic.
+```
 
 ### 3. `death_slowmo.mp4` — 死亡演出（**验证通过后再做**）
-- 2~3 秒，1920×1080
-- 红白闪 + 慢镜头感；结尾可衔接结算界面
+
+| 项 | 要求 |
+|---|---|
+| 时长 | 2~3 秒 |
+| 分辨率 | 1920×1080 |
+| 格式 | MP4 / H.264 |
+| 内容 | 红色冲击闪 → 慢镜头下坠感 → 收黑 |
+| 关键 | **结尾收黑**，可直接衔接失败结算界面 |
+
+```
+Pixel art death transition, no text. A harsh red-white impact flash fills the screen, then the image slows down and desaturates as if time is dragging, dark red embers and torn cherry blossom petals drift upward slowly, cyan neon light flickers and dies out, everything sinks into darkness. Oppressive and final mood. Dark red, black and dying cyan palette. Ends almost fully black so it can cut straight into a game over screen. No text, no watermark, no characters. 1920x1080, 16:9, 3 seconds, crisp pixel art aesthetic.
+```
 
 ---
 
