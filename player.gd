@@ -137,6 +137,14 @@ func _sync_skill_slots() -> void:
 			skill_slots[i] = ""
 
 
+## 每击杀一只怪，给所有携带武器累积 1 点"击杀经验"（武器升级条件之一）。
+## 说明：目前不区分"是谁打死的"——所有携带武器同时累积，简单直观；
+## 将来要精确归属，需要在 take_damage 里带上来源武器 id。
+func add_kill_credit() -> void:
+	for w in weapons:
+		w["kills"] = int(w["kills"]) + 1
+
+
 func add_material(id: String, amount := 1) -> void:
 	materials[id] = int(materials.get(id, 0)) + amount
 

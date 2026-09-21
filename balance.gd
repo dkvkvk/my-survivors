@@ -113,6 +113,10 @@ const SKILL_AURA_DAMAGE := 12
 
 # 武器掉落（P6）：普通怪小概率掉；首领必掉（见 mob.gd）
 const WEAPON_DROP_CHANCE := 0.04
+# 材料掉落概率（P6 武器升级用）
+const MATERIAL_DROP_CHANCE := 0.22   # 铁屑
+const CRYSTAL_DROP_CHANCE := 0.06    # 雷晶
+const SKILL_BOOK_DROP_CHANCE := 0.02 # 技能切换书
 
 # 法力（蓝条，P6 技能系统）：技能消耗蓝，随时间回复。
 const MANA_MAX := 100.0

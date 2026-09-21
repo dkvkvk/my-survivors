@@ -166,6 +166,7 @@ func take_damage(amount := 1, knockback := Vector2.ZERO):
 		drop_xp_gem()
 		drop_coins()
 		drop_weapon()
+		drop_materials()
 		if is_boss:
 			drop_chest()
 		_burst_debris()
@@ -198,6 +199,29 @@ func drop_coins():
 
 
 ## 首领死亡必掉宝箱（P4）
+## 材料与切换书掉落（P6）：材料按概率掉，切换书稀有。
+## 首领一次给较多材料。
+func drop_materials() -> void:
+	# 铁屑：常见
+	if is_boss or randf() < Balance.MATERIAL_DROP_CHANCE:
+		var n: int = 4 if is_boss else 1
+		for i in n:
+			_drop_pickup("material", "scrap")
+	# 雷晶：稀有（首领必给）
+	if is_boss or randf() < Balance.CRYSTAL_DROP_CHANCE:
+		_drop_pickup("material", "crystal")
+	# 技能切换书：很稀有
+	if randf() < Balance.SKILL_BOOK_DROP_CHANCE:
+		_drop_pickup("book", "")
+
+
+func _drop_pickup(kind: String, mat: String) -> void:
+	var p = preload("res://pickup_drop.tscn").instantiate()
+	get_parent().add_child(p)
+	p.global_position = global_position + Vector2.from_angle(randf() * TAU) * randf_range(4.0, 22.0)
+	p.setup(kind, mat)
+
+
 ## 武器掉落（P6）：普通怪小概率，首领必掉。地上生成 weapon_drop，走近按 F 拾取。
 func drop_weapon() -> void:
 	var chance: float = 1.0 if is_boss else Balance.WEAPON_DROP_CHANCE

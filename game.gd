@@ -78,6 +78,8 @@ func _on_timer_timeout():
 func _on_mob_died():
 	kill_count += 1
 	%KillLabel.text = "击杀 %d" % kill_count
+	# 武器升级条件之一：击杀数累积（P6）
+	player.add_kill_credit()
 
 
 ## 金币拾取入口（coin.gd 延迟调用）
