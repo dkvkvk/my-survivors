@@ -72,7 +72,7 @@ main_menu.gd      # 主菜单（项目启动场景）：开始游戏 / 最高纪
 game.gd           # 主逻辑：刷怪、更次、HUD、胜负流程
 chunk_map.gd      # ★ 分块无限地图：小地图模板随机拼接 + 瓦片碰撞 + 流式加载
 hero.gd           # 守山人角色：四方向待机/行走动画（素材 Ninja Adventure）
-player.gd         # 玩家：移动、血量、经验等级、强化与法宝应用
+player.gd         # 玩家：移动、血量、修为、强化与法宝应用
 mob.gd            # 敌人：变体属性、软分离围圈、掉宝石、击退
 enemy_sprite.gd   # 敌人外观适配器：两帧动画 + 受击压扁（Kenney 素材）
 gun.gd / bullet_2d.gd  # 自动发射与旋转本命飞剑（代码绘制）

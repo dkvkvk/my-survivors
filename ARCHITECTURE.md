@@ -9,7 +9,7 @@
 | `project.godot` | 项目配置。要求 Godot **4.7**，主场景 `main_menu.tscn`，视口 1920×1080 |
 | `main_menu.tscn` + `main_menu.gd` | 主菜单（项目启动场景）：开始游戏、最高纪录展示、退出（Web 版自动隐藏退出按钮） |
 | `survivors_game.tscn` + `game.gd` | 战斗场景：刷怪计时器、更次切换、HUD、升级/暂停/结算流程 |
-| `player.tscn` + `player.gd` | 玩家：移动、血量、经验等级、属性卡应用、法宝/材料/技能槽/灵力（P6） |
+| `player.tscn` + `player.gd` | 玩家：移动、血量、修为、属性卡应用、法宝/材料/技能槽/灵力（P6） |
 | `gun.tscn` + `gun.gd` | 本命飞剑（法宝"本命飞剑"的**被动**）：索敌转向、定时开火，弹丸数与伤害随法宝品阶 |
 | `orbit_blades.tscn` + `orbit_blades.gd` | 法宝"环形刀刃"的被动：刀刃绕玩家公转撞击伤害，刀刃数 = 法宝品阶（纯代码绘制） |
 | `aura.tscn` + `aura.gd` | 法宝"灼热光环"的被动：周期性灼烧范围内敌人，半径/伤害随法宝品阶（碰撞与外观代码生成） |
