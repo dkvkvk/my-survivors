@@ -143,11 +143,20 @@ const SKILL_AURA_RADIUS := 420.0      # 烈日爆发范围
 const SKILL_AURA_DAMAGE := 12
 
 # 武器掉落（P6）：普通怪小概率掉；首领必掉（见 mob.gd）
-const WEAPON_DROP_CHANCE := 0.04
+const WEAPON_DROP_CHANCE := 0.12
 # 材料掉落概率（P6 武器升级用）
 const MATERIAL_DROP_CHANCE := 0.22   # 铁屑
 const CRYSTAL_DROP_CHANCE := 0.06    # 雷晶
 const SKILL_BOOK_DROP_CHANCE := 0.02 # 技能切换书
+
+# 武器获取（P6 调整）：原来 4% 太稀，开局两分钟一把都掉不出来（实测站桩 3 分钟 66 击杀 = 0 把）。
+# 现在提高基础概率 + 开局保底，并且限制地上同时存在的把数，避免满地掉落物堆积。
+const WEAPON_PITY_TIME := 90.0   # 开局这段时间内启用保底
+const WEAPON_PITY_KILLS := 12    # 每积累这么多次击杀还没掉够武器就必掉一把
+const WEAPON_PITY_MAX := 2       # 保底最多给几把
+const WEAPON_DROP_MAX_GROUND := 8 # 地上同时最多留几把（超了回收最早的一把）
+# 开局选武器：手里剑是固定基础武器，选它 = 起手直接给到这个等级
+const START_WEAPON_LEVEL := 3
 
 # 武器被动（P6 模型 B）：武器 = 被动效果 + 提供技能，**被动等级 = 武器等级**。
 # 手里剑（被动=自动投掷）：每 WEAPON_SHURIKEN_LEVEL_STEP 级多 1 发弹丸、+1 伤害；射速线性提升

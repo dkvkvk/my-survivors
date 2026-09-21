@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://skill_bar.gd" id="11_skillbar"]
 [ext_resource type="Texture2D" path="res://assets/ui/victory_bg.png" id="10_vbg"]
 [ext_resource type="Script" path="res://victory_ui.gd" id="9_victory"]
+[ext_resource type="Script" path="res://start_select_ui.gd" id="13_startsel"]
 
 [sub_resource type="Curve2D" id="Curve2D_cp6e5"]
 _data = {
@@ -620,6 +621,13 @@ theme_override_font_sizes/font_size = 32
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
+
+[node name="StartSelectUI" type="CanvasLayer" parent="."]
+layer = 30
+unique_name_in_owner = true
+process_mode = 3
+visible = false
+script = ExtResource("13_startsel")
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="health_depleted" from="Player" to="." method="_on_player_health_depleted"]

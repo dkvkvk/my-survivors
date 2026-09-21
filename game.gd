@@ -5,6 +5,7 @@ var run_time := 0.0
 var run_coins := 0  # 本局拾取的金币，死亡时结算入存档余额
 var current_wave: Dictionary = Balance.WAVES[0]
 var boss_kill_count := 0  # 击杀首领数，决定下一只的血量
+var weapon_drops := 0     # 已掉出的武器数（开局保底用，见 weapon_pity_ready）
 var _boss_timer := 0.0
 var _run_ended := false  # 已结算（胜利或失败），防止重复触发
 
@@ -21,6 +22,8 @@ func _ready():
 	_chunk_map = preload("res://chunk_map.gd").new()
 	add_child(_chunk_map)
 	_boss_timer = Balance.BOSS_FIRST_DELAY  # 首领倒计时（P4）
+	# 开局选武器（P6）：弹 4 张卡并暂停游戏，选完才正式开打
+	%StartSelectUI.call_deferred("open", player)
 
 
 func _process(delta):
@@ -57,6 +60,15 @@ func _process(delta):
 			_win("time")
 		elif boss_kill_count >= Balance.VICTORY_BOSS_KILLS:
 			_win("boss")
+
+
+## 开局保底判定：前 WEAPON_PITY_TIME 秒内，每攒够 WEAPON_PITY_KILLS 次击杀还没掉够武器就返回 true
+func weapon_pity_ready() -> bool:
+	if run_time > Balance.WEAPON_PITY_TIME:
+		return false
+	if weapon_drops >= Balance.WEAPON_PITY_MAX:
+		return false
+	return kill_count >= (weapon_drops + 1) * Balance.WEAPON_PITY_KILLS
 
 
 func spawn_mob():

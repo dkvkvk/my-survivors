@@ -487,9 +487,19 @@ func _drop_pickup(kind: String, mat: String) -> void:
 func drop_weapon() -> void:
 	if not can_drop_loot:
 		return
+	var game = get_parent()
 	var chance: float = 1.0 if is_boss else Balance.WEAPON_DROP_CHANCE
+	# 开局保底：前 WEAPON_PITY_TIME 秒内杀够数还没掉够武器，就必掉一把（否则开局两分钟一把都没有）
+	if not is_boss and game != null and game.has_method("weapon_pity_ready") and game.weapon_pity_ready():
+		chance = 1.0
 	if randf() > chance:
 		return
+	# 地上同时最多留 WEAPON_DROP_MAX_GROUND 把，超了回收最早的一把（防满地掉落物、也防节点堆积）
+	var live: Array = get_tree().get_nodes_in_group("weapon_drops")
+	var excess: int = live.size() - Balance.WEAPON_DROP_MAX_GROUND + 1
+	for i in maxi(excess, 0):
+		if i < live.size():
+			live[i].queue_free()
 	var ids: Array = []
 	for w in Weapons.LIST:
 		ids.append(w["id"])
@@ -497,6 +507,8 @@ func drop_weapon() -> void:
 	get_parent().add_child(drop)
 	drop.global_position = global_position + Vector2(randf_range(-16, 16), randf_range(-16, 16))
 	drop.setup(ids[randi() % ids.size()])
+	if game != null and "weapon_drops" in game:
+		game.weapon_drops += 1
 
 
 func drop_chest():

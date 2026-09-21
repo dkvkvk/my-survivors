@@ -31,6 +31,7 @@
 | `skills.gd` | ★ 主动技能表：4 个技能（耗蓝 / 冷却 / 图标 / 描述）+ `FUSIONS` 融合占位表 |
 | `skill_bar.gd` | 技能槽 HUD（4 槽 + 冷却遮罩 + 蓝不够变暗），纯代码构建 |
 | `inventory_ui.gd` | 背包（按 B，纯代码构建）：武器 4 格 / 技能选择 / 材料 / 升级按钮 / 替换面板 |
+| `start_select_ui.gd` | 开局选武器（进战斗时弹 4 张卡并暂停；手里剑为固定基础武器） |
 | `weapon_drop.gd` + `pickup_drop.gd` | 掉落物：武器（按 F 拾取）、材料（铁屑/雷晶）、技能切换书 |
 | `audio.gd` | 音效池 autoload（12 播放器，防重叠、变调随机）+ `play_music()` 循环 BGM |
 | `fader.gd` | 全局过渡 autoload：场景切换黑场淡入淡出 + 全屏暗角后期 |
@@ -73,17 +74,21 @@ Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
 │   ├─ ChainLightning (chain_lightning.gd) 链式闪电被动 + 雷神之怒技能（纯代码电弧）
 │   ├─ HurtBox (Area2D) / HealthBar      受击范围与头顶血条
 │   └─ Path2D / PathFollow2D             刷怪环（挂在 Player 下，跟随玩家移动）
-├─ GameOver (CanvasLayer, process_mode=3)  结算遮罩：战绩/新纪录/重开(R)/回主菜单
+├─ GameOver (CanvasLayer, layer=30)       结算遮罩：战绩/新纪录/重开(R)/回主菜单
 ├─ CanvasLayer (layer=-32)               背景纯色
 ├─ ChunkMap（game.gd 代码挂载）           分块无限地图：瓦片障碍+碰撞，5x5 流式加载
-├─ HUD (CanvasLayer, layer=10)           击杀数 / 存活时间 / 经验条 / 等级
-├─ LevelUpUI (CanvasLayer, process_mode=3) 升级三选一
-└─ PauseUI (CanvasLayer, process_mode=3)   暂停菜单（Esc）
+├─ HUD (CanvasLayer, layer=10)           击杀数 / 存活时间 / 经验条 / 等级 / 蓝条 / 技能栏
+├─ LevelUpUI (CanvasLayer, layer=30)      升级三选一
+├─ PauseUI (CanvasLayer, layer=30)        暂停菜单（Esc）
+├─ InventoryUI (CanvasLayer, layer=25)    背包（按 B）
+└─ StartSelectUI (CanvasLayer, layer=30)  开局选武器（进战斗即弹出，选完才解除暂停）
 ```
 
 ## 三、核心循环与数据流
 
-1. **启动**：`main_menu.tscn` 展示最高纪录 → 开始游戏切到战斗场景；Esc 随时打开暂停菜单（升级/结算界面打开时忽略，避免状态叠加）。
+1. **启动**：`main_menu.tscn` 展示最高纪录 → 开始游戏切到战斗场景 →
+   **先弹「开局选武器」（4 选 1，暂停游戏，见 `start_select_ui.gd`）** → 选完解除暂停正式开打；
+   Esc 随时打开暂停菜单（升级/结算/背包/选武器界面打开时忽略，避免状态叠加）。
 2. **刷怪**：`Timer` 触发 `game.gd:spawn_mob()` → 在跟随玩家的 `PathFollow2D` 环上取随机点（敌人总从屏幕外刷出）→ `mob.setup()` 按波次权重选变体；刷怪间隔由 `Balance.current_wave(run_time)` 从五档波次表动态改写。
 3. **敌人 AI**：`mob.gd` 按变体速度追击 `玩家位置 + 环形偏移`（软分离，不会叠成一点），进入攻击距离后停下贴身。
 4. **索敌开火**：`gun.gd` 对 Area2D 内第一个敌人 `look_at()`；开火时按 `1 + 玩家额外弹丸` 生成扇形散射子弹（分裂弹头卡）。

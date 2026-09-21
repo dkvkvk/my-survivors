@@ -96,6 +96,21 @@ func add_weapon(id: String) -> bool:
 	return true
 
 
+## 开局选武器（P6）：手里剑是固定基础武器（保证有自动攻击），
+## 选它 = 起手直接给到 START_WEAPON_LEVEL；选其它武器 = 追加装备（武器位与技能槽各 +1）。
+func apply_start_weapon(id: String) -> void:
+	var w: Dictionary = get_weapon(id)
+	if w.is_empty():
+		add_weapon(id)
+	else:
+		w["level"] = Balance.START_WEAPON_LEVEL
+		_apply_weapon_passive(id)
+	var def: Dictionary = Weapons.get_def(id)
+	Juice.damage_number(get_parent(), global_position + Vector2(0, -120),
+		"起手：%s" % def.get("name", id), {"color": Color(0.6, 1.0, 1.0), "scale": 1.6})
+	VFX.levelup_burst(global_position, VFX.C_CYAN)
+
+
 ## 丢弃武器（替换面板用）：同时卸下它的被动效果
 func drop_weapon(id: String) -> void:
 	for i in weapons.size():

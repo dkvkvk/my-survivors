@@ -17,6 +17,7 @@ var _player: Node
 
 
 func _ready():
+	add_to_group("weapon_drops")
 	collision_layer = 0
 	collision_mask = 1          # 只关心玩家靠近
 	monitorable = false
