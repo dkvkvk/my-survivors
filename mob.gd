@@ -458,7 +458,7 @@ func drop_coins():
 
 
 ## 妖王死亡必掉宝箱（P4）
-## 材料与切换书掉落（P6）：材料按概率掉，切换书稀有。
+## 材料与神通残卷掉落（P6）：材料按概率掉，神通残卷稀有。
 ## 妖王一次给较多材料。
 func drop_materials() -> void:
 	if not can_drop_loot:

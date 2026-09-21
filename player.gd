@@ -163,7 +163,7 @@ func _evolve_weapon(id: String) -> void:
 			%ChainLightning.evolve()
 
 
-## 设置某把法宝的"本场激活技能"。需要消耗一本切换书（swap=false 时不消耗，用于首次选择）
+## 设置某把法宝的"本场激活技能"。需要消耗一本神通残卷（swap=false 时不消耗，用于首次选择）
 func set_active_skill(weapon_id: String, skill_id: String, use_book := true) -> bool:
 	var w: Dictionary = get_weapon(weapon_id)
 	if w.is_empty():

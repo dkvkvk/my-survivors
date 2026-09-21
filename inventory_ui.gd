@@ -4,7 +4,7 @@ extends CanvasLayer
 ##
 ## 布局：
 ##   左  = 法宝 4 格（点击选中）
-##   中  = 选中法宝的技能列表（点击设为"本场激活技能"，需消耗切换书）
+##   中  = 选中法宝的技能列表（点击设为"本场激活技能"，需消耗神通残卷）
 ##         + 升级信息与 [升级] 按钮
 ##   右  = 当前技能配装 1/2/3/4 + 材料 + 灵力
 ##
@@ -94,7 +94,7 @@ func _build() -> void:
 		_weapon_boxes.append(_make_weapon_box(panel, i, Vector2(28 + i * (SLOT + 12), 112)))
 
 	# ---- 中：选中法宝的技能 + 升级 ----
-	_label(panel, "神通（每夜只用 1 门 · 改换需耗神通残卷）", Vector2(560, 70), 26)
+	_label(panel, "神通（每夜 1 门 · 改换耗残卷）", Vector2(560, 70), 26)
 	for i in 4:
 		_skill_rows.append(_make_skill_row(panel, i, Vector2(560, 112 + i * 52)))
 	_upgrade_info = _label(panel, "", Vector2(560, 360), 24)
@@ -183,7 +183,7 @@ func _refresh() -> void:
 			var def: Dictionary = Weapons.get_def(w["id"])
 			var icon_path: String = def.get("icon", "")
 			box["icon"].texture = load(icon_path) if (icon_path != "" and ResourceLoader.exists(icon_path)) else null
-			box["name"].text = "%s Lv%d" % [def.get("name", w["id"]), w["level"]]
+			box["name"].text = "%s %d 阶" % [def.get("name", w["id"]), w["level"]]
 			box["btn"].modulate = Color(1, 1, 1, 1)
 			if _selected == "":
 				_selected = w["id"]
@@ -201,7 +201,7 @@ func _refresh() -> void:
 			var sid: String = skills[i]
 			var sdef: Dictionary = Skills.get_def(sid)
 			var mark := "●" if w2.get("active_skill", "") == sid else "○"
-			var need := "" if mark == "●" else "  （切换需切换书 x1，现有 %d）" % _player.skill_books
+			var need := "" if mark == "●" else "  （改换需神通残卷 x1，现有 %d）" % _player.skill_books
 			row.text = "%s %s%s" % [mark, sdef.get("name", sid), need]
 			row.disabled = false
 		else:
@@ -256,7 +256,7 @@ func _on_skill_clicked(i: int) -> void:
 		return
 	var w: Dictionary = _player.get_weapon(_selected)
 	var is_current: bool = w.get("active_skill", "") == skills[i]
-	# 首次选择不消耗；切换消耗一本切换书
+	# 首次选择不消耗；切换消耗一本神通残卷
 	var ok: bool = _player.set_active_skill(_selected, skills[i], not is_current)
 	if not ok:
 		Audio.play("res://sounds/hurt.wav", false, 0.8, 0.2)
