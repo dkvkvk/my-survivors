@@ -17,7 +17,7 @@ const PLAYER_DAMAGE_RATE := 9.0  # 每个重叠敌人每秒掉的血：贴身必
 # hit_radius：碰撞/接触判定圆半径（世界像素）。按"身体"给，不要按包围盒——
 # 蝙蝠展翼 54px、野兽 48px，若按包围盒给半径会出现"没碰到却掉血"。
 # 变体专属能力表（数值全在这里，mob.gd 只负责按名字执行）
-#   split       死亡时分裂成小史莱姆（子体不再分裂、不掉任何收益）
+#   split       死亡时分裂成小百足虫（断而不僵；子体不再分裂、不掉任何收益）
 #   dive        飞扑：短蓄力后向玩家直线突进一段
 #   pounce      扑击：蓄力更久、突进更远的强化版飞扑（魔化野兽）
 #   break_walls 撞碎障碍：被墙挡住时直接把瓦片打掉，给后面的怪开路
@@ -44,6 +44,7 @@ const ABILITIES := {
 }
 
 const MOB_VARIANTS := {
+	# 百足虫（旧"机械史莱姆"位）：最弱杂兵，断而不僵——斩成两段各成一条
 	"slime": {"hp": 3, "speed": [200.0, 300.0], "scale": 2.4, "hit_radius": 24.0, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "phasing": false, "ability": "split", "sprites": ["res://assets/mobs/mech_slime_0.png", "res://assets/mobs/mech_slime_1.png"]},
 	# 机械蝙蝠：会飞，无视地形（唯一天生穿墙的杂兵）
 	"runner": {"hp": 1, "speed": [380.0, 460.0], "scale": 2.2, "hit_radius": 12.0, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "phasing": true, "ability": "dive", "sprites": ["res://assets/mobs/mech_bat_0.png", "res://assets/mobs/mech_bat_1.png"]},

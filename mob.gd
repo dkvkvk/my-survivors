@@ -327,7 +327,7 @@ func _smash_around(radius: float, delta: float) -> void:
 		Juice.shake(player.get_node("Camera2D"), 0.3)
 
 
-## 机械史莱姆能力：死亡时分裂成更小更快的子体。
+## 百足虫能力 · 断而不僵：死亡时分裂成更小更快的子体。
 ## 子体不再分裂、不掉经验/灵石/材料/法宝（否则经验与掉落经济会成倍膨胀）。
 func _split() -> void:
 	if ability != "split" or _split_depth >= 1:
@@ -517,7 +517,7 @@ func drop_chest():
 	chest.global_position = global_position
 
 
-## 该怪的特效配色：妖王赤红，其余按变体区分（史莱姆青绿 / 蝙蝠紫 / 重甲钢蓝 / 野兽猩红）
+## 该怪的特效配色：妖王赤红，其余按变体区分（百足虫惨绿 / 蝙蝠紫 / 重甲钢蓝 / 野兽猩红）
 func _fx_color() -> Color:
 	if is_boss:
 		return Color(1.0, 0.42, 0.35)
@@ -529,7 +529,8 @@ func _fx_color() -> Color:
 		"elite":
 			return Color(1.0, 0.5, 0.45)
 		_:
-			return Color(0.5, 1.0, 0.85)
+			# 百足虫：惨绿（红色一律留给"危险"，别抢赤目狼妖的招牌）
+			return Color(0.6, 0.95, 0.45)
 
 
 ## 死亡时爆一圈同色碎片（一次性粒子，纯代码创建，播完自毁）
