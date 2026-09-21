@@ -1,6 +1,6 @@
 # 美术素材提示词（ART PROMPTS）
 
-> 交给我（用户）用网页版 Nano Banana / 视频模型生成，生成后放到 `E:\games\`。
+> 交给我（用户）用网页版 Nano Banana / 视频模型生成，生成后放到 `E:\games`。
 > **一条提示词 = 一张图 = 一个素材**，千万别让模型把多个素材画在一张图里。
 
 ---
@@ -102,11 +102,38 @@ Seamless tileable pixel art ground texture, 256x256, top-down view. Japanese sto
 
 ## 四、视频清单
 
-> **重要**：Godot 的 `gl_compatibility` 渲染器 + Web 版对视频支持有限。
-> 所以**先只做 `menu_loop` 一个**，我验证在 Windows / Web 都能播之后，再批量做其余两个。
-> 如果播不了，我会改用**序列帧（PNG 序列）**或代码动画替代。
+> ### 🚫 先读：视频目前被技术卡住了
+>
+> **实测结论：Godot 4.7 标准版放不了 MP4。**
+>
+> ```
+> ResourceLoader.exists(mp4) = false
+> load(mp4) -> null  (No loader found)
+> VideoStream 支持的扩展名 = ["ogv", "tres", "res"]   ← 只有 Ogg Theora
+> ```
+>
+> 要播就得转成 **`.ogv`**，而转码需要 ffmpeg —— **本机没有 ffmpeg，pip 也装不上（网络被墙）**。
+> 所以**视频这条路暂时堵死**，见下面「替代方案」。
 
-### ⚠️ 安全区更正（之前写错了）
+### 替代方案（推荐）：用现成美术做代码动画
+
+既然已经有了 `menu_bg.png`（1920×1080 的和风村落夜景），直接在代码里动它就行：
+
+| 做法 | 效果 |
+|---|---|
+| 背景**极缓慢视差横移** | 镜头在动，有生气 |
+| **樱花花瓣粒子**飘落（代码粒子） | 主菜单不再死板 |
+| 霓虹**呼吸式明暗脉动** | 科技入侵的感觉 |
+| 远景/近景**分层**错速移动 | 有纵深感 |
+
+**优点**：原生 + Web 都能跑、任何分辨率都清晰（不会糊）、**循环天然无缝**、文件几乎不占体积。
+比 Theora 视频（有损压缩、CPU 解码、Web 支持存疑）稳得多。
+
+---
+
+## 四·附、视频提示词（**等能转码了再用**）
+
+### ⚠️ 安全区（之前写错过，这里更正）
 
 游戏主菜单的标题和按钮是**居中**的（不是靠左）。所以：
 
@@ -114,19 +141,33 @@ Seamless tileable pixel art ground texture, 256x256, top-down view. Japanese sto
 - 动效放在**左右两侧**（鸟居、竹林、飘落樱花）
 - 整体**偏暗、低对比**，否则文字再清楚也压不住运动
 
-### 1. `menu_loop.mp4` — 主菜单循环背景（**先做这个**）
+### ⚠️ 怪物必须用游戏里真实存在的（之前我编错了）
+
+游戏里**只有这 5 种**敌人，别的一律不要出现：
+
+| 名称 | 外观 |
+|---|---|
+| 机械史莱姆 | 青绿色圆滚滚的软泥怪，两只小黑豆眼，底部有小水珠 |
+| 机械蝙蝠 | 紫色小机械蝙蝠，青色发光眼睛，洋红翼膜 |
+| 重甲兵 | 钢灰色厚甲士兵机器人，青色面罩，拿小盾 |
+| 魔化野兽 | 猩红色四足猛兽，洋红发光眼睛，背上有能量裂纹 |
+| 巨型机甲首领 | 深灰重型机甲，胸口红色能量核心 |
+
+> ❌ **绝对不要**：虫子、蜘蛛、细腿机械昆虫、成群的小飞虫、任何密密麻麻爬动的东西。
+> ✅ **要**：圆润、可爱、chibi 像素风、不吓人、离镜头远、数量少（两三只点缀即可）。
+
+### 1. `menu_loop` — 主菜单循环背景
 
 | 项 | 要求 |
 |---|---|
 | 时长 | 8~15 秒 |
 | 分辨率 | 1920×1080（16:9） |
-| 格式 | MP4 / H.264 |
-| 循环 | **首尾帧必须完全一致**，否则循环会跳 |
-| 内容 | 镜头极缓慢横移 + 樱花飘落 + 霓虹脉动 + 机械虫爬行 |
+| 格式 | **`.ogv`（Ogg Theora）** —— MP4 播不了；若工具只能出 MP4，先别做 |
+| 循环 | **首尾帧必须完全一致** |
 | 安全区 | **正中 1/3 保持暗且平静** |
 
 ```
-Pixel art animated loop, Japanese ninja village at night invaded by technology. Extremely slow horizontal camera drift, cherry blossom petals drifting gently across the frame, cyan neon cables pulsing softly, small mechanical insect drones crawling slowly over wooden buildings and a large red torii gate on the right side. The CENTER THIRD of the frame stays dark, calm and low-contrast so UI text can be read over it. Overall dark, moody and low contrast. Dark navy and black palette with cyan neon glow and pink sakura accents. Seamless loop: the first frame and the last frame must be identical. No camera cuts, no zoom, no text, no watermark, no characters in the foreground. 1920x1080, 16:9, 10 seconds, crisp pixel art aesthetic.
+Pixel art animated loop, a peaceful Japanese ninja village at night. Extremely slow horizontal camera drift, cherry blossom petals drifting gently across the frame, cyan neon vines on the wooden buildings pulsing softly, a large red torii gate on the right side. A couple of CUTE round cyan mechanical slimes bouncing slowly on the stone path far in the background, and one small friendly purple mechanical bat fluttering. Cute chibi pixel art style, adorable, NOT scary, no insects, no spiders, no bugs, no creepy crawlies, no swarm. The CENTER THIRD of the frame stays dark, calm and low-contrast so UI text can be read over it. Overall dark, moody and low contrast. Dark navy and black palette with cyan neon glow and pink sakura accents. Seamless loop: the first frame and the last frame must be identical. No camera cuts, no zoom, no text, no watermark, no characters in the foreground. 1920x1080, 16:9, 10 seconds, crisp pixel art aesthetic.
 ```
 
 > 💡 循环小技巧：如果模型做不到首尾一致，就让它**多生成几秒**，我从中截取一段能接上的。
