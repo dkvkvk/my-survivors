@@ -23,7 +23,9 @@ const C_GREEN := Color(0.5, 1.0, 0.7)
 const C_WHITE := Color(1.0, 1.0, 1.0)
 
 const FX_GROUP := "fx"
-const FX_LIMIT := 260   # 同屏特效节点上限，超了就只出最便宜的（防止极端情况掉帧）
+# 同屏特效节点上限：超了之后**只丢低优先级特效**（命中火花/拖尾/粒子/拾取小环），
+# 技能起手、爆炸、预警圈、升级光柱这类高优先级特效永远照常出。
+const FX_LIMIT := 260
 
 var _glow: Texture2D
 var _star: Texture2D
@@ -59,9 +61,11 @@ func _busy() -> bool:
 	return get_tree().get_nodes_in_group(FX_GROUP).size() >= FX_LIMIT
 
 
-func _add(n: Node2D, z: int) -> Node2D:
+## priority=true 的特效不受 FX_LIMIT 限制（数量由"技能施放/击杀"这类低频事件决定）；
+## priority=false 的在超限时直接丢弃（命中火花、粒子、拖尾这类高频且最不值钱的）
+func _add(n: Node2D, z: int, priority := false) -> Node2D:
 	var w: Node = world()
-	if w == null:
+	if w == null or (not priority and _busy()):
 		n.queue_free()
 		return null
 	n.z_index = z
@@ -77,11 +81,11 @@ func _add(n: Node2D, z: int) -> Node2D:
 
 ## 扩散冲击环（技能起手、爆炸、落地都能用）。fill=true 时带一层半透明填充
 func shockwave(pos: Vector2, radius: float, color: Color = C_CYAN, duration := 0.35,
-		width := 7.0, fill := false, z := 40) -> void:
+		width := 7.0, fill := false, z := 40, priority := true) -> void:
 	var n := _Ring.new()
 	n.setup(radius, color, duration, width, fill)
 	n.global_position = pos
-	_add(n, z)
+	_add(n, z, priority)
 
 
 ## 由外向内收缩的环（首领蓄力预警）
@@ -89,7 +93,7 @@ func warning_ring(pos: Vector2, radius: float, color: Color = C_RED, duration :=
 	var n := _Ring.new()
 	n.setup(radius, color, duration, 8.0, true, true)
 	n.global_position = pos
-	_add(n, -5)
+	_add(n, -5, true)
 
 
 ## ---------- 斩击 ----------
@@ -101,7 +105,7 @@ func slash_arc(pos: Vector2, angle: float, radius: float, color: Color = C_CYAN,
 	n.setup(radius, color, duration, span)
 	n.global_position = pos
 	n.rotation = angle
-	_add(n, z)
+	_add(n, z, true)
 
 
 ## 旋转刀光：count 条斩击弧围绕一点旋转扩散（刃风暴）
@@ -113,7 +117,7 @@ func spin_slash(pos: Vector2, radius: float, color: Color = C_CYAN, count := 5, 
 			randf_range(1.1, 1.9), randf_range(2.4, 5.2))
 		n.global_position = pos
 		n.rotation = base + TAU * i / float(count)
-		_add(n, 42)
+		_add(n, 42, true)
 
 
 ## ---------- 粒子 ----------
@@ -139,7 +143,7 @@ func burst(pos: Vector2, count: int, color: Color = C_CYAN, speed := 260.0,
 	p.scale_amount_max = size * 1.25
 	p.color = color
 	p.global_position = pos
-	var n := _add(p, z)
+	var n := _add(p, z, false)
 	if n != null:
 		p.emitting = true
 		# 粒子播完自毁（多等一点寿命，避免最后一帧被截断）
@@ -165,17 +169,17 @@ func impact(pos: Vector2, dir: Vector2 = Vector2.ZERO, color: Color = C_CYAN, st
 	var s := _Flash.new()
 	s.setup(_star, 0.9 if not strong else 1.4, 0.16, color, randf() * TAU)
 	s.global_position = pos
-	_add(s, 44)
-	if _busy():
-		return
-	shockwave(pos, 22.0 if not strong else 34.0, color, 0.18, 3.0, false, 43)
-	var back: Vector2 = -dir.normalized() if dir.length() > 0.01 else Vector2.UP
+	_add(s, 44, false)
+	shockwave(pos, 22.0 if not strong else 34.0, color, 0.18, 3.0, false, 43, false)
 	burst(pos, 4 if not strong else 7, color, 200.0, 0.28, "spark", 1.6, 520.0, 38)
 
 
 ## 击杀爆炸：填充环 + 碎片 + 烟
 func explosion(pos: Vector2, radius: float, color: Color = C_ORANGE) -> void:
 	shockwave(pos, radius, color, 0.4, 9.0, true)
+	# 高密度战斗时只保留主环，省掉次要层（爆量时最不值钱的就是这些）
+	if _busy():
+		return
 	shockwave(pos, radius * 0.55, C_WHITE, 0.22, 4.0)
 	burst(pos, 12, color, 340.0, 0.55, "spark", 2.2, 760.0)
 	burst(pos, 5, Color(0.75, 0.78, 0.82, 0.55), 110.0, 0.75, "smoke", 2.6, -40.0, 36)
@@ -186,8 +190,8 @@ func pickup_pop(pos: Vector2, color: Color = C_GREEN) -> void:
 	var s := _Flash.new()
 	s.setup(_star, 0.55, 0.18, color, randf() * TAU)
 	s.global_position = pos
-	_add(s, 44)
-	shockwave(pos, 16.0, color, 0.16, 2.5, false, 43)
+	_add(s, 44, false)
+	shockwave(pos, 16.0, color, 0.16, 2.5, false, 43, false)
 
 
 ## 升级：脚下双环 + 光柱 + 星芒
@@ -197,7 +201,7 @@ func levelup_burst(pos: Vector2, color: Color = C_GOLD) -> void:
 	var pillar := _Pillar.new()
 	pillar.setup(_glow, color, 0.7)
 	pillar.global_position = pos
-	_add(pillar, 41)
+	_add(pillar, 41, true)
 	burst(pos, 14, color, 260.0, 0.8, "star", 1.8, -120.0, 39)
 	screen_flash(color, 0.14, 0.22)
 
@@ -207,7 +211,7 @@ func muzzle_flash(pos: Vector2, angle: float, color: Color = C_CYAN) -> void:
 	var s := _Flash.new()
 	s.setup(_glow, 0.42, 0.09, color, angle)
 	s.global_position = pos
-	_add(s, 45)
+	_add(s, 45, true)
 
 
 ## 天雷落点：地面炸环 + 火花（链式闪电用）
@@ -250,7 +254,7 @@ func trail(target: Node2D, color: Color = C_CYAN, width := 10.0, points := 12, l
 		return
 	var t := _Trail.new()
 	t.setup(target, color, width, points, life)
-	_add(t, 39)
+	_add(t, 39, false)
 
 
 ## ---------- 内部实现 ----------
