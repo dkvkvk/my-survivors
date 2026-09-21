@@ -524,6 +524,19 @@ offset_bottom = 66.0
 mouse_filter = 2
 stretch_mode = 5
 
+[node name="Card0Text" type="Label" parent="LevelUpUI/Card0"]
+offset_left = 16.0
+offset_top = 76.0
+offset_right = 424.0
+offset_bottom = 212.0
+mouse_filter = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.7)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
 [node name="Card1Icon" type="TextureRect" parent="LevelUpUI/Card1" unique_id=97110021]
 modulate = Color(1, 1, 1, 1)
 offset_left = 192.0
@@ -533,6 +546,19 @@ offset_bottom = 66.0
 mouse_filter = 2
 stretch_mode = 5
 
+[node name="Card1Text" type="Label" parent="LevelUpUI/Card1"]
+offset_left = 16.0
+offset_top = 76.0
+offset_right = 424.0
+offset_bottom = 212.0
+mouse_filter = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.7)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
 [node name="Card2Icon" type="TextureRect" parent="LevelUpUI/Card2" unique_id=97110022]
 modulate = Color(1, 1, 1, 1)
 offset_left = 192.0
@@ -541,6 +567,19 @@ offset_right = 248.0
 offset_bottom = 66.0
 mouse_filter = 2
 stretch_mode = 5
+
+[node name="Card2Text" type="Label" parent="LevelUpUI/Card2"]
+offset_left = 16.0
+offset_top = 76.0
+offset_right = 424.0
+offset_bottom = 212.0
+mouse_filter = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.7)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="health_depleted" from="Player" to="." method="_on_player_health_depleted"]

@@ -17,7 +17,6 @@ script = ExtResource("1_xhyow")
 [node name="Slime" type="AnimatedSprite2D" parent="."]
 unique_name_in_owner = true
 position = Vector2(0, -24)
-scale = Vector2(3, 3)
 script = ExtResource("2_esprite")
 
 [node name="BossBar" type="ProgressBar" parent="."]

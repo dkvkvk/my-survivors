@@ -18,7 +18,10 @@ func present(p_player: CharacterBody2D) -> void:
 	%Title.text = "★ 升级！选一张强化 ★"
 	for i in 3:
 		var card: Button = get_node("Card%d" % i)
-		card.text = "%s\n%s" % [choices[i]["name"], choices[i]["desc"]]
+		# 文字放在独立 Label 里（图标占卡片顶部居中，Button 自带文字会压在图标上）
+		card.text = ""
+		var text_label: Label = get_node("Card%d/Card%dText" % [i, i])
+		text_label.text = "%s\n%s" % [choices[i]["name"], choices[i]["desc"]]
 		# 卡片图标（P5）：无贴图时隐藏图标槽
 		var icon_slot: TextureRect = get_node("Card%d/Card%dIcon" % [i, i])
 		var icon_path: String = choices[i].get("icon", "")

@@ -14,7 +14,7 @@ const FRAME := 16
 const DIR_COL := {"down": 0, "up": 1, "right": 3}
 const MIRROR_OF := {"left": "right"}
 # 6.0：新敌人素材比旧素材高大，主角同步放大才不会显得是"小不点"
-const SPRITE_SCALE := 6.0
+const SPRITE_SCALE := 6.6
 
 var _sprite: AnimatedSprite2D
 var _last_dir := "down"
