@@ -12,14 +12,43 @@ const PLAYER_DAMAGE_RATE := 9.0  # 每个重叠敌人每秒掉的血：贴身必
 # sprites：两帧走路贴图（assets/mobs/，Kenney CC0）；color 为白色时用贴图原色
 # phasing：是否天生穿墙。地面单位一律 false（会被障碍挡住，贴墙滑行绕路），
 #          只有会飞的变体给 true。被墙卡住超过约 2.4 秒的怪会短暂穿墙脱困（mob.gd 自愈）。
+# ability：该变体的专属能力（见下方 ABILITIES 表）。
+#          加一种怪 = MOB_VARIANTS 加一行 + ABILITIES 加一条 + mob.gd 加一个分支。
 # hit_radius：碰撞/接触判定圆半径（世界像素）。按"身体"给，不要按包围盒——
 # 蝙蝠展翼 54px、野兽 48px，若按包围盒给半径会出现"没碰到却掉血"。
+# 变体专属能力表（数值全在这里，mob.gd 只负责按名字执行）
+#   split       死亡时分裂成小史莱姆（子体不再分裂、不掉任何收益）
+#   dive        飞扑：短蓄力后向玩家直线突进一段
+#   pounce      扑击：蓄力更久、突进更远的强化版飞扑（魔化野兽）
+#   break_walls 撞碎障碍：被墙挡住时直接把瓦片打掉，给后面的怪开路
+const ABILITIES := {
+	"split": {
+		"count": 2,            # 分裂出几只
+		"hp_ratio": 0.35,      # 子体血量 = 父体变体血量 x 该比例（至少 1）
+		"scale": 0.62,         # 子体体型
+		"speed_mult": 1.25,    # 子体更快
+		"max_mobs": 240,       # 场上怪超过这个数就不再分裂（防后期爆炸）
+	},
+	# 飞扑距离 ≈ speed x speed_mult x time（蝙蝠 380~460 x 1.7 x 0.25 ≈ 160~195px）
+	"dive": {
+		"cd": 2.6, "range": 460.0, "windup": 0.22, "time": 0.25, "speed_mult": 1.7,
+		"flash": Color(1.7, 1.3, 2.4),
+	},
+	"pounce": {
+		"cd": 3.2, "range": 420.0, "windup": 0.35, "time": 0.45, "speed_mult": 2.4,
+		"flash": Color(2.6, 0.8, 0.7),
+	},
+	"break_walls": {
+		"cd": 0.35,            # 每次撞碎瓦片的间隔（防一帧碎一片）
+	},
+}
+
 const MOB_VARIANTS := {
-	"slime": {"hp": 3, "speed": [200.0, 300.0], "scale": 2.4, "hit_radius": 24.0, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "phasing": false, "sprites": ["res://assets/mobs/mech_slime_0.png", "res://assets/mobs/mech_slime_1.png"]},
+	"slime": {"hp": 3, "speed": [200.0, 300.0], "scale": 2.4, "hit_radius": 24.0, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "phasing": false, "ability": "split", "sprites": ["res://assets/mobs/mech_slime_0.png", "res://assets/mobs/mech_slime_1.png"]},
 	# 机械蝙蝠：会飞，无视地形（唯一天生穿墙的杂兵）
-	"runner": {"hp": 1, "speed": [380.0, 460.0], "scale": 2.2, "hit_radius": 12.0, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "phasing": true, "sprites": ["res://assets/mobs/mech_bat_0.png", "res://assets/mobs/mech_bat_1.png"]},
-	"tank": {"hp": 10, "speed": [110.0, 150.0], "scale": 3.0, "hit_radius": 28.0, "color": Color(1, 1, 1), "xp": 5, "contact": 1.5, "phasing": false, "sprites": ["res://assets/mobs/mech_knight_0.png", "res://assets/mobs/mech_knight_1.png"]},
-	"elite": {"hp": 20, "speed": [240.0, 280.0], "scale": 2.6, "hit_radius": 22.0, "color": Color(1.4, 0.55, 0.55), "xp": 15, "contact": 2.5, "phasing": false, "sprites": ["res://assets/mobs/mech_beast_0.png", "res://assets/mobs/mech_beast_1.png"]},
+	"runner": {"hp": 1, "speed": [380.0, 460.0], "scale": 2.2, "hit_radius": 12.0, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "phasing": true, "ability": "dive", "sprites": ["res://assets/mobs/mech_bat_0.png", "res://assets/mobs/mech_bat_1.png"]},
+	"tank": {"hp": 10, "speed": [110.0, 150.0], "scale": 3.0, "hit_radius": 28.0, "color": Color(1, 1, 1), "xp": 5, "contact": 1.5, "phasing": false, "ability": "break_walls", "sprites": ["res://assets/mobs/mech_knight_0.png", "res://assets/mobs/mech_knight_1.png"]},
+	"elite": {"hp": 20, "speed": [240.0, 280.0], "scale": 2.6, "hit_radius": 22.0, "color": Color(1.4, 0.55, 0.55), "xp": 15, "contact": 2.5, "phasing": false, "ability": "pounce", "sprites": ["res://assets/mobs/mech_beast_0.png", "res://assets/mobs/mech_beast_1.png"]},
 }
 
 # 波次表：t=生效时间（秒），spawn=刷怪间隔，weights=各变体出现权重。
@@ -156,6 +185,9 @@ const BOSS_XP := 50
 const BOSS_CONTACT := 3.0
 const BOSS_KNOCKBACK_RESIST := 0.2  # 吃击退的比率
 const BOSS_HIT_RADIUS := 38.0  # 首领身体判定圆（世界像素，不跟精灵缩放）
+# 首领冲锋时会把沿途的瓦片障碍撞碎（自己穿墙，但顺手给玩家和杂兵开路）
+const BOSS_BREAK_RADIUS := 120.0  # 以首领为中心，这个半径内的瓦片被撞碎
+const BOSS_BREAK_CD := 0.08       # 撞碎节流（秒）
 # 首领专属贴图（AI 生成后放入 assets/mobs/；缺失时回退用坦克贴图染色）
 const BOSS_SPRITES := ["res://assets/mobs/boss_0.png", "res://assets/mobs/boss_1.png"]
 

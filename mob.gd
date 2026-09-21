@@ -16,6 +16,7 @@ var _knockback := Vector2.ZERO
 
 # 穿墙与卡墙自愈（障碍在物理层 3，位值 4；见 chunk_map.gd）
 const OBSTACLE_MASK := 4
+const TILE_PX := 64               # 瓦片边长（与 chunk_map.gd 的 TILE 一致，撞碎瓦片时算格子用）
 const STUCK_CHECK := 0.6          # 每 0.6 秒检查一次"有没有靠近玩家"
 const STUCK_CHECKS := 4           # 连续 4 次没进展（约 2.4 秒）判定卡墙
 const STUCK_MIN_PROGRESS := 12.0  # 每次检查至少要靠近这么多像素
@@ -25,6 +26,24 @@ var _phase_timer := 0.0
 var _stuck_check := 0.0
 var _stuck_count := 0
 var _last_dist := -1.0
+
+# 专属能力（P6）：名字来自 balance.gd 的 MOB_VARIANTS["ability"]，数值全在 ABILITIES 表。
+# 加能力 = ABILITIES 加一条 + _apply_ability() 加一个分支 + 对应触发点加一个调用。
+var ability := ""
+var breaks_walls := false         # 撞碎障碍（重甲兵）
+var can_drop_loot := true         # 分裂出的子体为 false：不给任何收益，防经济膨胀
+var _split_depth := 0             # 分裂代数，子体为 1（不再分裂）
+var _break_cd := 0.0
+# 飞扑/扑击共用的"蓄力 → 突进"状态机：0=正常 1=蓄力 2=突进
+var _dash_state := 0
+var _dash_timer := 0.0
+var _dash_cd := 0.0
+var _dash_dir := Vector2.ZERO
+var _dash_range := 0.0
+var _dash_windup := 0.0
+var _dash_time := 0.0
+var _dash_speed_mult := 1.0
+var _dash_flash := Color(2, 2, 2)
 
 # 首领模式（P4）：三段循环 AI + 头顶血条 + 击退抗性
 var is_boss := false
@@ -84,6 +103,9 @@ func setup(variant_name: String) -> void:
 	%Slime.modulate = def["color"]
 	%Slime.set_variant(def["sprites"])
 	_apply_phasing(bool(def.get("phasing", false)))
+	ability = str(def.get("ability", ""))
+	breaks_walls = ability == "break_walls"
+	_apply_ability()
 	_ground_sprite()
 
 
@@ -106,6 +128,8 @@ func setup_boss(hp_bonus: int) -> void:
 	# 首领天生穿墙：它的判定圆远大于视觉体型（BOSS_HIT_RADIUS x BOSS_SCALE），
 	# 若被墙挡会停在离墙一百多像素的地方，看着像卡住
 	_apply_phasing(true)
+	ability = ""
+	breaks_walls = false
 	_ground_sprite()
 	_charge_timer = Balance.BOSS_CHARGE_PHASE["chase"]
 	%BossBar.max_value = health
@@ -124,13 +148,17 @@ func _physics_process(delta):
 		_boss_ai(delta)
 	else:
 		_update_stuck(delta)
-		var to_target := (player.global_position + approach_offset) - global_position
-		var dist := to_target.length()
-		if is_finite(dist) and dist > attack_range:
-			velocity = to_target.normalized() * speed
-		else:
-			velocity = Vector2.ZERO
+		_update_ability(delta)
+		if _dash_state == 0:
+			var to_target := (player.global_position + approach_offset) - global_position
+			var dist := to_target.length()
+			if is_finite(dist) and dist > attack_range:
+				velocity = to_target.normalized() * speed
+			else:
+				velocity = Vector2.ZERO
 	move_and_slide()
+	if breaks_walls:
+		_smash_walls(delta)
 	# 击退位移叠加在行走之上，指数式衰减回正
 	position += _knockback * delta
 	_knockback = _knockback.move_toward(Vector2.ZERO, Balance.KNOCKBACK_FRICTION * delta)
@@ -176,6 +204,164 @@ func _update_stuck(delta: float) -> void:
 	_last_dist = dist
 
 
+## ---------- 专属能力（P6）----------
+
+## 按能力名把 ABILITIES 表里的数值搬进本地状态；出场后随机错开，避免整群同时扑
+func _apply_ability() -> void:
+	_dash_state = 0
+	_dash_timer = 0.0
+	_dash_cd = 0.0
+	_break_cd = 0.0
+	if ability == "dive" or ability == "pounce":
+		var cfg: Dictionary = Balance.ABILITIES[ability]
+		_dash_cd = randf_range(0.4, 1.6)
+		_dash_range = float(cfg["range"])
+		_dash_windup = float(cfg["windup"])
+		_dash_time = float(cfg["time"])
+		_dash_speed_mult = float(cfg["speed_mult"])
+		_dash_flash = cfg["flash"]
+
+
+## 飞扑 / 扑击：蓄力（闪色预告）→ 朝玩家方向直线突进 → 进冷却
+func _update_ability(delta: float) -> void:
+	if ability != "dive" and ability != "pounce":
+		return
+	if _dash_state == 1:
+		velocity = Vector2.ZERO
+		_dash_timer -= delta
+		if _dash_timer <= 0.0:
+			_dash_state = 2
+			_dash_timer = _dash_time
+			_dash_dir = (player.global_position - global_position).normalized()
+			VFX.impact(global_position, _dash_dir, VFX.C_RED, true)
+			Audio.play("res://sounds/hurt.wav", false, 1.5, 0.12)
+		return
+	if _dash_state == 2:
+		velocity = _dash_dir * speed * _dash_speed_mult
+		_dash_timer -= delta
+		if _dash_timer <= 0.0:
+			_dash_state = 0
+			_dash_cd = float(Balance.ABILITIES[ability]["cd"])
+		return
+	_dash_cd = maxf(0.0, _dash_cd - delta)
+	if _dash_cd > 0.0:
+		return
+	var dist: float = global_position.distance_to(player.global_position)
+	# 注意不要排除"已经贴脸"的情况：蝙蝠/野兽是最快的怪，一到玩家身边就停在攻击距离内，
+	# 若排除贴身，飞扑就只在入场那一次触发，之后再也看不到（实测稳态 0 只在扑）。
+	# 现在贴身也能扑：扑过头 -> 走回来 -> 再扑，变成"俯冲咬一口"的节奏。
+	if dist > _dash_range:
+		return
+	_dash_state = 1
+	_dash_timer = _dash_windup
+	Juice.flash(%Slime, _dash_flash, 0.3)
+	# 扑击是强化动作，给玩家一个明确的地面预警；蝙蝠数量多，只闪不画圈免得刷屏
+	if ability == "pounce":
+		VFX.warning_ring(global_position, _dash_range * 0.22, VFX.C_RED, _dash_windup + 0.05)
+
+
+## 重甲兵能力：撞到瓦片障碍就把它打掉，给后面的怪开路
+func _smash_walls(delta: float) -> void:
+	_break_cd = maxf(0.0, _break_cd - delta)
+	if _break_cd > 0.0:
+		return
+	for i in get_slide_collision_count():
+		var col := get_slide_collision(i)
+		var layer := col.get_collider() as TileMapLayer
+		if layer == null:
+			continue
+		var point: Vector2 = col.get_position()
+		# 接触点经常正好压在瓦片边界线上，local_to_map 会解析到隔壁的空格，
+		# 所以先沿法线（指向自己）往瓦片内部挪半格取格，再在 3x3 邻域里兜底找实心格
+		var probe: Vector2 = point - col.get_normal() * (float(TILE_PX) * 0.5)
+		var base: Vector2i = layer.local_to_map(layer.to_local(probe))
+		var cell := Vector2i(-9999, -9999)
+		if layer.get_cell_source_id(base) != -1:
+			cell = base
+		else:
+			var best := 1e12
+			for dx in range(-1, 2):
+				for dy in range(-1, 2):
+					var c: Vector2i = base + Vector2i(dx, dy)
+					if layer.get_cell_source_id(c) == -1:
+						continue
+					var d: float = layer.to_global(layer.map_to_local(c)).distance_to(probe)
+					if d < best:
+						best = d
+						cell = c
+		if cell.x == -9999:
+			continue
+		layer.erase_cell(cell)
+		_break_cd = float(Balance.ABILITIES["break_walls"]["cd"])
+		VFX.impact(point, -col.get_normal(), VFX.C_ORANGE, true)
+		VFX.burst(point, 7, Color(0.62, 0.46, 0.32), 190.0, 0.5, "smoke", 2.2, 420.0)
+		Audio.play("res://sounds/hit.wav", false, 0.7, 0.25)
+		Juice.shake(player.get_node("Camera2D"), 0.2)
+		return
+
+
+## 首领能力：把以自己为中心、半径内的瓦片全部撞碎
+func _smash_around(radius: float, delta: float) -> void:
+	_break_cd = maxf(0.0, _break_cd - delta)
+	if _break_cd > 0.0:
+		return
+	_break_cd = Balance.BOSS_BREAK_CD
+	var erased := 0
+	var span: int = int(ceil(radius / float(TILE_PX))) + 1
+	# 瓦片层是 ChunkMap 的子节点（不是 Game 的直接子节点），必须递归找
+	for chunk in get_parent().find_children("*", "TileMapLayer", true, false):
+		var layer := chunk as TileMapLayer
+		if layer == null:
+			continue
+		var cell: Vector2i = layer.local_to_map(layer.to_local(global_position))
+		for dx in range(-span, span + 1):
+			for dy in range(-span, span + 1):
+				var c: Vector2i = cell + Vector2i(dx, dy)
+				if layer.get_cell_source_id(c) == -1:
+					continue
+				if layer.to_global(layer.map_to_local(c)).distance_to(global_position) <= radius:
+					layer.erase_cell(c)
+					erased += 1
+	if erased > 0:
+		VFX.burst(global_position, 10, Color(0.62, 0.46, 0.32), 260.0, 0.6, "smoke", 2.6, 420.0)
+		Juice.shake(player.get_node("Camera2D"), 0.3)
+
+
+## 机械史莱姆能力：死亡时分裂成更小更快的子体。
+## 子体不再分裂、不掉经验/金币/材料/武器（否则经验与掉落经济会成倍膨胀）。
+func _split() -> void:
+	if ability != "split" or _split_depth >= 1:
+		return
+	var cfg: Dictionary = Balance.ABILITIES["split"]
+	if get_tree().get_nodes_in_group("mobs").size() >= int(cfg["max_mobs"]):
+		return
+	var scene: PackedScene = load("res://mob.tscn")
+	var count: int = int(cfg["count"])
+	var child_hp: int = maxi(1, int(round(float(Balance.MOB_VARIANTS[variant]["hp"]) * float(cfg["hp_ratio"]))))
+	for i in count:
+		var child = scene.instantiate()
+		get_parent().add_child(child)
+		child.global_position = global_position + Vector2.from_angle(TAU * float(i) / float(count) + randf()) * 24.0
+		child.setup(variant)
+		child.setup_split(float(cfg["scale"]), child_hp, _split_depth + 1)
+	VFX.burst(global_position, 8, VFX.C_GREEN, 200.0, 0.5, "spark", 1.8, 200.0)
+	Juice.damage_number(get_parent(), global_position + Vector2(0, -70), "分裂",
+		{"color": Color(0.6, 1.0, 0.85), "scale": 1.2})
+
+
+## 由父体在死亡时调用：变小变快、血量重设、标记不再分裂且不掉收益。
+## 注意：判定圆不用改——节点的 scale 缩小后，碰撞形状会跟着一起缩。
+func setup_split(scale_mult: float, hp: int, depth: int) -> void:
+	scale *= scale_mult
+	health = hp
+	speed *= float(Balance.ABILITIES["split"]["speed_mult"])
+	_split_depth = depth
+	can_drop_loot = false
+	xp_value = 0
+	Juice.pop(self, 1.3, 0.2)
+	_ground_sprite()
+
+
 ## 首领三段循环：追击 → 蓄力（闪白预示）→ 直线冲锋
 func _boss_ai(delta):
 	_charge_timer -= delta
@@ -199,6 +385,8 @@ func _boss_ai(delta):
 				Audio.play("res://sounds/hurt.wav", false, 0.7, 0.15)
 		2:
 			velocity = _charge_dir * speed * Balance.BOSS_CHARGE_SPEED_MULT
+			# 冲锋沿途把瓦片撞碎：首领自己穿墙，但顺手给玩家和杂兵开路（也更有破坏感）
+			_smash_around(Balance.BOSS_BREAK_RADIUS, delta)
 			if _charge_timer <= 0.0:
 				_charge_state = 0
 				_charge_timer = Balance.BOSS_CHARGE_PHASE["chase"]
@@ -233,6 +421,7 @@ func take_damage(amount := 1, knockback := Vector2.ZERO):
 			drop_chest()
 		_burst_debris()
 		VFX.explosion(global_position, 260.0 if is_boss else 90.0, _fx_color())
+		_split()
 		if is_boss:
 			VFX.screen_flash(VFX.C_RED, 0.34, 0.4)
 			Juice.shake(player.get_node("Camera2D"), 0.9)
@@ -244,6 +433,8 @@ func take_damage(amount := 1, knockback := Vector2.ZERO):
 
 
 func drop_xp_gem():
+	if not can_drop_loot or xp_value <= 0:
+		return
 	var gem = preload("res://xp_gem.tscn").instantiate()
 	gem.value = xp_value
 	if xp_value >= 5:
@@ -254,6 +445,8 @@ func drop_xp_gem():
 
 ## 按变体概率掉金币（P2 局外经济），散落成小圈避免叠成一枚
 func drop_coins():
+	if not can_drop_loot:
+		return
 	var drop: Dictionary = Balance.COIN_DROPS[variant]
 	if randf() > drop["chance"]:
 		return
@@ -268,6 +461,8 @@ func drop_coins():
 ## 材料与切换书掉落（P6）：材料按概率掉，切换书稀有。
 ## 首领一次给较多材料。
 func drop_materials() -> void:
+	if not can_drop_loot:
+		return
 	# 铁屑：常见
 	if is_boss or randf() < Balance.MATERIAL_DROP_CHANCE:
 		var n: int = 4 if is_boss else 1
@@ -290,6 +485,8 @@ func _drop_pickup(kind: String, mat: String) -> void:
 
 ## 武器掉落（P6）：普通怪小概率，首领必掉。地上生成 weapon_drop，走近按 F 拾取。
 func drop_weapon() -> void:
+	if not can_drop_loot:
+		return
 	var chance: float = 1.0 if is_boss else Balance.WEAPON_DROP_CHANCE
 	if randf() > chance:
 		return
