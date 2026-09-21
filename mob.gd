@@ -14,6 +14,18 @@ var approach_offset := Vector2.from_angle(randf() * TAU) * randf_range(6.0, 26.0
 # 受击击退的当前速度（px/s），每帧摩擦衰减，数值见 balance.gd 的 KNOCKBACK_*
 var _knockback := Vector2.ZERO
 
+# 穿墙与卡墙自愈（障碍在物理层 3，位值 4；见 chunk_map.gd）
+const OBSTACLE_MASK := 4
+const STUCK_CHECK := 0.6          # 每 0.6 秒检查一次"有没有靠近玩家"
+const STUCK_CHECKS := 4           # 连续 4 次没进展（约 2.4 秒）判定卡墙
+const STUCK_MIN_PROGRESS := 12.0  # 每次检查至少要靠近这么多像素
+const STUCK_PHASE_TIME := 2.0     # 卡墙后临时穿墙的时长
+var _phasing := false             # 该变体天生穿墙（飞行的机械蝙蝠 / 首领）
+var _phase_timer := 0.0
+var _stuck_check := 0.0
+var _stuck_count := 0
+var _last_dist := -1.0
+
 # 首领模式（P4）：三段循环 AI + 头顶血条 + 击退抗性
 var is_boss := false
 var _charge_state := 0  # 0=追击 1=蓄力 2=冲锋
@@ -71,6 +83,7 @@ func setup(variant_name: String) -> void:
 	_set_hit_radius(def.get("hit_radius", 40.0))
 	%Slime.modulate = def["color"]
 	%Slime.set_variant(def["sprites"])
+	_apply_phasing(bool(def.get("phasing", false)))
 	_ground_sprite()
 
 
@@ -90,6 +103,9 @@ func setup_boss(hp_bonus: int) -> void:
 		var paths: Array = Balance.BOSS_SPRITES
 		%Slime.set_variant(paths)
 		%Slime.modulate = Color(1, 1, 1)
+	# 首领天生穿墙：它的判定圆远大于视觉体型（BOSS_HIT_RADIUS x BOSS_SCALE），
+	# 若被墙挡会停在离墙一百多像素的地方，看着像卡住
+	_apply_phasing(true)
 	_ground_sprite()
 	_charge_timer = Balance.BOSS_CHARGE_PHASE["chase"]
 	%BossBar.max_value = health
@@ -107,6 +123,7 @@ func _physics_process(delta):
 	if is_boss:
 		_boss_ai(delta)
 	else:
+		_update_stuck(delta)
 		var to_target := (player.global_position + approach_offset) - global_position
 		var dist := to_target.length()
 		if is_finite(dist) and dist > attack_range:
@@ -117,6 +134,46 @@ func _physics_process(delta):
 	# 击退位移叠加在行走之上，指数式衰减回正
 	position += _knockback * delta
 	_knockback = _knockback.move_toward(Vector2.ZERO, Balance.KNOCKBACK_FRICTION * delta)
+
+
+## 设置穿墙开关：穿墙时碰撞 mask 归零（能穿墙 = 不与障碍层交互）
+func _apply_phasing(on: bool) -> void:
+	_phasing = on
+	_phase_timer = 0.0
+	_stuck_count = 0
+	_last_dist = -1.0
+	collision_mask = 0 if on else OBSTACLE_MASK
+
+
+## 卡墙自愈：地面怪被障碍挡住、又连续一段时间没能靠近玩家时，短暂穿墙脱困。
+## 没有它的话，随机拼接出的房间外墙会把怪永远挡在墙后，场上的怪只会越堆越多。
+func _update_stuck(delta: float) -> void:
+	if _phasing:
+		return
+	if _phase_timer > 0.0:
+		_phase_timer -= delta
+		if _phase_timer <= 0.0:
+			collision_mask = OBSTACLE_MASK
+		return
+	_stuck_check -= delta
+	if _stuck_check > 0.0:
+		return
+	_stuck_check = STUCK_CHECK
+	var dist: float = global_position.distance_to(player.global_position)
+	# 已经贴到玩家身边的不算卡住（贴身时距离本来就不再缩短）
+	if dist <= attack_range * 3.0:
+		_stuck_count = 0
+		_last_dist = dist
+		return
+	if _last_dist >= 0.0 and dist > _last_dist - STUCK_MIN_PROGRESS:
+		_stuck_count += 1
+		if _stuck_count >= STUCK_CHECKS:
+			_stuck_count = 0
+			_phase_timer = STUCK_PHASE_TIME
+			collision_mask = 0
+	else:
+		_stuck_count = 0
+	_last_dist = dist
 
 
 ## 首领三段循环：追击 → 蓄力（闪白预示）→ 直线冲锋

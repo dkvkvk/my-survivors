@@ -132,6 +132,9 @@ Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
   **新增弹窗一律 layer = 30**，否则会被 HUD 压住——踩过：结算界面上还挂着击杀/存活/血条/蓝条，技能栏还压在"回到主菜单"按钮上；
   连 HUD 里的低血量红色脉冲都会盖在结算背景上把它染红。结算时另外 `$HUD.hide()` 收干净。
 - **伤害单一入口**：一切武器最终调 `mob.take_damage(n)`，新武器零改动接入。
+- **★ 碰撞层**：**1 = 玩家 · 2 = 敌人 · 3 = 障碍**。瓦片障碍在层 3（`chunk_map.gd` 的 `set_physics_layer_collision_layer(0, 4)`），玩家 mask = 5，怪 mask = 4。
+  谁穿墙由 `balance.gd` 变体表的 `phasing` 决定（只有会飞的机械蝙蝠 + 首领）；地面怪被墙卡住约 2.4 秒会短暂穿墙脱困
+  （`mob.gd` 的 `_update_stuck()`）；**子弹一律穿行**，防自动瞄准浪费。
 - **纯代码绘制**：经验宝石菱形、飞刀、光环均不依赖美术素材（新增内容避开上游 CC-BY-NC-SA 素材的商用限制）。
 - **存档**：`SaveGame` 纯静态类读写 `user://records.json`（Web 导出走 IndexedDB，同样可用）。
 - **Y 排序**：根节点开 `y_sort_enabled`，角色与树的遮挡按 Y 坐标自动处理。

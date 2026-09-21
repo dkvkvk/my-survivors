@@ -4,7 +4,9 @@ extends Node2D
 ## 每块 1024px；玩家周围保持 5x5 块，走远自动回收，回头走地形不变（按坐标取种子）。
 ## 碰撞挂在瓦片上——看得见的格子才撞得上，从根源上消灭空气墙：
 ## 墙块/货箱/服务器=整格碰撞，天线=窄条碰撞（与桅杆视觉对齐），水晶/灌木=无碰撞。
-## 物理层只挡玩家（层 1）；怪物与子弹穿行，防止卡怪和自动瞄准浪费弹。
+## 碰撞层：1=玩家 2=敌人 3=障碍（本文件）。障碍挡玩家和"不穿墙"的怪（见 balance.gd 的 phasing 字段），
+## 子弹一律穿行（防自动瞄准浪费弹）；飞行变体（机械蝙蝠）与首领天生穿墙，
+## 其余怪被墙挡住超过 STUCK_CHECKS*STUCK_CHECK 秒会短暂穿墙脱困（防怪堆在墙后走不过来）。
 
 const TILE := 64
 const CHUNK_TILES := 16
@@ -213,7 +215,7 @@ func _build_tile_set() -> void:
 	_tile_set = TileSet.new()
 	_tile_set.tile_size = Vector2(TILE, TILE)
 	_tile_set.add_physics_layer()
-	_tile_set.set_physics_layer_collision_layer(0, 1)  # 只挡玩家层
+	_tile_set.set_physics_layer_collision_layer(0, 4)  # 障碍层（第 3 层）：挡玩家 + 不穿墙的怪
 	_tile_set.set_physics_layer_collision_mask(0, 0)
 
 	var src := TileSetAtlasSource.new()

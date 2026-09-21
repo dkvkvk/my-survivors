@@ -10,13 +10,16 @@ const PLAYER_DAMAGE_RATE := 9.0  # 每个重叠敌人每秒掉的血：贴身必
 
 # 敌人变体（U4）：血量/速度区间/体型/色调/经验/接触伤害倍率
 # sprites：两帧走路贴图（assets/mobs/，Kenney CC0）；color 为白色时用贴图原色
+# phasing：是否天生穿墙。地面单位一律 false（会被障碍挡住，贴墙滑行绕路），
+#          只有会飞的变体给 true。被墙卡住超过约 2.4 秒的怪会短暂穿墙脱困（mob.gd 自愈）。
 # hit_radius：碰撞/接触判定圆半径（世界像素）。按"身体"给，不要按包围盒——
 # 蝙蝠展翼 54px、野兽 48px，若按包围盒给半径会出现"没碰到却掉血"。
 const MOB_VARIANTS := {
-	"slime": {"hp": 3, "speed": [200.0, 300.0], "scale": 2.4, "hit_radius": 24.0, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "sprites": ["res://assets/mobs/mech_slime_0.png", "res://assets/mobs/mech_slime_1.png"]},
-	"runner": {"hp": 1, "speed": [380.0, 460.0], "scale": 2.2, "hit_radius": 12.0, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "sprites": ["res://assets/mobs/mech_bat_0.png", "res://assets/mobs/mech_bat_1.png"]},
-	"tank": {"hp": 10, "speed": [110.0, 150.0], "scale": 3.0, "hit_radius": 28.0, "color": Color(1, 1, 1), "xp": 5, "contact": 1.5, "sprites": ["res://assets/mobs/mech_knight_0.png", "res://assets/mobs/mech_knight_1.png"]},
-	"elite": {"hp": 20, "speed": [240.0, 280.0], "scale": 2.6, "hit_radius": 22.0, "color": Color(1.4, 0.55, 0.55), "xp": 15, "contact": 2.5, "sprites": ["res://assets/mobs/mech_beast_0.png", "res://assets/mobs/mech_beast_1.png"]},
+	"slime": {"hp": 3, "speed": [200.0, 300.0], "scale": 2.4, "hit_radius": 24.0, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "phasing": false, "sprites": ["res://assets/mobs/mech_slime_0.png", "res://assets/mobs/mech_slime_1.png"]},
+	# 机械蝙蝠：会飞，无视地形（唯一天生穿墙的杂兵）
+	"runner": {"hp": 1, "speed": [380.0, 460.0], "scale": 2.2, "hit_radius": 12.0, "color": Color(1, 1, 1), "xp": 1, "contact": 1.0, "phasing": true, "sprites": ["res://assets/mobs/mech_bat_0.png", "res://assets/mobs/mech_bat_1.png"]},
+	"tank": {"hp": 10, "speed": [110.0, 150.0], "scale": 3.0, "hit_radius": 28.0, "color": Color(1, 1, 1), "xp": 5, "contact": 1.5, "phasing": false, "sprites": ["res://assets/mobs/mech_knight_0.png", "res://assets/mobs/mech_knight_1.png"]},
+	"elite": {"hp": 20, "speed": [240.0, 280.0], "scale": 2.6, "hit_radius": 22.0, "color": Color(1.4, 0.55, 0.55), "xp": 15, "contact": 2.5, "phasing": false, "sprites": ["res://assets/mobs/mech_beast_0.png", "res://assets/mobs/mech_beast_1.png"]},
 }
 
 # 波次表：t=生效时间（秒），spawn=刷怪间隔，weights=各变体出现权重。
