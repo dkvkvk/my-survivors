@@ -16,13 +16,13 @@
 
 | 文件 | 尺寸 | 变体 | 颜色 |
 |---|---|---|---|
-| `assets/mobs/mech_slime_0/1.png` | 49×24 | slime 史莱姆 | 青绿 |
-| `assets/mobs/mech_bat_0/1.png` | 54×24 | runner 机械蝙蝠 | 紫 |
-| `assets/mobs/mech_knight_0/1.png` | 26×24 | tank 重甲兵 | 钢灰 |
-| `assets/mobs/mech_beast_0/1.png` | 48×24 | elite 魔化野兽 | 猩红 |
-| `assets/mobs/boss_0/1.png` | 52×32 | 首领 | 深灰+红核心 |
+| `assets/mobs/mech_slime_0/1.png` | 49×24 | slime 百足虫 | 青绿 |
+| `assets/mobs/mech_bat_0/1.png` | 54×24 | runner 阴风鸮 | 紫 |
+| `assets/mobs/mech_knight_0/1.png` | 26×24 | tank 蛮石傀 | 钢灰 |
+| `assets/mobs/mech_beast_0/1.png` | 48×24 | elite 赤目狼妖 | 猩红 |
+| `assets/mobs/boss_0/1.png` | 52×32 | 妖王 | 深灰+红核心 |
 
-> ⚠️ 每对两帧**必须同尺寸**（高度尤其要一致）。宽度可以不同——那是动画本身（蝙蝠扇翅、史莱姆压扁）。
+> ⚠️ 每对两帧**必须同尺寸**（高度尤其要一致）。宽度可以不同——那是动画本身（阴风鸮扇翅、百足虫压扁）。
 
 ### 地图
 
@@ -43,24 +43,24 @@
 | `assets/ui/card_orbit_blade.png` | 21×22 | 环形刀刃 |
 | `assets/ui/card_aura.png` | 21×21 | 灼热光环 |
 | `assets/ui/card_split_shot.png` | 22×20 | 分裂弹头 |
-| `assets/ui/card_chain_lightning.png` | 16×16 | 链式闪电（**暂用手里剑占位**） |
+| `assets/ui/card_chain_lightning.png` | 16×16 | 链式闪电（**暂用本命飞剑占位**） |
 | `assets/ui/star.png` | 21×21 | 备用（未引用） |
 
 ### UI — 掉落物图标
 
 | 文件 | 尺寸 | 引用处 | 对应物品 |
 |---|---|---|---|
-| `assets/ui/icon_coin.png` | 10×11 | `coin.gd` | 金币 |
-| `assets/ui/icon_chest.png` | 12×10 | `chest.gd` | 宝箱 |
-| `assets/ui/icon_gem.png` | 9×12 | `xp_gem.tscn` | 经验宝石 |
-| `assets/ui/icon_shuriken.png` | 16×16 | `bullet_2d.gd` | 手里剑弹体 |
+| `assets/ui/icon_coin.png` | 10×11 | `coin.gd` | 灵石 |
+| `assets/ui/icon_chest.png` | 12×10 | `chest.gd` | 藏宝匣 |
+| `assets/ui/icon_gem.png` | 9×12 | `xp_gem.tscn` | 灵珠 |
+| `assets/ui/icon_shuriken.png` | 16×16 | `bullet_2d.gd` | 本命飞剑弹体 |
 
 ### UI — 背景大图
 
 | 文件 | 尺寸 | 引用处 | 说明 |
 |---|---|---|---|
-| `assets/ui/menu_bg.png` | 1920×1080 | `main_menu.tscn` | 主菜单背景（和风村落 + 科技入侵） |
-| `assets/ui/gameover_bg.png` | 1920×1080 | `survivors_game.tscn` | 失败结算背景（忍者倒地·暗红） |
+| `assets/ui/menu_bg.png` | 1920×1080 | `main_menu.tscn` | 主菜单背景（修仙村落 + 修仙入侵） |
+| `assets/ui/gameover_bg.png` | 1920×1080 | `survivors_game.tscn` | 失败结算背景（守山人倒地·暗红） |
 | `assets/ui/victory_bg.png` | 1920×1080 | `survivors_game.tscn` | 胜利结算背景（鸟居之上·晨曦） |
 | `assets/ui/cover.png` | 1920×1080 | **未引用** | 宣传封面备用 |
 
@@ -71,7 +71,7 @@
 | `assets/fx/glow_64.png` | 64×64 | `vfx.gd` | 径向光晕（枪口闪 / 升级光柱 / 通用发光），7 级色阶量化 → 像素硬边 |
 | `assets/fx/star_64.png` | 64×64 | `vfx.gd` | 四角星芒（命中爆点 / 拾取 / 升级爆散） |
 | `assets/fx/spark_32.png` | 32×32 | `vfx.gd` | 火花小菱形（CPUParticles2D 粒子贴图） |
-| `assets/fx/smoke_64.png` | 64×64 | `vfx.gd` | 噪声软烟团（击杀 / 爆炸烟） |
+| `assets/fx/smoke_64.png` | 64×64 | `vfx.gd` | 噪声软烟团（斩妖 / 爆炸烟） |
 
 > 生成脚本思路：16×16（spark 为 8×8）手算 alpha 场 → 色阶量化 → NEAREST 放大 4 倍。
 > 想换风格时改 `vfx.gd` 里的路径即可，或按 `ART_PROMPTS.md` 的提示词生图替换。
@@ -86,7 +86,7 @@
 
 ## 二、待生成（提示词见 `ART_PROMPTS.md`）
 
-### 本轮（和风忍者村 + 科技入侵）
+### 本轮（中国修仙世界（魔渊妖潮 · 青冥山守夜））
 
 | # | 文件名 | 尺寸 | 用途 | 状态 |
 |---|---|---|---|---|
@@ -94,8 +94,8 @@
 | 2 | `gameover_bg` | 1920×1080 | 失败结算 | ✅ 已接入 |
 | 3 | `victory_bg` | 1920×1080 | 胜利结算 | ✅ 已接入 |
 | 4 | `cover` | 1920×1080 | 宣传封面 | ✅ 已接入（备用） |
-| 5 | `tileset_wa` | 384×64 | 和风瓦片集（6 格） | ✅ 已接入（抠底后 384×64） |
-| 6 | `tech_floor_wa` | 256×256 | 和风无缝地面 | ✅ 已接入（2048→256） |
+| 5 | `tileset_wa` | 384×64 | 瓦片集（6 格） | ✅ 已接入（抠底后 384×64） |
+| 6 | `tech_floor_wa` | 256×256 | 修仙无缝地面 | ✅ 已接入（2048→256） |
 | 7 | `menu_loop.mp4` | 1920×1080 | 主菜单循环视频 | ⬜ 待生成 |
 
 ### 下一轮
@@ -103,8 +103,8 @@
 | 文件名 | 用途 |
 |---|---|
 | `card_chain_lightning.png` | 链式闪电正式图标（现为占位） |
-| 8 张 `card_*.png` 重画 | 和风+科技统一风格 |
-| `icon_coin/chest/gem/shuriken` 重画 | 和风化（铜钱/唐柜/勾玉） |
+| 8 张 `card_*.png` 重画 | 修仙+修仙统一风格 |
+| `icon_coin/chest/gem/shuriken` 重画 | 修仙化（铜钱/唐柜/勾玉） |
 | `title_logo.png` | 标题 Logo（含中文，成功率低，可后置） |
 | `sakura_particle.png` | 樱花花瓣粒子（洋红底） |
 

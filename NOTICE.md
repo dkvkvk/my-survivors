@@ -18,20 +18,20 @@
 | 素材/模块 | 来源 | 许可证 |
 |---|---|---|
 | 代码（上游继承 + 二开） | GDQuest / 本项目 | MIT |
-| `assets/hero/` 忍者角色与影子 | [Ninja Adventure by pixel-boy](https://pixel-boy.itch.io/ninja-adventure)（[GitHub 镜像](https://github.com/pixel-boy/NinjaAdventure)） | CC0 |
-| `assets/mobs/` 史莱姆/蝙蝠/重甲/野兽（各两帧） | [Kenney Pixel Platformer](https://kenney.nl/assets/pixel-platformer) | CC0 |
+| `assets/hero/` 守山人角色与影子 | [Ninja Adventure by pixel-boy](https://pixel-boy.itch.io/ninja-adventure)（[GitHub 镜像](https://github.com/pixel-boy/NinjaAdventure)） | CC0 |
+| `assets/mobs/` 小妖四色各两帧（**当前仍是旧美术：史莱姆 / 蝙蝠 / 重甲 / 野兽**；修仙化后换成百足虫 / 阴风鸮 / 蛮石傀 / 赤目狼妖，**文件名不变**） | [Kenney Pixel Platformer](https://kenney.nl/assets/pixel-platformer) | CC0 |
 | `assets/tiles/` 瓦片集（墙/货箱/服务器/天线/水晶/灌木） | 本项目脚本生成像素图 | CC0（自制） |
 | `addons/saltmire_juice/` 打击感套件 | [Saltmire Juice](https://github.com/saltmire/saltmire-juice) | MIT |
 | `sounds/*.wav` 6 个音效 | [Juhani Junkala 8-bit 音效包](https://opengameart.org/content/512-sound-effects-8-bit-style) | CC0 |
 | `sounds/bgm_*.wav` 两首循环 BGM | 本项目脚本合成（`synth_bgm.py` 思路，见提交历史） | CC0（自制） |
 | `backgrounds/grass-ground-soft.png` 草地地面 | [Seamless Grass II](https://opengameart.org/content/seamless-grass-texture-ii) | CC0 |
 | `fonts/` 中文像素字体 + OFL.txt | [Fusion Pixel（缝合像素）by TakWolf](https://github.com/TakWolf/fusion-pixel-font) | SIL OFL 1.1 |
-| 代码绘制的视觉（经验宝石/飞刀/光环/手里剑/伤害数字） | 本项目 | 随项目 MIT |
+| 代码绘制的视觉（灵珠/飞刀/光环/本命飞剑/伤害数字） | 本项目 | 随项目 MIT |
 | `assets/fx/` 特效贴图（光晕/星芒/火花/烟雾） | 本项目用 Python 脚本程序化生成（见 ASSETS.md 说明） | CC0（自制） |
 | `vfx.gd` 特效库（冲击环/斩击弧/拖尾/全屏闪/天雷等） | 本项目纯代码绘制 | 随项目 MIT |
 
 Kenney 包随附的许可原文见 `assets/Kenney-License.txt`。
 
-| `assets/ui/` 主菜单背景、金币/宝箱/宝石/手里剑图标；`assets/mobs/mech_bat_*` 机械蝙蝠 | AI 生成（Google Gemini 图像模型/Nano Banana，提示词见提交历史），经像素化与抠底处理 | 遵循 [Gemini API 商用条款](https://ai.google.dev/gemini-api/terms)（允许商用，不得主张生成物为独立版权作品） |
+| `assets/ui/` 主菜单背景、灵石/藏宝匣/宝石/本命飞剑图标；`assets/mobs/mech_bat_*` 阴风鸮 | AI 生成（Google Gemini 图像模型/Nano Banana，提示词见提交历史），经像素化与抠底处理 | 遵循 [Gemini API 商用条款](https://ai.google.dev/gemini-api/terms)（允许商用，不得主张生成物为独立版权作品） |
 
 > 提示：OFL 1.1 对字体保留名称"缝合像素/Fusion Pixel"，未修改的原文件分发不受影响。
