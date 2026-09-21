@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://dlqas1jal36sy" path="res://assets/ground/tech_floor.png" id="6_ground"]
 [ext_resource type="Script" uid="uid://ddvickkrmyjq0" path="res://pause_ui.gd" id="7_pause"]
 [ext_resource type="Texture2D" path="res://assets/ui/gameover_bg.png" id="8_gobg"]
+[ext_resource type="Script" path="res://inventory_ui.gd" id="12_inv"]
 [ext_resource type="Script" path="res://skill_bar.gd" id="11_skillbar"]
 [ext_resource type="Texture2D" path="res://assets/ui/victory_bg.png" id="10_vbg"]
 [ext_resource type="Script" path="res://victory_ui.gd" id="9_victory"]
@@ -83,6 +84,12 @@ unique_name_in_owner = true
 process_mode = 3
 visible = false
 script = ExtResource("7_pause")
+
+[node name="InventoryUI" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+process_mode = 3
+visible = false
+script = ExtResource("12_inv")
 
 [node name="Path2D" type="Path2D" parent="Player" unique_id=1949369106]
 curve = SubResource("Curve2D_cp6e5")

@@ -32,14 +32,20 @@ var mana_max: float = Balance.MANA_MAX
 var skill_slots := ["", "", "", ""]   # 空字符串 = 该槽没装技能
 var _skill_cd := {}                    # 技能 id -> 剩余冷却（秒）
 
+# 武器与材料（P6）：武器最多 4 把；每把武器有多个技能但每场只选一个激活。
+# 捡到技能切换书可换成本武器的另一个技能。
+var weapons: Array = []                # [{id, level, active_skill, kills}]
+var materials := {}                    # {材料id: 数量}
+var skill_books := 0                   # 技能切换书数量
+
 
 func _ready():
 	_apply_shop_upgrades()
 	%HealthBar.max_value = max_health
 	%ManaBar.max_value = mana_max
 	%ManaBar.value = mana
-	# 开局自带手枪（算一把武器），因此自带它的技能
-	learn_skill("shuriken_burst")
+	# 开局自带手枪（算一把武器，占一个武器位）
+	add_weapon("shuriken")
 
 
 ## 法力回复 + 技能冷却 + 键位 1/2/3/4 施放
@@ -52,6 +58,120 @@ func _process(delta: float) -> void:
 		if Input.is_action_just_pressed("skill_%d" % (i + 1)):
 			cast_skill(i)
 
+
+## ---------- 武器与材料（P6） ----------
+
+func weapon_count() -> int:
+	return weapons.size()
+
+
+func has_weapon(id: String) -> bool:
+	for w in weapons:
+		if w["id"] == id:
+			return true
+	return false
+
+
+func get_weapon(id: String) -> Dictionary:
+	for w in weapons:
+		if w["id"] == id:
+			return w
+	return {}
+
+
+## 获得武器：装进空位并把它的默认技能同步到技能槽。
+## 武器位已满时返回 false（由上层弹替换面板）。
+func add_weapon(id: String) -> bool:
+	var def: Dictionary = Weapons.get_def(id)
+	if def.is_empty():
+		return false
+	if has_weapon(id):
+		return true
+	if weapons.size() >= Weapons.MAX_SLOTS:
+		return false
+	var skills: Array = def.get("skills", [])
+	weapons.append({
+		"id": id,
+		"level": 1,
+		"active_skill": skills[0] if skills.size() > 0 else "",
+		"kills": 0,
+	})
+	_sync_skill_slots()
+	return true
+
+
+## 丢弃武器（替换面板用）
+func drop_weapon(id: String) -> void:
+	for i in weapons.size():
+		if weapons[i]["id"] == id:
+			weapons.remove_at(i)
+			break
+	_sync_skill_slots()
+
+
+## 设置某把武器的"本场激活技能"。需要消耗一本切换书（swap=false 时不消耗，用于首次选择）
+func set_active_skill(weapon_id: String, skill_id: String, use_book := true) -> bool:
+	var w: Dictionary = get_weapon(weapon_id)
+	if w.is_empty():
+		return false
+	var def: Dictionary = Weapons.get_def(weapon_id)
+	if not (skill_id in def.get("skills", [])):
+		return false
+	if w["active_skill"] == skill_id:
+		return true
+	if use_book:
+		if skill_books <= 0:
+			return false
+		skill_books -= 1
+	w["active_skill"] = skill_id
+	_sync_skill_slots()
+	return true
+
+
+## 把武器的激活技能同步进技能槽（槽位顺序 = 武器顺序）
+func _sync_skill_slots() -> void:
+	for i in skill_slots.size():
+		if i < weapons.size():
+			skill_slots[i] = weapons[i]["active_skill"]
+		else:
+			skill_slots[i] = ""
+
+
+func add_material(id: String, amount := 1) -> void:
+	materials[id] = int(materials.get(id, 0)) + amount
+
+
+func material_count(id: String) -> int:
+	return int(materials.get(id, 0))
+
+
+## 武器升级：材料够 且 击杀数够 才成功
+func can_upgrade_weapon(id: String) -> bool:
+	var w: Dictionary = get_weapon(id)
+	if w.is_empty():
+		return false
+	var def: Dictionary = Weapons.get_def(id)
+	if int(w["level"]) >= int(def.get("max_level", 5)):
+		return false
+	if int(w["kills"]) < int(def.get("kills_per_level", 100)) * int(w["level"]):
+		return false
+	return material_count(def.get("upgrade_material", "scrap")) >= Weapons.upgrade_cost(def, int(w["level"]))
+
+
+func upgrade_weapon(id: String) -> bool:
+	if not can_upgrade_weapon(id):
+		return false
+	var w: Dictionary = get_weapon(id)
+	var def: Dictionary = Weapons.get_def(id)
+	var mat: String = def.get("upgrade_material", "scrap")
+	materials[mat] = material_count(mat) - Weapons.upgrade_cost(def, int(w["level"]))
+	w["level"] = int(w["level"]) + 1
+	Audio.play("res://sounds/pickup.wav", false, 1.5, 0.4)
+	Juice.pop(self, 1.4, 0.3)
+	return true
+
+
+## ---------- 技能 ----------
 
 ## 学会一个技能：放进第一个空槽；没有空槽则返回 false（由上层弹替换界面）
 func learn_skill(id: String) -> bool:
