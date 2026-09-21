@@ -94,4 +94,4 @@ func _on_blade_body_entered(body):
 	var kb: Vector2 = (body.global_position - global_position).normalized() * Balance.KNOCKBACK_BLADE
 	body.call_deferred("take_damage", damage, kb)
 	# 命中事件喂给链式闪电（没这张卡时是空操作）
-	get_parent().call_deferred("on_weapon_hit", body.global_position)
+	get_parent().call_deferred("on_weapon_hit", body.global_position, body.get_instance_id())

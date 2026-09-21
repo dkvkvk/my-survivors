@@ -1,22 +1,22 @@
 extends Node2D
 
-## 链式闪电（P5）：任意一次命中（子弹/飞刀）作为触发源，
-## 从命中点开始，在 CHAIN_RANGE 内依次跳向最近的敌人，逐跳衰减。
-## 电弧纯代码绘制（锯齿折线），不依赖美术素材；数值见 balance.gd 的 CHAIN_*。
-
+## 链式闪电（P5/P6）：被动 + 技能，电弧纯代码绘制（锯齿折线 + 四层辉光）。
+##   被动 on_hit()：任意一次命中（子弹/飞刀）作为触发源，逐跳衰减地跳向附近敌人
+##   技能 cast_ultimate()：雷神之怒——从天上劈下多道天雷，落点目标再继续跳跃
+## 数值见 balance.gd 的 CHAIN_* / SKILL_THUNDER_* / SKY_BOLT_HEIGHT。
 
 var level := 0
-var evolved := false  # 雷神之怒形态
+var evolved := false  # 满级进化形态
 var _cooldown := 0.0
 var _lines: Array = []  # 每段电弧：{"from":Vector2, "to":Vector2, "points":PackedVector2Array, "life":float}
 
 
-## 抽到"链式闪电"卡时由 player.gd 调用；level 从 1 开始
+## 由 player.gd 按**武器等级**调用（P6 模型 B）；level 从 1 开始，0 = 未持有该武器
 func configure(p_level: int) -> void:
 	level = p_level
 
 
-## 进化：雷神之怒——跳跃次数增加、伤害衰减放缓
+## 满级进化：跳跃次数增加、伤害衰减放缓
 func evolve() -> void:
 	if evolved:
 		return
@@ -24,23 +24,72 @@ func evolve() -> void:
 	Juice.pop(self, 1.6, 0.4)
 
 
-## 命中触发入口（由 bullet_2d / orbit_blades 调用）
-func on_hit(pos: Vector2) -> void:
+## 被动触发入口（由 bullet_2d / orbit_blades 调用）。
+## exclude_id：触发这次命中的敌人 id——必须排除，否则电弧会原地"打自己"一次
+func on_hit(pos: Vector2, exclude_id := 0) -> void:
 	if level <= 0 or _cooldown > 0.0:
 		return
 	_cooldown = Balance.CHAIN_TRIGGER_CD
-	_strike(pos)
+	var exclude := {}
+	if exclude_id != 0:
+		exclude[exclude_id] = true
+	_strike(pos, 0, 0, exclude)
 
 
-func _strike(origin: Vector2) -> void:
-	var jumps: int = Balance.CHAIN_BASE_JUMPS + Balance.CHAIN_JUMP_STEP * (level - 1)
+## 技能「雷神之怒」：向四周劈下多道天雷，落点目标挨一击后再继续跳跃。
+## 附近怪不够时按圆周补足落点，保证"大范围雷击"的观感。
+func cast_ultimate() -> void:
+	if level <= 0:
+		return
+	_cooldown = Balance.CHAIN_TRIGGER_CD
+	for t in _ultimate_targets():
+		var pos: Vector2 = t["pos"]
+		var id: int = int(t["id"])
+		# 天雷：从目标正上方劈下来，落点爆闪
+		_add_arc(pos + Vector2(randf_range(-70.0, 70.0), -Balance.SKY_BOLT_HEIGHT), pos)
+		if id != 0:
+			var mob = instance_from_id(id)
+			if mob != null and is_instance_valid(mob):
+				mob.call_deferred("take_damage", _hit_damage(Balance.SKILL_THUNDER_DAMAGE_BONUS))
+		var exclude := {}
+		if id != 0:
+			exclude[id] = true
+		_strike(pos, Balance.SKILL_THUNDER_EXTRA_JUMPS, Balance.SKILL_THUNDER_DAMAGE_BONUS, exclude)
+
+
+## 雷神之怒的落点：优先取玩家附近的敌人，不足时圆周均分补足
+func _ultimate_targets() -> Array:
+	var me: Vector2 = get_parent().global_position
+	var out: Array = []
+	for mob in get_tree().get_nodes_in_group("mobs"):
+		if out.size() >= Balance.SKILL_THUNDER_ORIGINS:
+			break
+		if not is_instance_valid(mob) or not (mob is Node2D) or not mob.has_method("take_damage"):
+			continue
+		var p: Vector2 = mob.global_position
+		if me.distance_to(p) <= Balance.SKILL_AURA_RADIUS:
+			out.append({"pos": p, "id": mob.get_instance_id()})
+	var missing: int = Balance.SKILL_THUNDER_ORIGINS - out.size()
+	for i in missing:
+		var ang: float = TAU * float(i) / float(maxi(missing, 1)) + randf() * 0.6
+		out.append({"pos": me + Vector2(Balance.SKILL_AURA_RADIUS * 0.55, 0).rotated(ang), "id": 0})
+	return out
+
+
+## 当前一跳的伤害
+func _hit_damage(bonus: int) -> int:
+	return Balance.CHAIN_BASE_DAMAGE + Balance.CHAIN_DAMAGE_STEP * (level - 1) + bonus
+
+
+func _strike(origin: Vector2, extra_jumps := 0, damage_bonus := 0, exclude := {}) -> void:
+	var jumps: int = Balance.CHAIN_BASE_JUMPS + Balance.CHAIN_JUMP_STEP * (level - 1) + extra_jumps
 	var falloff: float = Balance.CHAIN_FALLOFF
 	if evolved:
 		jumps += Balance.CHAIN_EVOLVE_EXTRA_JUMPS
 		falloff = Balance.CHAIN_EVOLVE_FALLOFF
 
-	var damage: float = float(Balance.CHAIN_BASE_DAMAGE + Balance.CHAIN_DAMAGE_STEP * (level - 1))
-	var hit_ids := {}
+	var damage: float = float(_hit_damage(damage_bonus))
+	var hit_ids: Dictionary = exclude.duplicate()
 	var from := origin
 
 	for i in jumps:

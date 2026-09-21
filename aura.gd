@@ -54,7 +54,18 @@ func configure(p_level: int) -> void:
 	_timer.start()
 
 
-## 进化：烈日领域——灼烧间隔减半、伤害提升、变炽黄
+## 卸下武器时调用：停止灼烧并隐藏（被动等级 = 武器等级，丢武器就归零）
+func deactivate() -> void:
+	_setup()
+	level = 0
+	radius = 0.0
+	_circle.radius = 0.0
+	_timer.stop()
+	hide()
+	queue_redraw()
+
+
+## 满级进化：烈日领域——灼烧间隔减半、伤害提升、变炽黄
 func evolve() -> void:
 	if evolved:
 		return

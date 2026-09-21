@@ -15,13 +15,8 @@ var fire_rate_mult := 1.0
 var bullet_damage := 1
 var pickup_radius := Balance.PICKUP_RADIUS
 
-# 武器卡（U6）：环形刀刃数量 / 灼热光环等级 / 手枪额外弹丸 / 链式闪电等级
-var orbit_blade_count := 0
-var aura_level := 0
-var extra_bullets := 0
-var chain_level := 0
-# 武器进化（P3）：同名卡抽满 5 级后第 6 张触发进化，进化后从卡池移除
-var evolved_weapons := {}
+# 武器被动状态由各武器节点自己保存（Gun / OrbitBlades / Aura / ChainLightning）；
+# 等级的唯一来源是 weapons 数组里的 level（P6 模型 B），这里不再重复存一份。
 
 # 受伤音效节流：被怪围着时每 0.6 秒最多响一次，不然太吵
 var hurt_sound_cooldown := 0.0
@@ -79,7 +74,7 @@ func get_weapon(id: String) -> Dictionary:
 	return {}
 
 
-## 获得武器：装进空位并把它的默认技能同步到技能槽。
+## 获得武器：装进空位 → **激活它的被动效果** → 把默认技能同步到技能槽。
 ## 武器位已满时返回 false（由上层弹替换面板）。
 func add_weapon(id: String) -> bool:
 	var def: Dictionary = Weapons.get_def(id)
@@ -96,17 +91,61 @@ func add_weapon(id: String) -> bool:
 		"active_skill": skills[0] if skills.size() > 0 else "",
 		"kills": 0,
 	})
+	_apply_weapon_passive(id)
 	_sync_skill_slots()
 	return true
 
 
-## 丢弃武器（替换面板用）
+## 丢弃武器（替换面板用）：同时卸下它的被动效果
 func drop_weapon(id: String) -> void:
 	for i in weapons.size():
 		if weapons[i]["id"] == id:
 			weapons.remove_at(i)
 			break
+	_clear_weapon_passive(id)
 	_sync_skill_slots()
+
+
+## ---------- 武器被动（P6 模型 B：武器 = 被动效果 + 提供技能）----------
+## 被动等级 = 武器等级。加武器时这里加一个分支即可（武器节点自己处理数值曲线）。
+
+func _apply_weapon_passive(id: String) -> void:
+	var w: Dictionary = get_weapon(id)
+	if w.is_empty():
+		return
+	var lv: int = int(w["level"])
+	match id:
+		"shuriken":
+			$Gun.set_weapon_level(lv)
+		"orbit_blade":
+			%OrbitBlades.set_blade_count(lv)
+		"aura":
+			%Aura.configure(lv)
+		"chain_lightning":
+			%ChainLightning.configure(lv)
+
+
+func _clear_weapon_passive(id: String) -> void:
+	match id:
+		"orbit_blade":
+			%OrbitBlades.set_blade_count(0)
+		"aura":
+			%Aura.deactivate()
+		"chain_lightning":
+			%ChainLightning.configure(0)
+
+
+## 满级进化：把该武器的被动切到强化形态（手里剑大师 / 刃风暴 / 烈日领域 / 雷神之怒）
+func _evolve_weapon(id: String) -> void:
+	match id:
+		"shuriken":
+			$Gun.evolve()
+		"orbit_blade":
+			%OrbitBlades.evolve()
+		"aura":
+			%Aura.evolve()
+		"chain_lightning":
+			%ChainLightning.evolve()
 
 
 ## 设置某把武器的"本场激活技能"。需要消耗一本切换书（swap=false 时不消耗，用于首次选择）
@@ -174,33 +213,53 @@ func upgrade_weapon(id: String) -> bool:
 	var mat: String = def.get("upgrade_material", "scrap")
 	materials[mat] = material_count(mat) - Weapons.upgrade_cost(def, int(w["level"]))
 	w["level"] = int(w["level"]) + 1
+	_apply_weapon_passive(id)
 	Audio.play("res://sounds/pickup.wav", false, 1.5, 0.4)
+	Juice.pop(self, 1.4, 0.3)
+	# 满级即进入进化形态（旧版"第 6 张同名卡进化"已取消）
+	if Weapons.is_maxed(def, int(w["level"])):
+		_evolve_weapon(id)
+		Juice.damage_number(get_parent(), global_position + Vector2(0, -120), "★ 满级进化 ★",
+			{"color": Color(1.0, 0.85, 0.3), "scale": 2.0})
+	return true
+
+
+## 宝箱奖励：无视材料与击杀数，直接给一把已持有武器 +1 级
+func force_upgrade_weapon(id: String) -> bool:
+	var w: Dictionary = get_weapon(id)
+	if w.is_empty():
+		return false
+	var def: Dictionary = Weapons.get_def(id)
+	if Weapons.is_maxed(def, int(w["level"])):
+		return false
+	w["level"] = int(w["level"]) + 1
+	_apply_weapon_passive(id)
+	if Weapons.is_maxed(def, int(w["level"])):
+		_evolve_weapon(id)
 	Juice.pop(self, 1.4, 0.3)
 	return true
 
 
+## 随机一把**还没满级**的已持有武器（宝箱用）；都满级或没武器返回空串
+func random_upgradable_weapon() -> String:
+	var pool: Array = []
+	for w in weapons:
+		if not Weapons.is_maxed(Weapons.get_def(w["id"]), int(w["level"])):
+			pool.append(w["id"])
+	if pool.is_empty():
+		return ""
+	return pool[randi() % pool.size()]
+
+
+## 技能槽里某个技能的下标（找不到返回 -1）
+func skill_slot_of(skill_id: String) -> int:
+	for i in skill_slots.size():
+		if skill_slots[i] == skill_id:
+			return i
+	return -1
+
+
 ## ---------- 技能 ----------
-
-## 学会一个技能：放进第一个空槽；没有空槽则返回 false（由上层弹替换界面）
-func learn_skill(id: String) -> bool:
-	if not Skills.has(id):
-		return false
-	for i in skill_slots.size():
-		if skill_slots[i] == id:
-			return true   # 已经有了
-	for i in skill_slots.size():
-		if skill_slots[i] == "":
-			skill_slots[i] = id
-			return true
-	return false
-
-
-## 把技能装到指定槽（id 传空字符串 = 卸下）
-func equip_skill(slot: int, id: String) -> void:
-	if slot < 0 or slot >= skill_slots.size():
-		return
-	skill_slots[slot] = id
-
 
 ## 该技能当前剩余冷却（供 HUD 画遮罩）
 func get_skill_cooldown(id: String) -> float:
@@ -237,7 +296,7 @@ func _run_skill_effect(id: String) -> void:
 		"sunburst":
 			_hit_all_in_radius(Balance.SKILL_AURA_RADIUS, Balance.SKILL_AURA_DAMAGE)
 		"thunder":
-			%ChainLightning.on_hit(global_position)
+			%ChainLightning.cast_ultimate()
 
 
 ## 手里剑乱舞：以自身为中心放射一圈子弹
@@ -246,7 +305,7 @@ func _shuriken_burst() -> void:
 	var n: int = Balance.SKILL_SHURIKEN_COUNT
 	for i in n:
 		var b = BULLET.instantiate()
-		b.damage = bullet_damage + Balance.SKILL_SHURIKEN_DAMAGE_BONUS
+		b.damage = $Gun.bullet_damage_now() + Balance.SKILL_SHURIKEN_DAMAGE_BONUS
 		b.global_position = global_position
 		b.rotation = TAU * i / float(n)
 		get_parent().add_child(b)
@@ -331,58 +390,10 @@ func apply_upgrade(id: String) -> void:
 			%HealthBar.max_value = max_health
 		"magnet":
 			pickup_radius *= 1.35
-		"orbit_blade":
-			if _try_evolve("orbit_blade"):
-				%OrbitBlades.evolve()
-			else:
-				orbit_blade_count += 1
-				%OrbitBlades.set_blade_count(orbit_blade_count)
-		"aura":
-			if _try_evolve("aura"):
-				%Aura.evolve()
-			else:
-				aura_level += 1
-				%Aura.configure(aura_level)
-		"split_shot":
-			if _try_evolve("split_shot"):
-				$Gun.evolve()
-			else:
-				extra_bullets += 1
-		"chain_lightning":
-			if _try_evolve("chain_lightning"):
-				%ChainLightning.evolve()
-			else:
-				chain_level += 1
-				%ChainLightning.configure(chain_level)
 	%HealthBar.value = health
-
-
-## 武器满级后再抽一张同名卡时触发进化（返回 true）。计数封顶在 EVOLVE_LEVEL。
-func _try_evolve(id: String) -> bool:
-	var count := 0
-	match id:
-		"orbit_blade":
-			count = orbit_blade_count
-		"aura":
-			count = aura_level
-		"split_shot":
-			count = extra_bullets
-		"chain_lightning":
-			count = chain_level
-	if count >= Balance.EVOLVE_LEVEL and not evolved_weapons.has(id):
-		evolved_weapons[id] = true
-		Audio.play("res://sounds/pickup.wav", false, 2.0, 0.4)
-		Juice.damage_number(get_parent(), global_position + Vector2(0, -120), "★ 进化 ★", {"color": Color(1.0, 0.85, 0.3), "scale": 2.0})
-		return true
-	return false
-
-
-## 卡池过滤：已进化的武器卡不再出现（供 level_up_ui 调用）
-func is_card_unavailable(id: String) -> bool:
-	return evolved_weapons.has(id)
 
 
 ## 任意武器命中敌人时调用（bullet_2d / orbit_blades），
 ## 由链式闪电自己判断等级与冷却——没有这张卡时这里等于空操作。
-func on_weapon_hit(pos: Vector2) -> void:
-	%ChainLightning.on_hit(pos)
+func on_weapon_hit(pos: Vector2, exclude_id := 0) -> void:
+	%ChainLightning.on_hit(pos, exclude_id)

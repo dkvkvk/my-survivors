@@ -35,6 +35,11 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Esc 关闭（开着的时候；否则交给暂停菜单）
+	if event.is_action_pressed("ui_cancel"):
+		if visible:
+			toggle()
+		return
 	if not event.is_action_pressed("inventory"):
 		return
 	# 升级/结算界面开着时不响应，避免状态叠加

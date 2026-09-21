@@ -16,7 +16,7 @@ const LIST := [
 		"name": "手里剑乱舞",
 		"icon": "res://assets/ui/skill_shuriken.png",
 		"mana": 20.0, "cd": 6.0,
-		"desc": "向四周爆发一圈手里剑",
+		"desc": "向四周爆发一圈手里剑（伤害吃手里剑武器等级）",
 		"from": "gun",
 	},
 	{
@@ -40,7 +40,7 @@ const LIST := [
 		"name": "雷神之怒",
 		"icon": "res://assets/ui/skill_chain_lightning.png",
 		"mana": 35.0, "cd": 12.0,
-		"desc": "大范围链式闪电连击",
+		"desc": "向四周劈下多道闪电，连击全场",
 		"from": "chain_lightning",
 	},
 ]

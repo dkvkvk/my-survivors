@@ -13,7 +13,7 @@
 - 主场景：`main_menu.tscn`（主菜单 → 开始游戏 → `survivors_game.tscn`）
 - 视口 1920×1080，渲染 `gl_compatibility`，全局纹理过滤 Nearest（像素风）
 
-## 1. 当前状态（2026-09-20）
+## 1. 当前状态（2026-09-21）
 
 已完成并上线（CI 全绿、GitHub Pages 在线版同步部署）：
 - 核心割草循环：波次刷怪（5 档）、4 变体怪 + 三段冲锋 AI 首领（每 3 分钟，血量递增，掉宝箱）
@@ -23,6 +23,13 @@
 - 视觉：忍者主角为 Ninja Adventure CC0 的 4×4 方向行走表（非 AI，见 NOTICE.md）；其余 AI 生成（四种怪两帧动画、首领、UI 图标、菜单/结算背景、封面）+ 脚本自制（地板/瓦片集）；中文像素字体 Fusion Pixel（OFL）；全局主题/暗角/黑场过渡/青色光尘
 - 音频：6 个 CC0 音效 + 两首脚本合成循环 BGM
 - 平衡基准：**站桩挂机必死**（约 1 分钟），走位风筝才有活路
+
+P6 武器/技能系统（进行中，权威设计见 `WEAPON_SYSTEM.md`）：
+- 蓝条 + 4 技能槽（键位 1/2/3/4）+ 冷却 + 技能 HUD
+- **模型 B：一把武器 = 一个被动效果 + 一组技能**；被动等级 = 武器等级，满级自动进化
+  - 被动由 `player._apply_weapon_passive()` 分发；加武器要同步改 `_clear_weapon_passive()` / `_evolve_weapon()`
+- 背包（按 B）、武器掉落（按 F 拾取 + 替换面板）、材料掉落、武器升级（材料 + 击杀数）
+- 升级三选一只出属性卡；宝箱奖励改走武器/材料体系
 
 ## 2. 架构速览
 
@@ -102,7 +109,7 @@ func _process(_delta) -> bool:  # 必须有返回值，否则 Parse Error
 5. Godot 会在运行后回写 project.godot / .tscn（加 uid 等），手改场景文件后 import 一次再看 diff；`.tscn` 手工编辑时 ext_resource 的 id 必须真实存在（引用不存在资源=Parse Error 指向使用行）。
 6. TileSet 物理：必须先 `add_source` 再给 TileData 加碰撞多边形（顺序反了碰撞静默失效）。
 7. 怪物碰撞圆/受击框几何要保证"攻击环最远停点 + 碰撞半径 > 受击框半宽"，否则掉血链路断（HurtBox mask 必须=2）。
-8. 项目改名会改 user:// 目录——已设 `custom_user_dir_name="my-survivors"` 固定，再改名存档不丢。
+8. **项目改名会改 user:// 目录**。原来只设了 `config/custom_user_dir_name` 而**漏了 `config/use_custom_user_dir=true`**，所以设置一直没生效——存档实际落在 `app_userdata/不退/`（历史遗留 `My Survivors/`、`忍者今天也在割韭菜/` 都是改名留下的孤儿目录）。**2026-09-21 已补上该开关**，现在固定为 `app_userdata/my-survivors/`。
 9. 窗口标题=project.godot 的 config/name（**不退**）；仓库名/导出文件名仍是 my-survivors。
 10. **贴图放错文件**：曾有"道具在乱跑"——AI 生成的是 3×3 升级卡图标九宫格，却被写进了 `assets/hero/ninja_sheet.png`，`hero.gd` 按 16px 切成 4×4 方向表，于是玩家身上显示的是图标碎片（同时 2c39948 那版提交的这张表 sha=1f5e0af1…，是坏的那张）。`ninja_sheet.png` 必须是 64×64 的 4×4 忍者行走表（Ninja Adventure CC0），已从 `97e93c6` 恢复，正确 sha256=`ea03e60f906dbab72a5be39bba04a8ad0d23854a9b6af8df48df45abf306bcb6`。**教训**：接入素材后必须实机截图核对"是谁在用这张图"，别只看文件名。
 11. **左右列映射别乱改**：上面那张坏图标表曾让人以为"新表左右列相反"，于是 `hero.gd` 的 `DIR_COL` 被改成 `left:3, right:2`——结果向左走时人是倒着走的。恢复正版表后已改回标准顺序 `{"down":0,"up":1,"left":2,"right":3}`（col2 面朝左、col3 面朝右，已验证）。**换方向表后必须重新核对左右**：把该朝向的行走帧渲染出来看脸朝哪边，不要凭围巾位置猜。
@@ -126,6 +133,8 @@ func _process(_delta) -> bool:  # 必须有返回值，否则 Parse Error
 5. BGM 可换更好的曲子（现在是脚本合成的，生成思路见 git 历史 synth_bgm）。
 6. 首领目前一只形象，可加多种（模板机制已支持，见 chunk_map 的做法）。
 7. 手机触屏虚拟摇杆（Web 版手机不可玩）。
+7b. **第 5/6 种武器 + 给武器补多技能**：补齐后"替换面板 / 技能切换书 / 武器掉落"才真正有意义（见 WEAPON_SYSTEM.md 待办）。
+7c. **精确击杀归属**：现在每击杀给所有武器各 +1，需要 `take_damage` 带来源武器 id。
 8. README/ARCHITECTURE 与代码保持同步——每次功能落地后更新（本项目的习惯）。
 
 ## 8. 其他背景

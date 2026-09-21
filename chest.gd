@@ -1,7 +1,7 @@
 extends Area2D
 
 ## 宝箱（P4）：首领必掉，走过去开启，随机奖励——
-## 一半概率直接升一级随机已持有的武器（含触发进化），一半概率金币。
+##   材料礼包 / 免材料免击杀直接给一把已持有武器 +1 级 / 金币。
 ## 外观代码绘制：棕木箱 + 金边 + 锁扣，带轻微浮动。
 
 
@@ -38,37 +38,38 @@ func _on_body_entered(body):
 		return
 	queue_free()
 	Audio.play("res://sounds/pickup.wav", false, 1.0, 0.35)
-	if randf() < Balance.CHEST_WEAPON_CHANCE:
-		var id := _pick_weapon_id()
-		player.apply_upgrade(id)
-		var card_name: String = _weapon_card_name(id)
-		Juice.damage_number(game, global_position + Vector2(0, -60), "宝箱：%s！" % card_name, {"color": Color(1.0, 0.85, 0.3), "scale": 1.5})
+	var roll := randf()
+	if roll < Balance.CHEST_MATERIAL_CHANCE:
+		_give_materials()
+	elif roll < Balance.CHEST_MATERIAL_CHANCE + Balance.CHEST_FREE_UPGRADE_CHANCE and _give_free_upgrade():
+		pass
 	else:
-		var coins := randi_range(Balance.CHEST_COIN_MIN, Balance.CHEST_COIN_MAX)
-		game.call_deferred("add_run_coins", coins)
-		Juice.damage_number(game, global_position + Vector2(0, -60), "宝箱：金币 +%d" % coins, {"color": Color(1.0, 0.85, 0.3), "scale": 1.5})
+		_give_coins()
 
 
-## 优先升级已持有的武器；都没持有则随机送一门
-func _pick_weapon_id() -> String:
-	var owned: Array = []
-	if player.orbit_blade_count > 0 or player.evolved_weapons.has("orbit_blade"):
-		owned.append("orbit_blade")
-	if player.aura_level > 0 or player.evolved_weapons.has("aura"):
-		owned.append("aura")
-	if player.extra_bullets > 0 or player.evolved_weapons.has("split_shot"):
-		owned.append("split_shot")
-	if owned.is_empty():
-		owned = ["orbit_blade", "aura", "split_shot"]
-	return owned[randi() % owned.size()]
+func _give_materials() -> void:
+	player.add_material("scrap", Balance.CHEST_SCRAP_AMOUNT)
+	player.add_material("crystal", Balance.CHEST_CRYSTAL_AMOUNT)
+	_float("宝箱：%s x%d  %s x%d" % [
+		Weapons.material_name("scrap"), Balance.CHEST_SCRAP_AMOUNT,
+		Weapons.material_name("crystal"), Balance.CHEST_CRYSTAL_AMOUNT,
+	], Color(0.6, 1.0, 0.85))
 
 
-func _weapon_card_name(id: String) -> String:
-	match id:
-		"orbit_blade":
-			return "环形刀刃 +1"
-		"aura":
-			return "灼热光环 +1"
-		"split_shot":
-			return "分裂弹头 +1"
-	return ""
+## 免材料免击杀直接升级；已全满级时返回 false（上层回退成金币）
+func _give_free_upgrade() -> bool:
+	var id: String = player.random_upgradable_weapon()
+	if id == "" or not player.force_upgrade_weapon(id):
+		return false
+	_float("宝箱：%s 升级！" % Weapons.get_def(id).get("name", id), Color(1.0, 0.85, 0.3))
+	return true
+
+
+func _give_coins() -> void:
+	var coins := randi_range(Balance.CHEST_COIN_MIN, Balance.CHEST_COIN_MAX)
+	game.call_deferred("add_run_coins", coins)
+	_float("宝箱：金币 +%d" % coins, Color(1.0, 0.85, 0.3))
+
+
+func _float(msg: String, color: Color) -> void:
+	Juice.damage_number(game, global_position + Vector2(0, -60), msg, {"color": color, "scale": 1.5})

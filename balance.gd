@@ -86,9 +86,8 @@ const CHAIN_FALLOFF := 0.5  # 每跳伤害衰减比例（0.5 = 每跳减半）
 const CHAIN_LINE_LIFE := 0.18  # 电弧残留时间（秒）
 const CHAIN_LINE_JITTER := 9.0  # 电弧抖动幅度（像素）
 
-# 武器进化（P3）：同名武器卡抽满 EVOLVE_LEVEL 级后，再来一张触发进化。
-# 进化后该卡从三选一卡池移除。
-const EVOLVE_LEVEL := 5
+# 武器进化（P3→P6）：**武器升到 weapons.gd 的 max_level 时自动进入进化形态**。
+# （旧版"第 6 张同名卡触发进化"已随武器卡移出卡池而取消）
 # 环形刀刃 → 刃风暴
 const BLADE_EVOLVE_ROT_MULT := 2.2  # 转速倍率
 const BLADE_EVOLVE_RADIUS_BONUS := 60.0
@@ -118,6 +117,18 @@ const MATERIAL_DROP_CHANCE := 0.22   # 铁屑
 const CRYSTAL_DROP_CHANCE := 0.06    # 雷晶
 const SKILL_BOOK_DROP_CHANCE := 0.02 # 技能切换书
 
+# 武器被动（P6 模型 B）：武器 = 被动效果 + 提供技能，**被动等级 = 武器等级**。
+# 手里剑（被动=自动投掷）：每 WEAPON_SHURIKEN_LEVEL_STEP 级多 1 发弹丸、+1 伤害；射速线性提升
+const WEAPON_SHURIKEN_LEVEL_STEP := 2         # 每 2 级：弹丸 +1、伤害 +1
+const WEAPON_SHURIKEN_RATE_PER_LEVEL := 0.10  # 每级射速 +10%
+# 环形刀刃 / 灼热光环 / 链式闪电的被动等级直接传给各自节点，曲线见各自 *_STEP 常量
+
+# 技能「雷神之怒」（P6）：同时向多个目标劈下闪电，每道都额外跳跃、伤害提升
+const SKILL_THUNDER_ORIGINS := 4        # 同时起跳的闪电数量
+const SKILL_THUNDER_EXTRA_JUMPS := 3    # 每道闪电的额外跳跃次数
+const SKILL_THUNDER_DAMAGE_BONUS := 2   # 每跳伤害加成
+const SKY_BOLT_HEIGHT := 900.0          # 天雷从目标上方多高处劈下（视觉用）
+
 # 法力（蓝条，P6 技能系统）：技能消耗蓝，随时间回复。
 const MANA_MAX := 100.0
 const MANA_START := 100.0
@@ -145,10 +156,14 @@ const BOSS_HIT_RADIUS := 38.0  # 首领身体判定圆（世界像素，不跟�
 # 首领专属贴图（AI 生成后放入 assets/mobs/；缺失时回退用坦克贴图染色）
 const BOSS_SPRITES := ["res://assets/mobs/boss_0.png", "res://assets/mobs/boss_1.png"]
 
-# 宝箱（P4）：首领必掉，走过去开启，随机奖励
+# 宝箱（P4）：首领必掉，走过去开启，随机奖励。
+# 权重：材料礼包 → 直接升级 → 其余金币
 const CHEST_COIN_MIN := 15
 const CHEST_COIN_MAX := 25
-const CHEST_WEAPON_CHANCE := 0.5  # 一半概率直接升一级随机已持有武器
+const CHEST_MATERIAL_CHANCE := 0.5     # 材料礼包
+const CHEST_FREE_UPGRADE_CHANCE := 0.2 # 免材料免击杀，直接给一把已持有武器 +1 级
+const CHEST_SCRAP_AMOUNT := 8
+const CHEST_CRYSTAL_AMOUNT := 3
 
 # 击退（P1 打磨）：命中把敌人推开，数值为初速度（px/s），摩擦衰减见 mob.gd
 const KNOCKBACK_BULLET := 220.0

@@ -6,7 +6,7 @@ extends CanvasLayer
 
 func _unhandled_input(event):
 	if event.is_action_pressed("ui_cancel"):  # 内置 Esc，兼容物理键与合成事件
-		if %GameOver.visible or %LevelUpUI.visible:
+		if %GameOver.visible or %LevelUpUI.visible or %InventoryUI.visible:
 			return
 		if visible:
 			resume()
