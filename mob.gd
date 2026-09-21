@@ -165,6 +165,7 @@ func take_damage(amount := 1, knockback := Vector2.ZERO):
 		Juice.hitstop(0.05)
 		drop_xp_gem()
 		drop_coins()
+		drop_weapon()
 		if is_boss:
 			drop_chest()
 		_burst_debris()
@@ -197,6 +198,20 @@ func drop_coins():
 
 
 ## 首领死亡必掉宝箱（P4）
+## 武器掉落（P6）：普通怪小概率，首领必掉。地上生成 weapon_drop，走近按 F 拾取。
+func drop_weapon() -> void:
+	var chance: float = 1.0 if is_boss else Balance.WEAPON_DROP_CHANCE
+	if randf() > chance:
+		return
+	var ids: Array = []
+	for w in Weapons.LIST:
+		ids.append(w["id"])
+	var drop = preload("res://weapon_drop.tscn").instantiate()
+	get_parent().add_child(drop)
+	drop.global_position = global_position + Vector2(randf_range(-16, 16), randf_range(-16, 16))
+	drop.setup(ids[randi() % ids.size()])
+
+
 func drop_chest():
 	var chest = preload("res://chest.tscn").instantiate()
 	get_parent().add_child(chest)

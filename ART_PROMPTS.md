@@ -215,3 +215,88 @@ Pixel art death transition, no text. A harsh red-white impact flash fills the sc
 | 7 | `menu_loop.mp4` | 1920×1080 / 8~15s | 1（视频，先验证） |
 
 **一张一张生成、一张一张命名**，我接入时就不会错位。
+
+---
+
+# 六、P6 武器/技能系统 —— 新增素材（**当前需要**）
+
+> 这一批是"武器 + 技能"系统要用的。全部**洋红底 `#FF00FF`、单个素材、`crisp pixels`**。
+> 风格：**和风 + 科技**（青色霓虹 + 红木/和纸 + 金），和现有升级卡图标统一。
+> 生成后放 `E:\games\`，按下面的文件名命名。
+
+## 通用提示词尾巴（每张都加）
+
+```
+Single centered object on a solid magenta background (#FF00FF). Crisp pixels, pixel art, no anti-aliasing, no blur, no text, no watermark, no border, no shadow on the ground.
+```
+
+---
+
+## 1. 技能图标（64×64，4 张）
+
+> 用途：底部技能栏 1/2/3/4 槽的图标，以及背包里的技能行。
+> 要求：**方形构图、主体占满、暗底上也看得清**（加一圈深色描边）。
+
+### 1.1 `skill_shuriken.png` — 手里剑乱舞
+```
+A pixel art skill icon: a cluster of three glowing shuriken (throwing stars) spinning outward in a burst, bright silver-white metal with cyan neon energy trails, dark outline. Japanese ninja style mixed with technology. Single centered object on a solid magenta background (#FF00FF). Crisp pixels, pixel art, no anti-aliasing, no blur, no text, no watermark, no border.
+```
+
+### 1.2 `skill_orbit_blade.png` — 刃风暴
+```
+A pixel art skill icon: a whirlwind of curved steel blades spinning in a circle, motion streaks, cyan neon glow along the edges, dark outline. Japanese ninja style mixed with technology. Single centered object on a solid magenta background (#FF00FF). Crisp pixels, pixel art, no anti-aliasing, no blur, no text, no watermark, no border.
+```
+
+### 1.3 `skill_aura.png` — 烈日爆发
+```
+A pixel art skill icon: an explosive ring of orange-gold fire radiating outward, with a bright white-hot core, cyan neon runes on the ring, dark outline. Japanese ninja style mixed with technology. Single centered object on a solid magenta background (#FF00FF). Crisp pixels, pixel art, no anti-aliasing, no blur, no text, no watermark, no border.
+```
+
+### 1.4 `skill_chain_lightning.png` — 雷神之怒
+```
+A pixel art skill icon: a jagged bolt of bright cyan-white lightning forking into three branches, with small electric sparks, dark outline. Japanese ninja style mixed with technology. Single centered object on a solid magenta background (#FF00FF). Crisp pixels, pixel art, no anti-aliasing, no blur, no text, no watermark, no border.
+```
+
+---
+
+## 2. 掉落物 / 材料图标（32×32，4 张）
+
+> 用途：地上的掉落物、背包里的材料计数。
+> 要求：小尺寸下辨识度高，**轮廓清晰、颜色区分明显**。
+
+### 2.1 `icon_weapon_drop.png` — 地上掉落的武器
+```
+A pixel art pickup icon: a rolled ninja scroll with a small glowing cyan blade emblem, tied with a red cord, faint cyan glow around it. Japanese ninja style mixed with technology. Single centered object on a solid magenta background (#FF00FF). Crisp pixels, pixel art, 16 colors, dark outline, no anti-aliasing, no blur, no text, no watermark.
+```
+
+### 2.2 `icon_material_scrap.png` — 铁屑（升级材料）
+```
+A pixel art material icon: a small pile of dark steel scrap metal fragments and a bent bolt, grey-blue with a slight cyan glint. Single centered object on a solid magenta background (#FF00FF). Crisp pixels, pixel art, 16 colors, dark outline, no anti-aliasing, no blur, no text, no watermark.
+```
+
+### 2.3 `icon_material_crystal.png` — 雷晶（升级材料）
+```
+A pixel art material icon: a small jagged cyan crystal shard crackling with tiny lightning arcs, bright and glowing. Single centered object on a solid magenta background (#FF00FF). Crisp pixels, pixel art, 16 colors, dark outline, no anti-aliasing, no blur, no text, no watermark.
+```
+
+### 2.4 `icon_skill_book.png` — 技能切换书
+```
+A pixel art item icon: a small closed ninja technique scroll book with a red cover, gold clasp and a cyan glowing seal on the front. Japanese style mixed with technology. Single centered object on a solid magenta background (#FF00FF). Crisp pixels, pixel art, 16 colors, dark outline, no anti-aliasing, no blur, no text, no watermark.
+```
+
+---
+
+## 3. 交付清单（P6 本批）
+
+| # | 文件名 | 尺寸 | 用途 | 状态 |
+|---|---|---|---|---|
+| 1 | `skill_shuriken.png` | 64×64 | 技能·手里剑乱舞 | ⬜ |
+| 2 | `skill_orbit_blade.png` | 64×64 | 技能·刃风暴 | ⬜ |
+| 3 | `skill_aura.png` | 64×64 | 技能·烈日爆发 | ⬜ |
+| 4 | `skill_chain_lightning.png` | 64×64 | 技能·雷神之怒 | ⬜ |
+| 5 | `icon_weapon_drop.png` | 32×32 | 地上掉落的武器 | ⬜ |
+| 6 | `icon_material_scrap.png` | 32×32 | 材料·铁屑 | ⬜ |
+| 7 | `icon_material_crystal.png` | 32×32 | 材料·雷晶 | ⬜ |
+| 8 | `icon_skill_book.png` | 32×32 | 技能切换书 | ⬜ |
+
+**一张一张生成、一张一张命名。** 我接入后会实机截图给你确认。

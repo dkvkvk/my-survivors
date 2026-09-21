@@ -258,6 +258,92 @@ func _on_skill_clicked(i: int) -> void:
 	_refresh()
 
 
+## ---------- 替换面板（武器位满时，从掉落物调用） ----------
+
+var _pending_id := ""
+var _pending_drop: Node = null
+var _replace_root: Control
+
+
+## 弹替换面板：列出当前 4 把武器 + 放弃选项
+func ask_replace(new_id: String, drop_node: Node) -> void:
+	_pending_id = new_id
+	_pending_drop = drop_node
+	_close_replace()
+	_replace_root = Control.new()
+	_replace_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_replace_root.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(_replace_root)
+
+	var dim := ColorRect.new()
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.color = Color(0, 0, 0, 0.6)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_replace_root.add_child(dim)
+
+	var panel := Panel.new()
+	panel.size = Vector2(620, 520)
+	panel.position = Vector2((1920 - 620) / 2.0, (1080 - 520) / 2.0)
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.06, 0.09, 0.12, 0.98)
+	sb.border_color = Color(0.4, 0.85, 0.95, 0.9)
+	sb.set_border_width_all(3)
+	sb.set_corner_radius_all(10)
+	panel.add_theme_stylebox_override("panel", sb)
+	_replace_root.add_child(panel)
+
+	var new_def: Dictionary = Weapons.get_def(new_id)
+	var t := _label(panel, "武器已满，要替换吗？", Vector2(28, 18), 34)
+	t.add_theme_color_override("font_color", Color(1, 0.92, 0.6))
+	_label(panel, "新：%s" % new_def.get("name", new_id), Vector2(28, 70), 26)
+
+	var y := 118.0
+	for i in _player.weapons.size():
+		var w: Dictionary = _player.weapons[i]
+		var def: Dictionary = Weapons.get_def(w["id"])
+		var b := _button(panel, "替换 → %s Lv%d" % [def.get("name", w["id"]), w["level"]], Vector2(28, y), Vector2(400, 52), _on_replace_pick.bind(i))
+		b.add_theme_font_size_override("font_size", 24)
+		y += 62.0
+	var give := _button(panel, "放弃（留在地上）", Vector2(28, y + 10), Vector2(400, 52), _on_replace_cancel)
+	give.add_theme_font_size_override("font_size", 24)
+
+	# 替换面板也暂停游戏
+	get_tree().paused = true
+	visible = true
+
+
+func _close_replace() -> void:
+	if _replace_root != null and is_instance_valid(_replace_root):
+		_replace_root.queue_free()
+	_replace_root = null
+
+
+func _on_replace_pick(index: int) -> void:
+	if _player == null or index >= _player.weapons.size():
+		return
+	var old_id: String = _player.weapons[index]["id"]
+	_player.drop_weapon(old_id)
+	var ok: bool = _player.add_weapon(_pending_id)
+	Audio.play("res://sounds/pickup.wav", false, 1.4, 0.4)
+	if ok and _pending_drop != null and is_instance_valid(_pending_drop):
+		# 把换下来的武器掉在原地，形成循环
+		var back: Node = load("res://weapon_drop.tscn").instantiate()
+		get_node("/root/Game").add_child(back)
+		back.global_position = _pending_drop.global_position + Vector2(70, 0)
+		back.setup(old_id)
+		_pending_drop.queue_free()
+	_close_replace()
+	_pending_drop = null
+	_refresh()
+
+
+func _on_replace_cancel() -> void:
+	_close_replace()
+	if _pending_drop != null and is_instance_valid(_pending_drop) and _pending_drop.has_method("cancel_replace"):
+		_pending_drop.cancel_replace()
+	_pending_drop = null
+
+
 func _on_upgrade() -> void:
 	if _player == null or _selected == "":
 		return

@@ -111,6 +111,9 @@ const SKILL_BLADE_DAMAGE := 8
 const SKILL_AURA_RADIUS := 420.0      # 烈日爆发范围
 const SKILL_AURA_DAMAGE := 12
 
+# 武器掉落（P6）：普通怪小概率掉；首领必掉（见 mob.gd）
+const WEAPON_DROP_CHANCE := 0.04
+
 # 法力（蓝条，P6 技能系统）：技能消耗蓝，随时间回复。
 const MANA_MAX := 100.0
 const MANA_START := 100.0
