@@ -37,7 +37,7 @@ func _process(delta):
 	%BossProgressLabel.text = "妖王 %d/%d" % [boss_kill_count, Balance.VICTORY_BOSS_KILLS]
 	%XPBar.max_value = player.xp_to_next
 	%XPBar.value = player.xp
-	%LevelLabel.text = "Lv %d" % player.level
+	%LevelLabel.text = "修为 %d" % player.level
 	# 无限草地：地面按贴图尺寸的整数倍跟随玩家，花纹无缝衔接
 	$Ground.global_position = player.global_position.snapped(Vector2(1024, 1024))
 	# 环境光尘：发射区跟随玩家，粒子本体留在世界坐标，走动时视野内始终有浮尘
