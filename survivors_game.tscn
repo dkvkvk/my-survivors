@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://dlqas1jal36sy" path="res://assets/ground/tech_floor.png" id="6_ground"]
 [ext_resource type="Script" uid="uid://ddvickkrmyjq0" path="res://pause_ui.gd" id="7_pause"]
 [ext_resource type="Texture2D" path="res://assets/ui/gameover_bg.png" id="8_gobg"]
+[ext_resource type="Texture2D" path="res://assets/ui/victory_bg.png" id="10_vbg"]
 [ext_resource type="Script" path="res://victory_ui.gd" id="9_victory"]
 
 [sub_resource type="Curve2D" id="Curve2D_cp6e5"]
@@ -109,6 +110,8 @@ offset_right = 450.0
 offset_bottom = 310.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 36
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -156,7 +159,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("8_gobg")
+texture = ExtResource("10_vbg")
 
 [node name="Tint" type="ColorRect" parent="VictoryUI"]
 anchors_preset = 15
@@ -200,6 +203,8 @@ offset_bottom = -120.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.75, 0.95, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 42
 text = "★"
 horizontal_alignment = 1
@@ -218,6 +223,8 @@ offset_right = 450.0
 offset_bottom = 310.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 36
 horizontal_alignment = 1
 vertical_alignment = 1
