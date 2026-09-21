@@ -11,6 +11,7 @@ var _t := 0.0
 var _hint: Label
 var _sprite: Sprite2D
 var _glow: Sprite2D
+var _beam: Sprite2D
 var _player: Node
 
 @onready var game: Node = get_node("/root/Game")
@@ -32,8 +33,16 @@ func _ready():
 	if ResourceLoader.exists(icon_path):
 		_sprite = Sprite2D.new()
 		_sprite.texture = load(icon_path)
-		_sprite.scale = Vector2.ONE * 1.4
+		_sprite.scale = Vector2.ONE * 1.8
 		add_child(_sprite)
+		VFX.drop_halo(_sprite)
+		# 光柱：武器稀有且要按 F 捡，远处也要一眼看到
+		_beam = Sprite2D.new()
+		_beam.texture = load("res://assets/fx/glow_64.png")
+		_beam.scale = Vector2(0.85, 4.6)
+		_beam.modulate = Color(0.4, 1.0, 1.0, 0.22)
+		_beam.z_index = -1
+		add_child(_beam)
 	else:
 		var poly := Polygon2D.new()
 		poly.polygon = PackedVector2Array([
@@ -64,6 +73,7 @@ func _ready():
 	add_child(_hint)
 
 	_player = get_node_or_null("/root/Game/Player")
+	VFX.drop_spawn_for(self, VFX.C_CYAN)
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 
@@ -81,6 +91,8 @@ func _process(delta: float) -> void:
 	position.y += sin(_t * 2.2) * 6.0 * delta
 	if _glow.texture != null:
 		_glow.modulate.a = 0.20 + 0.18 * (0.5 + 0.5 * sin(_t * 3.5))
+	if _beam != null:
+		_beam.modulate.a = 0.16 + 0.14 * (0.5 + 0.5 * sin(_t * 2.2))
 	# 走近时按 F 拾取
 	if _hint.visible and Input.is_action_just_pressed("pickup"):
 		_try_pickup()

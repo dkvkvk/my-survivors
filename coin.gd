@@ -14,8 +14,10 @@ var magnet_speed := 0.0
 func _ready():
 	var sprite := Sprite2D.new()
 	sprite.texture = load("res://assets/ui/icon_coin.png")
-	sprite.scale = Vector2.ONE * 0.9
+	sprite.scale = Vector2.ONE * 1.8   # 原 0.9 只有 9x10 像素，地面上基本看不见
 	add_child(sprite)
+	VFX.drop_halo(sprite)
+	VFX.drop_spawn_for(self, VFX.C_GOLD)
 	Juice.pop(self, 1.3)
 
 

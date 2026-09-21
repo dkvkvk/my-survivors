@@ -22,8 +22,17 @@ func _ready():
 	add_child(shape)
 	var sprite := Sprite2D.new()
 	sprite.texture = load("res://assets/ui/icon_chest.png")
-	sprite.scale = Vector2.ONE * 1.5
+	sprite.scale = Vector2.ONE * 2.8   # 原 1.5 只有 18x15 像素，比掉落物还小
 	add_child(sprite)
+	VFX.drop_halo(sprite)
+	# 光柱：首领必掉的重要奖励，远处也要能看到
+	var beam := Sprite2D.new()
+	beam.texture = load("res://assets/fx/glow_64.png")
+	beam.scale = Vector2(1.0, 5.0)
+	beam.modulate = Color(1.0, 0.85, 0.4, 0.22)
+	beam.z_index = -1
+	add_child(beam)
+	VFX.drop_spawn_for(self, VFX.C_GOLD)
 	Juice.pop(self, 1.4)
 
 

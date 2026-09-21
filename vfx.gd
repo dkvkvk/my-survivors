@@ -185,6 +185,41 @@ func explosion(pos: Vector2, radius: float, color: Color = C_ORANGE) -> void:
 	burst(pos, 5, Color(0.75, 0.78, 0.82, 0.55), 110.0, 0.75, "smoke", 2.6, -40.0, 36)
 
 
+## 掉落物**出现**时的爆点：让新掉落物在地面上"跳"出来（配合 Juice.pop 的缩放弹跳）
+func drop_spawn(pos: Vector2, color: Color = C_GREEN) -> void:
+	var s := _Flash.new()
+	s.setup(_star, 0.75, 0.3, color, randf() * TAU)
+	s.global_position = pos
+	_add(s, 44, true)
+	shockwave(pos, 36.0, color, 0.3, 3.0, false, 43, true)
+	burst(pos, 5, color, 130.0, 0.42, "spark", 1.6, -60.0)
+
+
+## 掉落物专用：_ready() 里坐标还没被调用方赋值（都是 add_child 之后才设 global_position），
+## 所以延迟一帧再取坐标放爆点，否则爆点会飞到世界原点
+func drop_spawn_for(node: Node2D, color: Color = C_GREEN) -> void:
+	if node == null:
+		return
+	_do_drop_spawn.call_deferred(node, color)
+
+
+func _do_drop_spawn(node: Node2D, color: Color) -> void:
+	if node != null and is_instance_valid(node):
+		drop_spawn(node.global_position, color)
+
+
+## 给掉落物图标垫一层暗色底衬：地面花纹很花，没这层小图标会"融进地里"看不见
+func drop_halo(icon: Sprite2D, scale_mult := 1.5, alpha := 0.8) -> void:
+	if icon == null or icon.texture == null:
+		return
+	var h := Sprite2D.new()
+	h.texture = icon.texture
+	h.scale = Vector2.ONE * scale_mult
+	h.modulate = Color(0.02, 0.03, 0.05, alpha)
+	h.show_behind_parent = true
+	icon.add_child(h)
+
+
 ## 拾取小反馈（经验宝石 / 金币 / 材料 / 武器）
 func pickup_pop(pos: Vector2, color: Color = C_GREEN) -> void:
 	var s := _Flash.new()

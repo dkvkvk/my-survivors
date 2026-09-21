@@ -4,8 +4,8 @@ extends Area2D
 ## 外观用 icon_gem.png，外面套一层柔光 + 呼吸缩放——深色石板地面上原本太小太暗，
 ## 玩家反馈"掉落的经验不显眼"，所以这里放大并加了发光。
 
-const VISUAL_SCALE := 2.2      # 宝石本体放大倍数（原图 9x12，太小）
-const GLOW_SCALE := 3.8        # 柔光层放大倍数
+const VISUAL_SCALE := 3.0      # 宝石本体放大倍数（原图 9x12，太小；地面花纹又花，再放大一档）
+const GLOW_SCALE := 4.8        # 柔光层放大倍数
 const PULSE_SPEED := 4.0       # 呼吸速度
 const PULSE_DEPTH := 0.12      # 呼吸幅度
 
@@ -29,6 +29,8 @@ func _ready():
 	_glow.modulate = Color(0.45, 1.0, 1.0, 0.35)
 	_glow.show_behind_parent = true
 	add_child(_glow)
+	VFX.drop_halo(_visual)
+	VFX.drop_spawn_for(self, VFX.C_CYAN)
 
 
 func _process(delta):

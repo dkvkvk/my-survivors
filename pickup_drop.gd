@@ -28,7 +28,8 @@ func _ready():
 	_sprite = Sprite2D.new()
 	if icon != "" and ResourceLoader.exists(icon):
 		_sprite.texture = load(icon)
-		_sprite.scale = Vector2.ONE * 1.1
+		_sprite.scale = Vector2.ONE * 1.5
+		VFX.drop_halo(_sprite)
 	else:
 		_sprite.texture = null
 	add_child(_sprite)
@@ -43,6 +44,7 @@ func _ready():
 		add_child(poly)
 
 	_player = get_node_or_null("/root/Game/Player")
+	VFX.drop_spawn_for(self, VFX.C_GOLD if kind == "book" else VFX.C_GREEN)
 	Juice.pop(self, 1.3)
 	body_entered.connect(_on_body_entered)
 
