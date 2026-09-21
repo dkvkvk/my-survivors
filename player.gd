@@ -290,12 +290,22 @@ func cast_skill(slot: int) -> void:
 func _run_skill_effect(id: String) -> void:
 	match id:
 		"shuriken_burst":
+			VFX.shockwave(global_position, 210.0, VFX.C_CYAN, 0.3, 6.0)
+			VFX.screen_flash(VFX.C_CYAN, 0.10, 0.14)
 			_shuriken_burst()
 		"blade_storm":
+			VFX.spin_slash(global_position, Balance.SKILL_BLADE_RADIUS, VFX.C_CYAN, 6, 0.5)
+			VFX.shockwave(global_position, Balance.SKILL_BLADE_RADIUS, VFX.C_WHITE, 0.32, 7.0)
 			_hit_all_in_radius(Balance.SKILL_BLADE_RADIUS, Balance.SKILL_BLADE_DAMAGE)
 		"sunburst":
+			VFX.shockwave(global_position, Balance.SKILL_AURA_RADIUS, VFX.C_GOLD, 0.45, 10.0, true)
+			VFX.shockwave(global_position, Balance.SKILL_AURA_RADIUS * 0.6, VFX.C_ORANGE, 0.3, 6.0)
+			VFX.burst(global_position, 16, VFX.C_GOLD, 420.0, 0.7, "star", 2.0, 120.0)
+			VFX.screen_flash(VFX.C_GOLD, 0.26, 0.26)
 			_hit_all_in_radius(Balance.SKILL_AURA_RADIUS, Balance.SKILL_AURA_DAMAGE)
 		"thunder":
+			VFX.shockwave(global_position, Balance.SKILL_AURA_RADIUS, VFX.C_BLUE, 0.4, 8.0)
+			VFX.screen_flash(VFX.C_BLUE, 0.30, 0.22)
 			%ChainLightning.cast_ultimate()
 
 
@@ -309,6 +319,7 @@ func _shuriken_burst() -> void:
 		b.global_position = global_position
 		b.rotation = TAU * i / float(n)
 		get_parent().add_child(b)
+		VFX.trail(b, VFX.C_CYAN, 9.0, 10, 0.16)
 
 
 ## 对半径内所有敌人造成一次伤害（近身爆发类技能共用）
@@ -319,6 +330,9 @@ func _hit_all_in_radius(radius: float, damage: int) -> void:
 			continue
 		if global_position.distance_to(mob.global_position) <= radius:
 			mob.call_deferred("take_damage", damage)
+			# 命中爆点最多画 10 个，避免一次打 40 只怪时刷屏
+			if hit < 10:
+				VFX.impact(mob.global_position, mob.global_position - global_position, VFX.C_GOLD)
 			hit += 1
 	if hit > 0:
 		Juice.shake($Camera2D, 0.25)
@@ -372,6 +386,7 @@ func add_xp(amount: int) -> void:
 		xp_to_next = Balance.xp_for_level(level)
 	health = minf(health + Balance.LEVEL_UP_HEAL, max_health)
 	%HealthBar.value = health
+	VFX.levelup_burst(global_position)
 	leveled_up.emit()
 
 

@@ -30,6 +30,10 @@ P6 武器/技能系统（进行中，权威设计见 `WEAPON_SYSTEM.md`）：
   - 被动由 `player._apply_weapon_passive()` 分发；加武器要同步改 `_clear_weapon_passive()` / `_evolve_weapon()`
 - 背包（按 B）、武器掉落（按 F 拾取 + 替换面板）、材料掉落、武器升级（材料 + 击杀数）
 - 升级三选一只出属性卡；宝箱奖励改走武器/材料体系
+- **特效系统（`vfx.gd` + `assets/fx/`）**：技能起手冲击环 / 旋转刀光 / 金色爆发 / 天雷落柱、命中爆点、
+  击杀爆炸、拾取星芒、升级光柱、枪口闪光、子弹与飞刀拖尾、首领蓄力预警圈、技能栏冷却完成闪光
+  - ⚠️ 特效节点一律 `PROCESS_MODE_ALWAYS`：升级/结算会暂停游戏，跟着暂停会把短命特效冻在画面上
+  - ⚠️ 全屏闪全局**复用同一块遮罩**，多次调用只刷新颜色（否则连续放技能会叠成一片死白）
 
 ## 2. 架构速览
 
@@ -52,6 +56,7 @@ P6 武器/技能系统（进行中，权威设计见 `WEAPON_SYSTEM.md`）：
 | `victory_ui.gd` | 胜利结算（P5）：活满 `SURVIVE_WIN_TIME` 或击破 `VICTORY_BOSS_KILLS` 只首领触发 |
 | `fader.gd` | autoload：黑场过渡 + 暗角后期（切场景统一走 `Fader.fade_to_scene()`） |
 | `audio.gd` | autoload：12 池音效 + `play_music()` 循环 BGM |
+| `vfx.gd` | ★ autoload `VFX`：**全局特效库**（冲击环/斩击弧/爆散粒子/拖尾/全屏闪/天雷落点），纯代码绘制 + `assets/fx/` 像素贴图 |
 | `theme.tres` + `fonts/` | 全局像素主题；字号取 12 的倍数 |
 | `assets/` | hero/mobs/ui/tiles/ground —— AI 生成 + 自制，全部可商用（见 NOTICE.md） |
 
@@ -59,6 +64,8 @@ P6 武器/技能系统（进行中，权威设计见 `WEAPON_SYSTEM.md`）：
 1. 伤害单一入口 `mob.take_damage(amount, knockback)`——新武器零改动接入
 2. 碰撞：障碍/墙只挡玩家（物理层 1），**怪物和子弹穿行**（防卡怪、防自动瞄准浪费）；玩家碰撞是"脚部小碰撞"36×22
 3. 所有可调数值进 `balance.gd`，别散落硬编码
+4. **加特效走 `VFX` 原语**（`VFX.impact` / `shockwave` / `slash_arc` / `burst` / `screen_flash` / `trail`），
+   别在各处手搓特效节点——统一入口才能统一风格、统一限流（`FX_LIMIT`）
 
 ## 3. 验证流程（重要，别跳过）
 

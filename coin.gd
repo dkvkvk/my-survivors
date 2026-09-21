@@ -30,6 +30,7 @@ func _physics_process(delta):
 
 func _on_body_entered(body):
 	if body == player:
+		VFX.pickup_pop(global_position, VFX.C_GOLD)
 		queue_free()
 		Audio.play("res://sounds/pickup.wav", false, randf_range(1.5, 1.8), 0.22)
 		game.call_deferred("add_run_coins", value)

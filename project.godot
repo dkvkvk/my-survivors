@@ -90,6 +90,7 @@ config/icon="res://icon.png"
 Audio="*res://audio.gd"
 Juice="*res://addons/saltmire_juice/juice.gd"
 Fader="*res://fader.gd"
+VFX="*res://vfx.gd"
 
 [display]
 

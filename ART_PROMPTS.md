@@ -38,10 +38,56 @@
 
 ---
 
-## 二、待生成（当前没有必须做的）
+## 二、待生成：特效贴图（可选升级，做了会更华丽）
 
-> 目前 P6 武器/技能系统的素材已齐。下面这些是**可选优化**，想做时告诉我，
-> 我会把对应的逐张提示词补到本节。
+> 现在特效是 `vfx.gd` 纯代码绘制 + `assets/fx/` 程序化生成的像素贴图（能跑、风格统一）。
+> 下面这批是**替换升级**：生图后我接进去，画质会明显提升。**一条提示词只出一张图。**
+> 生成后放 `E:\games\` 并按表里的文件名命名，我负责抠底/像素化/接入。
+
+### 1. `fx_ring_128.png` —— 冲击环 / 法阵环（替换 `vfx.gd` 里代码画的圆环）
+`@
+pixel art game VFX, a single glowing circular shockwave ring seen from the front,
+cyan neon (#3FF0FF) energy with faint Japanese paper-charm (ofuda) notches at 4 cardinal points,
+thin bright white inner edge, hollow center, perfectly centered and symmetric,
+solid magenta background (#FF00FF), crisp pixels, pixel art, no anti-aliasing, no blur, no text, no watermark, no border
+`@
+
+### 2. `fx_slash_128.png` —— 斩击弧（替换代码画的新月刀光）
+`@
+pixel art game VFX, a single crescent-shaped sword slash arc, cyan-white blade light with a bright white cutting edge,
+one clean swoosh crescent shape pointing to the right, tail fading out, no character, no weapon,
+solid magenta background (#FF00FF), crisp pixels, pixel art, no anti-aliasing, no blur, no text, no watermark, no border
+`@
+
+### 3. `fx_burst_96.png` —— 爆闪星芒（升级 / 宝箱开启）
+`@
+pixel art game VFX, a single four-pointed golden starburst flash, warm gold (#FFD24A) with white hot core,
+sharp thin spikes radiating out, small paper-charm fragments flying outward, centered and symmetric,
+solid magenta background (#FF00FF), crisp pixels, pixel art, no anti-aliasing, no blur, no text, no watermark, no border
+`@
+
+### 4. `fx_thunder_96.png` —— 落雷光柱（雷神之怒落点）
+`@
+pixel art game VFX, a single vertical lightning bolt striking down, cyan-blue electric glow with white hot core,
+jagged zigzag shape, wider at the top and narrower at the bottom, vertical composition,
+solid magenta background (#FF00FF), crisp pixels, pixel art, no anti-aliasing, no blur, no text, no watermark, no border
+`@
+
+### 5. `fx_smoke_64.png` —— 和纸烟团（击杀 / 爆炸烟）
+`@
+pixel art game VFX, a single soft round smoke puff, light warm gray, wispy edges, semi transparent look,
+one single puff only, centered,
+solid magenta background (#FF00FF), crisp pixels, pixel art, no anti-aliasing, no blur, no text, no watermark, no border
+`@
+
+### 6. `fx_sakura_32.png` —— 樱花花瓣（主菜单 / 场景粒子）
+`@
+pixel art, a single small pink cherry blossom petal seen from the side, soft pink with a slightly darker tip,
+one single petal only, centered,
+solid magenta background (#FF00FF), crisp pixels, pixel art, no anti-aliasing, no blur, no text, no watermark, no border
+`@
+
+### 其余可选优化
 
 | 项 | 说明 | 优先级 |
 |---|---|---|

@@ -101,6 +101,7 @@ func _try_pickup() -> void:
 	# 已经拥有 → 转成升级材料
 	if _player.has_weapon(weapon_id):
 		var def: Dictionary = Weapons.get_def(weapon_id)
+		VFX.pickup_pop(global_position, VFX.C_CYAN)
 		_player.add_material(def.get("upgrade_material", "scrap"), 2)
 		Audio.play("res://sounds/pickup.wav", false, 1.5, 0.35)
 		_float_text("+2 " + Weapons.material_name(def.get("upgrade_material", "scrap")))
@@ -108,6 +109,7 @@ func _try_pickup() -> void:
 		return
 	# 有空格 → 直接拿走
 	if _player.add_weapon(weapon_id):
+		VFX.levelup_burst(global_position, VFX.C_CYAN)
 		Audio.play("res://sounds/pickup.wav", false, 1.4, 0.4)
 		_float_text("获得 " + Weapons.get_def(weapon_id).get("name", weapon_id))
 		queue_free()

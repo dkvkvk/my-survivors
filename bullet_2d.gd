@@ -14,6 +14,7 @@ func _ready():
 	_star = Sprite2D.new()
 	_star.texture = load("res://assets/ui/icon_shuriken.png")
 	add_child(_star)
+	VFX.trail(self, VFX.C_CYAN, 10.0, 10, 0.15)
 
 
 func _physics_process(delta):

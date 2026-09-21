@@ -130,6 +130,9 @@ func _boss_ai(delta):
 				_charge_state = 1
 				_charge_timer = Balance.BOSS_CHARGE_PHASE["windup"]
 				Juice.flash(%Slime, Color(3.5, 2.5, 0.8), 0.55)
+				# 地面预警圈：收缩的赤红环，提示"要冲了"
+				VFX.warning_ring(global_position, Balance.BOSS_CHARGE_SPEED_MULT * 62.0, VFX.C_RED,
+					Balance.BOSS_CHARGE_PHASE["windup"] + 0.2)
 		1:
 			velocity = Vector2.ZERO
 			if _charge_timer <= 0.0:
@@ -149,6 +152,8 @@ func take_damage(amount := 1, knockback := Vector2.ZERO):
 	Audio.play("res://sounds/hit.wav", false, randf_range(0.9, 1.1), 0.3)
 	Juice.flash(%Slime)
 	Juice.damage_number(get_parent(), global_position + Vector2(0, -48), amount)
+	# 命中爆点：火花朝击退反方向溅；重击（>=5 伤害）更夸张
+	VFX.impact(global_position, knockback, _fx_color(), amount >= 5)
 	health -= amount
 	if is_boss:
 		knockback *= Balance.BOSS_KNOCKBACK_RESIST
@@ -170,6 +175,10 @@ func take_damage(amount := 1, knockback := Vector2.ZERO):
 		if is_boss:
 			drop_chest()
 		_burst_debris()
+		VFX.explosion(global_position, 260.0 if is_boss else 90.0, _fx_color())
+		if is_boss:
+			VFX.screen_flash(VFX.C_RED, 0.34, 0.4)
+			Juice.shake(player.get_node("Camera2D"), 0.9)
 		var smoke_scene = preload("res://smoke_explosion/smoke_explosion.tscn")
 		var smoke = smoke_scene.instantiate()
 		get_parent().add_child(smoke)
@@ -240,6 +249,21 @@ func drop_chest():
 	var chest = preload("res://chest.tscn").instantiate()
 	get_parent().add_child(chest)
 	chest.global_position = global_position
+
+
+## 该怪的特效配色：首领赤红，其余按变体区分（史莱姆青绿 / 蝙蝠紫 / 重甲钢蓝 / 野兽猩红）
+func _fx_color() -> Color:
+	if is_boss:
+		return Color(1.0, 0.42, 0.35)
+	match variant:
+		"runner":
+			return Color(0.78, 0.6, 1.0)
+		"tank":
+			return Color(0.75, 0.85, 1.0)
+		"elite":
+			return Color(1.0, 0.5, 0.45)
+		_:
+			return Color(0.5, 1.0, 0.85)
 
 
 ## 死亡时爆一圈同色碎片（一次性粒子，纯代码创建，播完自毁）

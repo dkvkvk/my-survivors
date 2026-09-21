@@ -10,6 +10,7 @@ const SLOT_GAP := 14.0
 const KEY_LABELS := ["1", "2", "3", "4"]
 
 var _slots: Array = []          # 每项：{"panel":Panel, "icon":TextureRect, "cd":ColorRect, "key":Label, "name":Label}
+var _was_cooling := {}          # 技能 id -> 上一帧是否在冷却（用来捕捉"冷却刚结束"）
 var _player: Node
 
 
@@ -100,6 +101,11 @@ func _process(_delta: float) -> void:
 		var cd_total: float = float(def.get("cd", 1.0))
 		var ratio: float = clampf(left / cd_total, 0.0, 1.0)
 		s["cd"].size.y = (SLOT_SIZE - 4) * ratio
+		# 冷却刚结束：技能栏闪一下，提示"可以再放了"
+		if _was_cooling.get(id, false) and left <= 0.0:
+			Juice.pop(s["panel"], 1.22, 0.22)
+			VFX.shockwave(_player.global_position, 90.0, VFX.C_CYAN, 0.25, 4.0)
+		_was_cooling[id] = left > 0.0
 		# 蓝不够时整体变暗
 		var enough: bool = _player.mana >= float(def.get("mana", 0.0))
 		s["panel"].modulate = Color(1, 1, 1, 1.0) if enough else Color(0.55, 0.6, 0.75, 0.85)

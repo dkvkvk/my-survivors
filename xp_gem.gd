@@ -52,6 +52,7 @@ func _physics_process(delta):
 
 func _on_body_entered(body):
 	if body == player:
+		VFX.pickup_pop(global_position, VFX.C_CYAN)
 		queue_free()
 		Audio.play("res://sounds/pickup.wav", false, randf_range(1.1, 1.35), 0.2)
 		# 加经验可能触发升级暂停，延迟到物理刷新外执行

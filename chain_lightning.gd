@@ -47,6 +47,7 @@ func cast_ultimate() -> void:
 		var id: int = int(t["id"])
 		# 天雷：从目标正上方劈下来，落点爆闪
 		_add_arc(pos + Vector2(randf_range(-70.0, 70.0), -Balance.SKY_BOLT_HEIGHT), pos)
+		VFX.thunder_strike(pos, VFX.C_BLUE)
 		if id != 0:
 			var mob = instance_from_id(id)
 			if mob != null and is_instance_valid(mob):
@@ -99,6 +100,7 @@ func _strike(origin: Vector2, extra_jumps := 0, damage_bonus := 0, exclude := {}
 		hit_ids[target.get_instance_id()] = true
 		var to: Vector2 = target.global_position
 		_add_arc(from, to)
+		VFX.impact(to, to - from, VFX.C_BLUE)
 		target.call_deferred("take_damage", int(round(damage)))
 		from = to
 		damage *= falloff

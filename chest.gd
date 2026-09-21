@@ -38,6 +38,8 @@ func _on_body_entered(body):
 		return
 	queue_free()
 	Audio.play("res://sounds/pickup.wav", false, 1.0, 0.35)
+	VFX.explosion(global_position, 150.0, VFX.C_GOLD)
+	VFX.screen_flash(VFX.C_GOLD, 0.20, 0.3)
 	var roll := randf()
 	if roll < Balance.CHEST_MATERIAL_CHANCE:
 		_give_materials()

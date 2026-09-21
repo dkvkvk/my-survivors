@@ -56,6 +56,7 @@ func shoot():
 	if evolved:
 		rate *= Balance.GUN_EVOLVE_FIRE_RATE_MULT
 	$Timer.wait_time = Balance.GUN_FIRE_INTERVAL / rate
+	VFX.muzzle_flash(%ShootingPoint.global_position, rotation, VFX.C_CYAN)
 	# 多发围绕瞄准方向左右对称扇形展开
 	var total: int = bullet_count_now()
 	for i in total:

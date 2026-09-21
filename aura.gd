@@ -98,5 +98,8 @@ func _on_timer_timeout():
 			body.call_deferred("take_damage", damage)
 			hit_any = true
 	if hit_any:
-		# 命中时轻微脉冲，给"灼烧正在生效"的反馈
+		# 命中时轻微脉冲 + 一圈灼热环，给"灼烧正在生效"的反馈
 		Juice.pop(self, 1.08, 0.3)
+		var col: Color = VFX.C_GOLD if evolved else VFX.C_ORANGE
+		VFX.shockwave(global_position, radius, col, 0.3, 4.0)
+		VFX.burst(global_position, 6, col, 90.0, 0.5, "spark", 1.4, -160.0)

@@ -34,6 +34,7 @@
 | `weapon_drop.gd` + `pickup_drop.gd` | 掉落物：武器（按 F 拾取）、材料（铁屑/雷晶）、技能切换书 |
 | `audio.gd` | 音效池 autoload（12 播放器，防重叠、变调随机）+ `play_music()` 循环 BGM |
 | `fader.gd` | 全局过渡 autoload：场景切换黑场淡入淡出 + 全屏暗角后期 |
+| `vfx.gd` + `assets/fx/` | ★ autoload `VFX`：全局特效库（见下方"特效系统"），纯代码绘制 + 程序化生成的像素贴图 |
 | `theme.tres` + `fonts/` | ★ 全局主题：Fusion Pixel 中文像素字体（SIL OFL 1.1）与按钮/进度条统一样式 |
 | `vignette.gdshader` | 暗角屏幕后期（透明黑径向叠加，兼容性渲染器友好） |
 | `addons/saltmire_juice/` | 打击感插件 autoload：震屏、闪白、hit-stop、伤害数字 |
@@ -94,6 +95,29 @@ Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
 8. **玩家受伤**：`%HurtBox` 内重叠敌人的接触伤害倍率求和，按 9.0/秒·倍率持续掉血（贴身很痛，站桩必死）；血量归零发 `health_depleted`，低于 30% 触发全屏红光脉冲。
 9. **游戏结束**：`game.gd` 播放音效 → `GameOver.show_results(击杀, 存活, 等级, 金币)` 展示战绩并经 `SaveGame.submit_run()` 把金币存入余额 → 暂停。破纪录时显示"★ 新纪录！ ★"。
 10. **首领（P4）**：倒计时到点 `game.gd:_spawn_boss()` → `mob.setup_boss()` 升格（三段 AI：追击→蓄力闪白→直线冲锋，血量随击杀数递增，击退抗性，头顶血条）→ 击杀必掉宝箱 → 走过去开启随机奖励。
+
+## 三·五、特效系统（`vfx.gd`，autoload `VFX`）
+
+**一个入口、两种实现**：所有特效都从 `VFX` 的原语里出来，内部是「纯代码绘制」+「程序化生成的像素贴图」，
+不依赖任何第三方素材（配色统一为 青霓虹 / 金 / 赤红）。
+
+| 原语 | 用途 | 实现 |
+|---|---|---|
+| `impact(pos, dir, color, strong)` | 命中爆点 | 星芒贴图 + 小环 + 4~7 颗火花 |
+| `explosion(pos, r, color)` | 击杀 / 宝箱 | 填充冲击环 + 碎片 + 烟 |
+| `shockwave(pos, r, color, dur, w, fill)` | 技能起手 / 灼烧脉冲 | `draw_arc` 双层圆环，先快后慢扩散 |
+| `warning_ring(pos, r, color, dur)` | 首领蓄力预警 | 由外向内收缩的红环 + 淡填充 |
+| `slash_arc` / `spin_slash` | 斩击 / 刃风暴 | 外弧+内弧围成的"刀刃"多边形 |
+| `burst(pos, n, color, ...)` | 通用爆散 | `CPUParticles2D` + `spark/star/smoke` 贴图 |
+| `trail(node, color, w)` | 子弹 / 飞刀拖尾 | `Line2D` 记录目标轨迹 + 渐变淡出 |
+| `muzzle_flash` / `pickup_pop` / `levelup_burst` | 开火 / 拾取 / 升级 | 光晕贴图 + 环 + 光柱 |
+| `thunder_strike(pos)` | 天雷落点 | 落点环 + 火花 + 短促全屏闪 |
+| `screen_flash(color, a, dur)` | 全屏闪 | **全局复用同一块 ColorRect**，只刷新颜色 |
+
+两个必须记住的坑：
+1. **特效节点一律 `PROCESS_MODE_ALWAYS`**——升级/结算会 `get_tree().paused = true`，
+   特效若跟着暂停，会以半透明状态冻在画面上（升级光柱卡在升级卡后面、闪白卡住不淡）。
+2. **同屏特效有上限**（`VFX.FX_LIMIT = 260`）：一次打 40 只怪时自动只出最便宜的效果，防止掉帧。
 
 ## 四、代码约定（二开前先了解）
 

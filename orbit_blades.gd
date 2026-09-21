@@ -61,6 +61,14 @@ func _add_blade() -> void:
 	])
 	knife.color = Color(0.92, 0.95, 1.0)
 	blade.add_child(knife)
+	# 刀刃底下垫一层青色光晕，让旋转轨迹在暗场景里也看得清
+	var glow := Sprite2D.new()
+	glow.texture = load("res://assets/fx/glow_64.png")
+	glow.scale = Vector2(1.5, 0.9)
+	glow.modulate = Color(0.4, 0.95, 1.0, 0.55)
+	glow.show_behind_parent = true
+	blade.add_child(glow)
+	blade.add_to_group("fx")
 	blade.body_entered.connect(_on_blade_body_entered)
 	add_child(blade)
 	_blades.append(blade)
@@ -93,5 +101,6 @@ func _on_blade_body_entered(body):
 	# 从玩家中心向外击退
 	var kb: Vector2 = (body.global_position - global_position).normalized() * Balance.KNOCKBACK_BLADE
 	body.call_deferred("take_damage", damage, kb)
+	VFX.impact(body.global_position, kb, VFX.C_CYAN)
 	# 命中事件喂给链式闪电（没这张卡时是空操作）
 	get_parent().call_deferred("on_weapon_hit", body.global_position, body.get_instance_id())

@@ -64,6 +64,18 @@
 | `assets/ui/victory_bg.png` | 1920×1080 | `survivors_game.tscn` | 胜利结算背景（鸟居之上·晨曦） |
 | `assets/ui/cover.png` | 1920×1080 | **未引用** | 宣传封面备用 |
 
+### 特效（P6，`assets/fx/`，本项目脚本程序化生成 = 自制 CC0）
+
+| 文件 | 尺寸 | 引用处 | 说明 |
+|---|---|---|---|
+| `assets/fx/glow_64.png` | 64×64 | `vfx.gd` | 径向光晕（枪口闪 / 升级光柱 / 通用发光），7 级色阶量化 → 像素硬边 |
+| `assets/fx/star_64.png` | 64×64 | `vfx.gd` | 四角星芒（命中爆点 / 拾取 / 升级爆散） |
+| `assets/fx/spark_32.png` | 32×32 | `vfx.gd` | 火花小菱形（CPUParticles2D 粒子贴图） |
+| `assets/fx/smoke_64.png` | 64×64 | `vfx.gd` | 噪声软烟团（击杀 / 爆炸烟） |
+
+> 生成脚本思路：16×16（spark 为 8×8）手算 alpha 场 → 色阶量化 → NEAREST 放大 4 倍。
+> 想换风格时改 `vfx.gd` 里的路径即可，或按 `ART_PROMPTS.md` 的提示词生图替换。
+
 ### 其他
 
 | 文件 | 尺寸 | 说明 |

@@ -82,6 +82,7 @@ func _physics_process(delta: float) -> void:
 func _on_body_entered(body: Node) -> void:
 	if body != _player:
 		return
+	VFX.pickup_pop(global_position, VFX.C_GOLD if kind == "book" else VFX.C_GREEN)
 	queue_free()
 	if kind == "book":
 		_player.skill_books += 1

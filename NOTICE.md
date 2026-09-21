@@ -27,6 +27,8 @@
 | `backgrounds/grass-ground-soft.png` 草地地面 | [Seamless Grass II](https://opengameart.org/content/seamless-grass-texture-ii) | CC0 |
 | `fonts/` 中文像素字体 + OFL.txt | [Fusion Pixel（缝合像素）by TakWolf](https://github.com/TakWolf/fusion-pixel-font) | SIL OFL 1.1 |
 | 代码绘制的视觉（经验宝石/飞刀/光环/手里剑/伤害数字） | 本项目 | 随项目 MIT |
+| `assets/fx/` 特效贴图（光晕/星芒/火花/烟雾） | 本项目用 Python 脚本程序化生成（见 ASSETS.md 说明） | CC0（自制） |
+| `vfx.gd` 特效库（冲击环/斩击弧/拖尾/全屏闪/天雷等） | 本项目纯代码绘制 | 随项目 MIT |
 
 Kenney 包随附的许可原文见 `assets/Kenney-License.txt`。
 
