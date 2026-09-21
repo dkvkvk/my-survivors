@@ -10,6 +10,7 @@ var evolved := false  # 烈日领域形态
 var radius := 0.0
 var damage := 0
 
+var _pulse := 0.0  # 呼吸相位（见 _process / _draw）
 var _circle: CircleShape2D
 var _shape: CollisionShape2D
 var _timer: Timer
@@ -78,15 +79,29 @@ func evolve() -> void:
 	Juice.pop(self, 1.5, 0.4)
 
 
+## 呼吸脉动：光环平时几乎静止，暗场景里容易被忽略，加一层明暗变化提高存在感
+func _process(delta: float) -> void:
+	if level <= 0 or radius <= 0.0:
+		return
+	_pulse += delta
+	queue_redraw()
+
+
 func _draw():
-	# 半透明圆盘加一圈描边，纯代码绘制；进化后转为炽黄
-	var fill := Color(1.0, 0.55, 0.25, 0.1)
-	var edge := Color(1.0, 0.55, 0.25, 0.45)
+	# 半透明圆盘 + 双层描边，纯代码绘制；进化后转为炽黄。
+	# 填充透明度/边缘亮度都跟着呼吸走，让玩家一眼看出"这个圈在生效"。
+	if level <= 0 or radius <= 0.0:
+		return
+	var k: float = 0.5 + 0.5 * sin(_pulse * 2.4)
+	var fill := Color(1.0, 0.55, 0.25, 0.10 + 0.06 * k)
+	var edge := Color(1.0, 0.62, 0.3, 0.55 + 0.30 * k)
 	if evolved:
-		fill = Color(1.0, 0.85, 0.3, 0.13)
-		edge = Color(1.0, 0.9, 0.45, 0.6)
+		fill = Color(1.0, 0.85, 0.3, 0.13 + 0.07 * k)
+		edge = Color(1.0, 0.9, 0.45, 0.65 + 0.30 * k)
 	draw_circle(Vector2.ZERO, radius, fill)
-	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 64, edge, 4.0)
+	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 64, edge, 5.0)
+	draw_arc(Vector2.ZERO, radius * 0.86, 0.0, TAU, 48,
+		Color(edge.r, edge.g, edge.b, edge.a * 0.45), 2.0)
 
 
 func _on_timer_timeout():

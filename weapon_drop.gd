@@ -23,7 +23,7 @@ func _ready():
 	monitorable = false
 	var shape := CollisionShape2D.new()
 	var circle := CircleShape2D.new()
-	circle.radius = 70.0        # 走近提示范围
+	circle.radius = 110.0       # 走近提示范围（原来 70 太小，掉落变多后容易漏捡）
 	shape.shape = circle
 	add_child(shape)
 
