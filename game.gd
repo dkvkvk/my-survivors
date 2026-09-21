@@ -122,6 +122,8 @@ func _on_player_health_depleted():
 		return
 	_run_ended = true
 	Audio.play("res://sounds/game-over.wav", false, 1.0, 0.5)
+	# 结算时收起 HUD：击杀/时间/血条/蓝条/技能栏不该压在结算界面上面
+	$HUD.hide()
 	%GameOver.show_results(kill_count, run_time, player.level, run_coins)
 	get_tree().paused = true
 
@@ -131,5 +133,6 @@ func _win(reason: String) -> void:
 	_run_ended = true
 	Audio.play("res://sounds/pickup.wav", false, 1.0, 0.6)
 	Audio.play("res://sounds/game-over.wav", false, 1.3, 0.3)
+	$HUD.hide()
 	%VictoryUI.show_victory(kill_count, run_time, player.level, run_coins, reason)
 	get_tree().paused = true

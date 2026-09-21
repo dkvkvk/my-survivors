@@ -27,7 +27,7 @@ var _mana_label: Label
 
 
 func _ready() -> void:
-	layer = 20
+	layer = 25   # HUD(10) 之上、弹窗(30) 之下
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
 	_build()
