@@ -103,6 +103,19 @@ const GUN_EVOLVE_FIRE_RATE_MULT := 1.2
 const CHAIN_EVOLVE_EXTRA_JUMPS := 2  # 跳跃次数 +2
 const CHAIN_EVOLVE_FALLOFF := 0.3  # 衰减放缓（0.3 = 每跳只减三成）
 
+# 主动技能数值（P6）
+const SKILL_SHURIKEN_COUNT := 10      # 手里剑乱舞放射数量
+const SKILL_SHURIKEN_DAMAGE_BONUS := 1
+const SKILL_BLADE_RADIUS := 260.0     # 刃风暴横扫半径
+const SKILL_BLADE_DAMAGE := 8
+const SKILL_AURA_RADIUS := 420.0      # 烈日爆发范围
+const SKILL_AURA_DAMAGE := 12
+
+# 法力（蓝条，P6 技能系统）：技能消耗蓝，随时间回复。
+const MANA_MAX := 100.0
+const MANA_START := 100.0
+const MANA_REGEN := 6.0  # 每秒回复
+
 # 胜利条件（P5）：活满 SURVIVE_WIN_TIME 秒，或击杀 VICTORY_BOSS_KILLS 只首领，任一达成即胜利。
 const SURVIVE_WIN_TIME := 900.0  # 15 分钟
 const VICTORY_BOSS_KILLS := 3

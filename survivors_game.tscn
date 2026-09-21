@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://dlqas1jal36sy" path="res://assets/ground/tech_floor.png" id="6_ground"]
 [ext_resource type="Script" uid="uid://ddvickkrmyjq0" path="res://pause_ui.gd" id="7_pause"]
 [ext_resource type="Texture2D" path="res://assets/ui/gameover_bg.png" id="8_gobg"]
+[ext_resource type="Script" path="res://skill_bar.gd" id="11_skillbar"]
 [ext_resource type="Texture2D" path="res://assets/ui/victory_bg.png" id="10_vbg"]
 [ext_resource type="Script" path="res://victory_ui.gd" id="9_victory"]
 
@@ -15,6 +16,13 @@ _data = {
 "points": PackedVector2Array(0, 0, 0, 0, -1055, -697, 0, 0, 0, 0, 1057, -697, 0, 0, 0, 0, 1057, 671, 0, 0, 0, 0, -1055, 663, 0, 0, 0, 0, -1055, -689)
 }
 point_count = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mana"]
+bg_color = Color(0.25, 0.55, 0.95, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [node name="Game" type="Node2D" unique_id=327747119]
 y_sort_enabled = true
@@ -350,6 +358,31 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(1, 0.12, 0.08, 0)
+
+[node name="ManaBar" type="ProgressBar" parent="HUD"]
+unique_name_in_owner = true
+offset_left = 24.0
+offset_top = 336.0
+offset_right = 424.0
+offset_bottom = 360.0
+show_percentage = false
+
+theme_override_styles/fill = SubResource("StyleBoxFlat_mana")
+[node name="SkillBar" type="Control" parent="HUD"]
+unique_name_in_owner = true
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -130.0
+offset_right = 200.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("11_skillbar")
 
 [node name="Dim" type="ColorRect" parent="LevelUpUI" unique_id=880031710]
 anchors_preset = 15

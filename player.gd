@@ -26,10 +26,115 @@ var evolved_weapons := {}
 # 受伤音效节流：被怪围着时每 0.6 秒最多响一次，不然太吵
 var hurt_sound_cooldown := 0.0
 
+# 法力与主动技能（P6）：4 个技能槽对应键位 1/2/3/4，施放消耗蓝条
+var mana: float = Balance.MANA_START
+var mana_max: float = Balance.MANA_MAX
+var skill_slots := ["", "", "", ""]   # 空字符串 = 该槽没装技能
+var _skill_cd := {}                    # 技能 id -> 剩余冷却（秒）
+
 
 func _ready():
 	_apply_shop_upgrades()
 	%HealthBar.max_value = max_health
+	%ManaBar.max_value = mana_max
+	%ManaBar.value = mana
+	# 开局自带手枪（算一把武器），因此自带它的技能
+	learn_skill("shuriken_burst")
+
+
+## 法力回复 + 技能冷却 + 键位 1/2/3/4 施放
+func _process(delta: float) -> void:
+	mana = minf(mana + Balance.MANA_REGEN * delta, mana_max)
+	%ManaBar.value = mana
+	for id in _skill_cd.keys():
+		_skill_cd[id] = maxf(0.0, _skill_cd[id] - delta)
+	for i in skill_slots.size():
+		if Input.is_action_just_pressed("skill_%d" % (i + 1)):
+			cast_skill(i)
+
+
+## 学会一个技能：放进第一个空槽；没有空槽则返回 false（由上层弹替换界面）
+func learn_skill(id: String) -> bool:
+	if not Skills.has(id):
+		return false
+	for i in skill_slots.size():
+		if skill_slots[i] == id:
+			return true   # 已经有了
+	for i in skill_slots.size():
+		if skill_slots[i] == "":
+			skill_slots[i] = id
+			return true
+	return false
+
+
+## 把技能装到指定槽（id 传空字符串 = 卸下）
+func equip_skill(slot: int, id: String) -> void:
+	if slot < 0 or slot >= skill_slots.size():
+		return
+	skill_slots[slot] = id
+
+
+## 该技能当前剩余冷却（供 HUD 画遮罩）
+func get_skill_cooldown(id: String) -> float:
+	return float(_skill_cd.get(id, 0.0))
+
+
+## 施放某个槽位的技能：校验有技能、蓝够、不在冷却
+func cast_skill(slot: int) -> void:
+	if slot < 0 or slot >= skill_slots.size():
+		return
+	var id: String = skill_slots[slot]
+	if id == "":
+		return
+	var def: Dictionary = Skills.get_def(id)
+	if def.is_empty():
+		return
+	var cost: float = float(def.get("mana", 0.0))
+	if mana < cost or get_skill_cooldown(id) > 0.0:
+		return
+	mana -= cost
+	_skill_cd[id] = float(def.get("cd", 1.0))
+	Audio.play("res://sounds/pickup.wav", false, 1.2, 0.35)
+	Juice.pop(self, 1.25, 0.3)
+	_run_skill_effect(id)
+
+
+## 技能效果：加新技能 = 这里加一个分支
+func _run_skill_effect(id: String) -> void:
+	match id:
+		"shuriken_burst":
+			_shuriken_burst()
+		"blade_storm":
+			_hit_all_in_radius(Balance.SKILL_BLADE_RADIUS, Balance.SKILL_BLADE_DAMAGE)
+		"sunburst":
+			_hit_all_in_radius(Balance.SKILL_AURA_RADIUS, Balance.SKILL_AURA_DAMAGE)
+		"thunder":
+			%ChainLightning.on_hit(global_position)
+
+
+## 手里剑乱舞：以自身为中心放射一圈子弹
+func _shuriken_burst() -> void:
+	const BULLET = preload("res://bullet_2d.tscn")
+	var n: int = Balance.SKILL_SHURIKEN_COUNT
+	for i in n:
+		var b = BULLET.instantiate()
+		b.damage = bullet_damage + Balance.SKILL_SHURIKEN_DAMAGE_BONUS
+		b.global_position = global_position
+		b.rotation = TAU * i / float(n)
+		get_parent().add_child(b)
+
+
+## 对半径内所有敌人造成一次伤害（近身爆发类技能共用）
+func _hit_all_in_radius(radius: float, damage: int) -> void:
+	var hit := 0
+	for mob in get_tree().get_nodes_in_group("mobs"):
+		if not is_instance_valid(mob) or not (mob is Node2D):
+			continue
+		if global_position.distance_to(mob.global_position) <= radius:
+			mob.call_deferred("take_damage", damage)
+			hit += 1
+	if hit > 0:
+		Juice.shake($Camera2D, 0.25)
 
 
 ## 应用商店局外强化（P2）：改的是初始面板，局内卡牌照常叠加
