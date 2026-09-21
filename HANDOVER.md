@@ -57,7 +57,7 @@ P6 武器/技能系统（进行中，权威设计见 `WEAPON_SYSTEM.md`）：
 | `victory_ui.gd` | 胜利结算（P5）：活满 `SURVIVE_WIN_TIME` 或击破 `VICTORY_BOSS_KILLS` 只首领触发 |
 | `fader.gd` | autoload：黑场过渡 + 暗角后期（切场景统一走 `Fader.fade_to_scene()`） |
 | `audio.gd` | autoload：12 池音效 + `play_music()` 循环 BGM |
-| `vfx.gd` | ★ autoload `VFX`：**全局特效库**（冲击环/斩击弧/爆散粒子/拖尾/全屏闪/天雷落点），纯代码绘制 + `assets/fx/` 像素贴图 |
+| `vfx.gd` | ★ autoload `VFX`：**全局特效库**（冲击环/斩击弧/爆散粒子/拖尾/全屏闪/天雷落点/掉落物底衬与爆点），纯代码绘制 + `assets/fx/` 像素贴图 |
 | `theme.tres` + `fonts/` | 全局像素主题；字号取 12 的倍数 |
 | `assets/` | hero/mobs/ui/tiles/ground —— AI 生成 + 自制，全部可商用（见 NOTICE.md） |
 
@@ -65,9 +65,11 @@ P6 武器/技能系统（进行中，权威设计见 `WEAPON_SYSTEM.md`）：
 1. 伤害单一入口 `mob.take_damage(amount, knockback)`——新武器零改动接入
 2. 碰撞层：**1=玩家 · 2=敌人 · 3=障碍**；障碍挡玩家，也挡**不穿墙的怪**（`balance.gd` 变体表的 `phasing`，目前只有会飞的机械蝙蝠为 true）；**子弹一律穿行**（防自动瞄准浪费）；首领天生穿墙；地面怪被墙卡住约 2.4 秒会短暂穿墙脱困（`mob.gd` 卡墙自愈）。玩家碰撞是"脚部小碰撞"36×22
 3. 所有可调数值进 `balance.gd`，别散落硬编码
-4. **加特效走 `VFX` 原语**（`VFX.impact` / `shockwave` / `slash_arc` / `burst` / `screen_flash` / `trail`），
+4. **掉落物可读性**：图标一律垫 `VFX.drop_halo()` 暗色底衬、出现时调 `VFX.drop_spawn_for(self, 颜色)` 出爆点；
+   重要掉落（武器/宝箱）再加一根光柱。⚠️ `drop_spawn_for` 是**延迟一帧**取坐标的——掉落物 `_ready()` 时坐标还没被调用方赋值
+5. **加特效走 `VFX` 原语**（`VFX.impact` / `shockwave` / `slash_arc` / `burst` / `screen_flash` / `trail`），
    别在各处手搓特效节点——统一入口才能统一风格、统一限流（`FX_LIMIT`）
-5. **加一种怪/一个能力** = `balance.gd` 的 `MOB_VARIANTS` 加一行（含 `ability` / `phasing`）+ `ABILITIES` 加一条数值
+6. **加一种怪/一个能力** = `balance.gd` 的 `MOB_VARIANTS` 加一行（含 `ability` / `phasing`）+ `ABILITIES` 加一条数值
    + `mob.gd` 的 `_apply_ability()` / `_update_ability()` 加一个分支。数值一律进 `ABILITIES`，别写死在 mob.gd
 
 ## 3. 验证流程（重要，别跳过）

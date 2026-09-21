@@ -28,7 +28,7 @@
 
 | 文件 | 尺寸 | 引用处 | 说明 |
 |---|---|---|---|
-| `assets/tiles/tileset.png` | 384×64 | `chunk_map.gd` | **横排 6 格 @64px**，索引即字符：0墙# 1货箱C 2服务器S 3天线A 4水晶c 5灌木b |
+| `assets/tiles/tileset.png` | 384×64 | `chunk_map.gd` | **横排 6 格 @64px**，索引即字符：0墙# 1货箱C 2服务器S 3天线A 4水晶c 5灌木b<br>⚠️ **挡路的 0-3 已加接触阴影+2px 暗描边+顶部青色边缘光并提亮 1.3x；可穿的 4-5 保持平贴无阴影** —— 这是"一眼区分地面/遮挡"的视觉语言，改图时别把阴影去掉 |
 | `assets/ground/tech_floor.png` | 256×256 | `survivors_game.tscn` | **无缝平铺**地面，游戏里按 1024px 网格吸附 |
 
 ### UI — 升级卡图标（8 张，`upgrades.gd` 引用）
