@@ -128,6 +128,9 @@ Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
   **加一把武器** = weapons.gd 加一行 + `player` 的三个分发分支（`_apply_weapon_passive` / `_clear_weapon_passive` / `_evolve_weapon`）；
   **加一个技能** = skills.gd 加一行 + `player._run_skill_effect()` 加一个分支。
 - **暂停覆盖层模式**：所有弹出界面（升级/暂停/结算）都是 `CanvasLayer + process_mode=3(ALWAYS) + get_tree().paused`，遮罩用全屏半透明 ColorRect。
+- **★ UI 层级（CanvasLayer.layer）**：世界 0 · HUD **10** · 全屏闪 **12** · 背包 **25** · 弹窗（升级/暂停/失败/胜利）**30** · Fader **128**。
+  **新增弹窗一律 layer = 30**，否则会被 HUD 压住——踩过：结算界面上还挂着击杀/存活/血条/蓝条，技能栏还压在"回到主菜单"按钮上；
+  连 HUD 里的低血量红色脉冲都会盖在结算背景上把它染红。结算时另外 `$HUD.hide()` 收干净。
 - **伤害单一入口**：一切武器最终调 `mob.take_damage(n)`，新武器零改动接入。
 - **纯代码绘制**：经验宝石菱形、飞刀、光环均不依赖美术素材（新增内容避开上游 CC-BY-NC-SA 素材的商用限制）。
 - **存档**：`SaveGame` 纯静态类读写 `user://records.json`（Web 导出走 IndexedDB，同样可用）。
