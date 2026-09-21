@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-## 全局过渡与屏幕效果（U7 美化）：autoload 常驻，跨场景存活。
+## 全局过渡与屏幕效果（U7 美化）：autoload 常驻，跨场景守夜。
 ## - 暗角滤镜：全屏轻量后期，聚焦画面中心
 ## - 黑场过渡：fade_to_scene() 先淡出再切场景再淡入，遮住场景加载跳变
 ## 两个 ColorRect 均 mouse_filter = IGNORE，不挡任何点击。

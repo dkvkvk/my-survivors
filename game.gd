@@ -2,10 +2,10 @@ extends Node2D
 
 var kill_count := 0
 var run_time := 0.0
-var run_coins := 0  # 本局拾取的金币，死亡时结算入存档余额
+var run_coins := 0  # 本局拾取的灵石，死亡时结算入存档余额
 var current_wave: Dictionary = Balance.WAVES[0]
-var boss_kill_count := 0  # 击杀首领数，决定下一只的血量
-var weapon_drops := 0     # 已掉出的武器数（开局保底用，见 weapon_pity_ready）
+var boss_kill_count := 0  # 斩妖妖王数，决定下一只的血量
+var weapon_drops := 0     # 已掉出的法宝数（开局保底用，见 weapon_pity_ready）
 var _boss_timer := 0.0
 var _run_ended := false  # 已结算（胜利或失败），防止重复触发
 
@@ -21,20 +21,20 @@ func _ready():
 	player.leveled_up.connect(_on_player_leveled_up)
 	_chunk_map = preload("res://chunk_map.gd").new()
 	add_child(_chunk_map)
-	_boss_timer = Balance.BOSS_FIRST_DELAY  # 首领倒计时（P4）
-	# 开局选武器（P6）：弹 4 张卡并暂停游戏，选完才正式开打
+	_boss_timer = Balance.BOSS_FIRST_DELAY  # 妖王倒计时（P4）
+	# 开局选法宝（P6）：弹 4 张卡并暂停游戏，选完才正式开打
 	%StartSelectUI.call_deferred("open", player)
 
 
 func _process(delta):
 	run_time += delta
-	# 存活时间 + 距胜利倒计时（P5）
+	# 守夜时间 + 距胜利倒计时（P5）
 	var left: float = maxf(0.0, Balance.SURVIVE_WIN_TIME - run_time)
-	%TimeLabel.text = "存活 %d:%02d　｜　胜利 %d:%02d" % [
+	%TimeLabel.text = "守夜 %d:%02d　｜　黎明 %d:%02d" % [
 		int(run_time) / 60, int(run_time) % 60,
 		int(left) / 60, int(left) % 60,
 	]
-	%BossProgressLabel.text = "首领 %d/%d" % [boss_kill_count, Balance.VICTORY_BOSS_KILLS]
+	%BossProgressLabel.text = "妖王 %d/%d" % [boss_kill_count, Balance.VICTORY_BOSS_KILLS]
 	%XPBar.max_value = player.xp_to_next
 	%XPBar.value = player.xp
 	%LevelLabel.text = "Lv %d" % player.level
@@ -49,12 +49,12 @@ func _process(delta):
 		%LowHpWarning.color.a = urgency * (0.14 + 0.12 * absf(sin(Time.get_ticks_msec() / (160.0 - 60.0 * urgency))))
 	else:
 		%LowHpWarning.color.a = 0.0
-	# 首领倒计时（P4）：到点且上一只已被击杀才刷新
+	# 妖王倒计时（P4）：到点且上一只已被斩妖才刷新
 	if _boss_timer > 0.0:
 		_boss_timer -= delta
 		if _boss_timer <= 0.0:
 			_spawn_boss()
-	# 胜利条件（P5）：活满时长 或 打满首领数，任一达成即胜利
+	# 胜利条件（P5）：活满时长 或 打满妖王数，任一达成即胜利
 	if not _run_ended:
 		if run_time >= Balance.SURVIVE_WIN_TIME:
 			_win("time")
@@ -62,7 +62,7 @@ func _process(delta):
 			_win("boss")
 
 
-## 开局保底判定：前 WEAPON_PITY_TIME 秒内，每攒够 WEAPON_PITY_KILLS 次击杀还没掉够武器就返回 true
+## 开局保底判定：前 WEAPON_PITY_TIME 秒内，每攒够 WEAPON_PITY_KILLS 次斩妖还没掉够法宝就返回 true
 func weapon_pity_ready() -> bool:
 	if run_time > Balance.WEAPON_PITY_TIME:
 		return false
@@ -82,25 +82,25 @@ func spawn_mob():
 
 func _on_timer_timeout():
 	spawn_mob()
-	# 每次刷怪后按存活时间刷新波次（难度与怪物组合）
+	# 每次刷怪后按守夜时间刷新更次（难度与怪物组合）
 	current_wave = Balance.current_wave(run_time)
 	$Timer.wait_time = current_wave["spawn"]
 
 
 func _on_mob_died():
 	kill_count += 1
-	%KillLabel.text = "击杀 %d" % kill_count
-	# 武器升级条件之一：击杀数累积（P6）
+	%KillLabel.text = "斩妖 %d" % kill_count
+	# 法宝升级条件之一：斩妖数累积（P6）
 	player.add_kill_credit()
 
 
-## 金币拾取入口（coin.gd 延迟调用）
+## 灵石拾取入口（coin.gd 延迟调用）
 func add_run_coins(amount: int) -> void:
 	run_coins += amount
-	%CoinLabel.text = "金币 %d" % run_coins
+	%CoinLabel.text = "灵石 %d" % run_coins
 
 
-## 刷新一只首领（P4）：血量随击杀数递增，三段冲锋 AI，死后掉宝箱
+## 刷新一只妖王（P4）：血量随斩妖数递增，三段冲锋 AI，死后掉宝箱
 func _spawn_boss() -> void:
 	%PathFollow2D.progress_ratio = randf()
 	var boss = preload("res://mob.tscn").instantiate()
@@ -134,13 +134,13 @@ func _on_player_health_depleted():
 		return
 	_run_ended = true
 	Audio.play("res://sounds/game-over.wav", false, 1.0, 0.5)
-	# 结算时收起 HUD：击杀/时间/血条/蓝条/技能栏不该压在结算界面上面
+	# 结算时收起 HUD：斩妖/时间/血条/蓝条/技能栏不该压在结算界面上面
 	$HUD.hide()
 	%GameOver.show_results(kill_count, run_time, player.level, run_coins)
 	get_tree().paused = true
 
 
-## 胜利结算（P5）：reason = "time"（活满）或 "boss"（打满首领数）
+## 胜利结算（P5）：reason = "time"（活满）或 "boss"（打满妖王数）
 func _win(reason: String) -> void:
 	_run_ended = true
 	Audio.play("res://sounds/pickup.wav", false, 1.0, 0.6)

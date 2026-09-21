@@ -1,8 +1,8 @@
 extends CanvasLayer
 
-## 开局选武器（P6）：进战斗时弹出 4 张卡并暂停游戏，选完才正式开打。
-## 手里剑是**固定基础武器**（没有它就没有自动攻击，开局会没法玩），
-## 所以选手里剑 = 起手直接给到 Balance.START_WEAPON_LEVEL；选其它 = 追加装备（武器位与技能槽各 +1）。
+## 开局选法宝（P6）：进战斗时弹出 4 张卡并暂停游戏，选完才正式开打。
+## 本命飞剑是**固定基础法宝**（没有它就没有自动攻击，开局会没法玩），
+## 所以选本命飞剑 = 起手直接给到 Balance.START_WEAPON_LEVEL；选其它 = 追加装备（法宝位与技能槽各 +1）。
 ## 纯代码构建界面，和 inventory_ui / skill_bar 一致。
 
 const PANEL_W := 1580.0
@@ -64,14 +64,14 @@ func _build() -> void:
 	_root.add_child(panel)
 
 	var title := Label.new()
-	title.text = "选 一 把 起 手 武 器"
+	title.text = "择 一 件 起 手 法 宝"
 	title.position = Vector2(44, 22)
 	title.add_theme_font_size_override("font_size", 46)
 	title.add_theme_color_override("font_color", Color(1, 0.92, 0.6))
 	panel.add_child(title)
 
 	var sub := Label.new()
-	sub.text = "手里剑是固定基础武器（保证有自动攻击）；选它则起手直接 Lv%d，选其它则追加装备" % Balance.START_WEAPON_LEVEL
+	sub.text = "本命飞剑是固定本命法宝（神念御剑，自动杀敌）；选它则起手直达 %d 阶，选其它则随身佩戴" % Balance.START_WEAPON_LEVEL
 	sub.position = Vector2(46, 96)
 	sub.add_theme_font_size_override("font_size", 24)
 	sub.add_theme_color_override("font_color", Color(0.62, 0.78, 0.88))
@@ -121,9 +121,9 @@ func _card(p: Control, def: Dictionary, pos: Vector2) -> void:
 	_text(btn, str(def.get("desc", "")), Vector2(22, 244), Vector2(CARD_W - 44.0, 96), 26, Color(0.8, 0.92, 1.0))
 	var extra := ""
 	if id == "shuriken":
-		extra = "已自带 → 起手直接 Lv%d（弹丸 +1、伤害 +1）" % Balance.START_WEAPON_LEVEL
+		extra = "已自带 → 起手直达 %d 阶" % Balance.START_WEAPON_LEVEL
 	else:
-		extra = "追加装备：武器位 +1、技能槽 +1"
+		extra = "随身佩戴：法宝位 +1、神通槽 +1"
 	_text(btn, extra, Vector2(22, 348), Vector2(CARD_W - 44.0, 92), 24, Color(0.55, 1.0, 0.85))
 
 

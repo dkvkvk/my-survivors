@@ -7,40 +7,40 @@ class_name Skills
 ## 设计（与用户确认）：
 ## - 技能槽最多 4 个，键位 1/2/3/4
 ## - 施放消耗蓝条（Balance.MANA_*）
-## - 武器掉落获得，每把武器自带技能；武器可升级
+## - 法宝掉落获得，每把法宝自带技能；法宝可升级
 ## - 两个技能可融合成融合技能（见 FUSIONS，后续实现）
 
 const LIST := [
 	{
 		"id": "shuriken_burst",
-		"name": "手里剑乱舞",
+		"name": "万剑归宗",
 		"icon": "res://assets/ui/skill_shuriken.png",
 		"mana": 20.0, "cd": 6.0,
-		"desc": "向四周爆发一圈手里剑（伤害吃手里剑武器等级）",
+		"desc": "剑分化影，向周身激射一圈剑气（伤害吃本命剑品阶）",
 		"from": "gun",
 	},
 	{
 		"id": "blade_storm",
-		"name": "刃风暴",
+		"name": "剑气纵横",
 		"icon": "res://assets/ui/skill_orbit_blade.png",
 		"mana": 25.0, "cd": 8.0,
-		"desc": "刀刃急速扩张，横扫周围",
+		"desc": "剑环暴涨，横扫四野",
 		"from": "orbit_blade",
 	},
 	{
 		"id": "sunburst",
-		"name": "烈日爆发",
+		"name": "大日焚天",
 		"icon": "res://assets/ui/skill_aura.png",
 		"mana": 30.0, "cd": 10.0,
-		"desc": "光环瞬间扩大并灼烧全场",
+		"desc": "真火骤涨，如小日炸开",
 		"from": "aura",
 	},
 	{
 		"id": "thunder",
-		"name": "雷神之怒",
+		"name": "九天神雷",
 		"icon": "res://assets/ui/skill_chain_lightning.png",
 		"mana": 35.0, "cd": 12.0,
-		"desc": "向四周劈下多道闪电，连击全场",
+		"desc": "举手画符，九天之雷当空劈落",
 		"from": "chain_lightning",
 	},
 ]
@@ -62,6 +62,6 @@ static func has(id: String) -> bool:
 ## 融合技能表（P6 后续实现）：两个技能同时装备时可融合。
 ## result 指向 LIST 里的某个技能 id，或后续单独扩展。
 const FUSIONS := [
-	{"requires": ["blade_storm", "sunburst"], "result": "inferno_ring", "name": "炼狱轮环"},
-	{"requires": ["shuriken_burst", "thunder"], "result": "storm_volley", "name": "雷暴连矢"},
+	{"requires": ["blade_storm", "sunburst"], "result": "inferno_ring", "name": "焚天剑轮"},
+	{"requires": ["shuriken_burst", "thunder"], "result": "storm_volley", "name": "惊雷剑引"},
 ]

@@ -1,7 +1,7 @@
 extends Area2D
 
-## 宝箱（P4）：首领必掉，走过去开启，随机奖励——
-##   材料礼包 / 免材料免击杀直接给一把已持有武器 +1 级 / 金币。
+## 宝箱（P4）：妖王必掉，走过去开启，随机奖励——
+##   材料礼包 / 免材料免斩妖直接给一把已持有法宝 +1 级 / 灵石。
 ## 外观代码绘制：棕木箱 + 金边 + 锁扣，带轻微浮动。
 
 
@@ -25,7 +25,7 @@ func _ready():
 	sprite.scale = Vector2.ONE * 2.8   # 原 1.5 只有 18x15 像素，比掉落物还小
 	add_child(sprite)
 	VFX.drop_halo(sprite)
-	# 光柱：首领必掉的重要奖励，远处也要能看到
+	# 光柱：妖王必掉的重要奖励，远处也要能看到
 	var beam := Sprite2D.new()
 	beam.texture = load("res://assets/fx/glow_64.png")
 	beam.scale = Vector2(1.0, 5.0)
@@ -61,25 +61,25 @@ func _on_body_entered(body):
 func _give_materials() -> void:
 	player.add_material("scrap", Balance.CHEST_SCRAP_AMOUNT)
 	player.add_material("crystal", Balance.CHEST_CRYSTAL_AMOUNT)
-	_float("宝箱：%s x%d  %s x%d" % [
+	_float("藏宝匣：%s x%d  %s x%d" % [
 		Weapons.material_name("scrap"), Balance.CHEST_SCRAP_AMOUNT,
 		Weapons.material_name("crystal"), Balance.CHEST_CRYSTAL_AMOUNT,
 	], Color(0.6, 1.0, 0.85))
 
 
-## 免材料免击杀直接升级；已全满级时返回 false（上层回退成金币）
+## 免材料免斩妖直接升级；已全满级时返回 false（上层回退成灵石）
 func _give_free_upgrade() -> bool:
 	var id: String = player.random_upgradable_weapon()
 	if id == "" or not player.force_upgrade_weapon(id):
 		return false
-	_float("宝箱：%s 升级！" % Weapons.get_def(id).get("name", id), Color(1.0, 0.85, 0.3))
+	_float("藏宝匣：%s 升阶！" % Weapons.get_def(id).get("name", id), Color(1.0, 0.85, 0.3))
 	return true
 
 
 func _give_coins() -> void:
 	var coins := randi_range(Balance.CHEST_COIN_MIN, Balance.CHEST_COIN_MAX)
 	game.call_deferred("add_run_coins", coins)
-	_float("宝箱：金币 +%d" % coins, Color(1.0, 0.85, 0.3))
+	_float("藏宝匣：灵石 +%d" % coins, Color(1.0, 0.85, 0.3))
 
 
 func _float(msg: String, color: Color) -> void:

@@ -29,7 +29,7 @@ func _ready():
 	_setup_sakura()
 
 	var records := SaveGame.load_records()
-	%RecordsLabel.text = "最高纪录　存活 %d:%02d　击杀 %d　Lv %d\n金币 %d（忍具商店可花）" % [
+	%RecordsLabel.text = "最高纪录　守夜 %d:%02d　斩妖 %d　修为 %d\n灵石 %d（坊市万宝楼可花）" % [
 		int(records["best_time"]) / 60,
 		int(records["best_time"]) % 60,
 		records["best_kills"],

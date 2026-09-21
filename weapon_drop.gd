@@ -1,7 +1,7 @@
 extends Area2D
 
-## 武器掉落物（P6）：怪死后按概率掉出，走近显示提示，**按 F 拾取**。
-## 武器位已满时弹替换面板（可选替换或放弃）；不相关的武器留在原地。
+## 法宝掉落物（P6）：怪死后按概率掉出，走近显示提示，**按 F 拾取**。
+## 法宝位已满时弹替换面板（可选替换或放弃）；不相关的法宝留在原地。
 ## 外观：图标缺失时用代码画的菱形 + 呼吸光晕（不依赖美术）。
 
 signal picked_up(weapon_id: String)
@@ -36,7 +36,7 @@ func _ready():
 		_sprite.scale = Vector2.ONE * 1.8
 		add_child(_sprite)
 		VFX.drop_halo(_sprite)
-		# 光柱：武器稀有且要按 F 捡，远处也要一眼看到
+		# 光柱：法宝稀有且要按 F 捡，远处也要一眼看到
 		_beam = Sprite2D.new()
 		_beam.texture = load("res://assets/fx/glow_64.png")
 		_beam.scale = Vector2(0.85, 4.6)
@@ -124,7 +124,7 @@ func _try_pickup() -> void:
 	if _player.add_weapon(weapon_id):
 		VFX.levelup_burst(global_position, VFX.C_CYAN)
 		Audio.play("res://sounds/pickup.wav", false, 1.4, 0.4)
-		_float_text("获得 " + Weapons.get_def(weapon_id).get("name", weapon_id))
+		_float_text("得法宝 · " + Weapons.get_def(weapon_id).get("name", weapon_id))
 		queue_free()
 		return
 	# 位子满了 → 弹替换面板
@@ -133,7 +133,7 @@ func _try_pickup() -> void:
 		_hint.hide()
 		ui.ask_replace(weapon_id, self)
 	else:
-		_float_text("武器已满")
+		_float_text("法宝已满")
 
 
 func _float_text(msg: String) -> void:

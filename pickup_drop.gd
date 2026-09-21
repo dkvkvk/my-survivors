@@ -1,7 +1,7 @@
 extends Area2D
 
-## 材料 / 切换书掉落物（P6）：复用金币的磁吸拾取手感。
-## kind = "material"（带 material_id）或 "book"（技能切换书）。
+## 材料 / 切换书掉落物（P6）：复用灵石的磁吸拾取手感。
+## kind = "material"（带 material_id）或 "book"（神通残卷）。
 ## 图标缺失时用代码画的菱形占位（材料=蓝绿，书=金）。
 
 var kind := "material"

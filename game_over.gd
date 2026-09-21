@@ -11,17 +11,17 @@ func _unhandled_input(event):
 		restart()
 
 
-## 展示本局战绩并把金币存入余额（P2）。game.gd 在玩家死亡时调用。
+## 展示本局战绩并把灵石存入余额（P2）。game.gd 在玩家死亡时调用。
 func show_results(kills: int, survived: float, level: int, coins: int) -> void:
 	var new_flags := SaveGame.submit_run(kills, survived, level, coins)
 	var records := SaveGame.load_records()
-	%StatsLabel.text = "本局　存活 %d:%02d　击杀 %d　Lv %d\n金币 +%d（余额 %d）" % [
+	%StatsLabel.text = "本夜　守夜 %d:%02d　斩妖 %d　修为 %d\n灵石 +%d（余额 %d）" % [
 		int(survived) / 60, int(survived) % 60, kills, level,
 		coins, int(records["coins"]),
 	]
 	if new_flags["time"] or new_flags["kills"] or new_flags["level"]:
 		%StatsLabel.text += "\n★ 新纪录！ ★"
-	%StatsLabel.text += "\n最高　存活 %d:%02d　击杀 %d　Lv %d" % [
+	%StatsLabel.text += "\n最高　守夜 %d:%02d　斩妖 %d　修为 %d" % [
 		int(records["best_time"]) / 60,
 		int(records["best_time"]) % 60,
 		records["best_kills"],

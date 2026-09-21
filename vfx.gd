@@ -2,7 +2,7 @@ extends Node
 
 ## 全局特效库（autoload VFX）——《不退》所有打击 / 技能 / 拾取特效的唯一入口。
 ## 全部「纯代码绘制 + 程序化生成的像素贴图」（assets/fx/，本项目自制 CC0），
-## 不依赖任何第三方素材；配色统一为 青霓虹 / 金 / 赤红（和风 + 科技）。
+## 不依赖任何第三方素材；配色统一为 青霓虹 / 金 / 赤红（修仙 + 修仙）。
 ##
 ## 用法（任意脚本里）：
 ##   VFX.impact(pos, dir)                      命中爆点
@@ -61,7 +61,7 @@ func _busy() -> bool:
 	return get_tree().get_nodes_in_group(FX_GROUP).size() >= FX_LIMIT
 
 
-## priority=true 的特效不受 FX_LIMIT 限制（数量由"技能施放/击杀"这类低频事件决定）；
+## priority=true 的特效不受 FX_LIMIT 限制（数量由"技能施放/斩妖"这类低频事件决定）；
 ## priority=false 的在超限时直接丢弃（命中火花、粒子、拖尾这类高频且最不值钱的）
 func _add(n: Node2D, z: int, priority := false) -> Node2D:
 	var w: Node = world()
@@ -88,7 +88,7 @@ func shockwave(pos: Vector2, radius: float, color: Color = C_CYAN, duration := 0
 	_add(n, z, priority)
 
 
-## 由外向内收缩的环（首领蓄力预警）
+## 由外向内收缩的环（妖王蓄力预警）
 func warning_ring(pos: Vector2, radius: float, color: Color = C_RED, duration := 0.7) -> void:
 	var n := _Ring.new()
 	n.setup(radius, color, duration, 8.0, true, true)
@@ -174,7 +174,7 @@ func impact(pos: Vector2, dir: Vector2 = Vector2.ZERO, color: Color = C_CYAN, st
 	burst(pos, 4 if not strong else 7, color, 200.0, 0.28, "spark", 1.6, 520.0, 38)
 
 
-## 击杀爆炸：填充环 + 碎片 + 烟
+## 斩妖爆炸：填充环 + 碎片 + 烟
 func explosion(pos: Vector2, radius: float, color: Color = C_ORANGE) -> void:
 	shockwave(pos, radius, color, 0.4, 9.0, true)
 	# 高密度战斗时只保留主环，省掉次要层（爆量时最不值钱的就是这些）
@@ -220,7 +220,7 @@ func drop_halo(icon: Sprite2D, scale_mult := 1.5, alpha := 0.8) -> void:
 	icon.add_child(h)
 
 
-## 拾取小反馈（经验宝石 / 金币 / 材料 / 武器）
+## 拾取小反馈（经验宝石 / 灵石 / 材料 / 法宝）
 func pickup_pop(pos: Vector2, color: Color = C_GREEN) -> void:
 	var s := _Flash.new()
 	s.setup(_star, 0.55, 0.18, color, randf() * TAU)
@@ -266,7 +266,7 @@ func screen_flash(color: Color = C_WHITE, alpha := 0.28, duration := 0.18) -> vo
 		return
 	if _flash_rect == null or not is_instance_valid(_flash_rect):
 		var layer := CanvasLayer.new()
-		layer.layer = 12   # 在 HUD(10) 之上、背包(20) 之下
+		layer.layer = 12   # 在 HUD(10) 之上、乾坤袋(20) 之下
 		layer.process_mode = Node.PROCESS_MODE_ALWAYS
 		_flash_rect = ColorRect.new()
 		_flash_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -283,7 +283,7 @@ func screen_flash(color: Color = C_WHITE, alpha := 0.28, duration := 0.18) -> vo
 
 ## ---------- 拖尾 ----------
 
-## 给移动节点（子弹 / 飞刀 / 首领）挂一条拖尾；节点销毁后拖尾自己淡出
+## 给移动节点（子弹 / 飞刀 / 妖王）挂一条拖尾；节点销毁后拖尾自己淡出
 func trail(target: Node2D, color: Color = C_CYAN, width := 10.0, points := 12, life := 0.18) -> void:
 	if target == null or _busy():
 		return

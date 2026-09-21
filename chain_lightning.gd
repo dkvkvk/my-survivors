@@ -11,7 +11,7 @@ var _cooldown := 0.0
 var _lines: Array = []  # 每段电弧：{"from":Vector2, "to":Vector2, "points":PackedVector2Array, "life":float}
 
 
-## 由 player.gd 按**武器等级**调用（P6 模型 B）；level 从 1 开始，0 = 未持有该武器
+## 由 player.gd 按**法宝等级**调用（P6 模型 B）；level 从 1 开始，0 = 未持有该法宝
 func configure(p_level: int) -> void:
 	level = p_level
 

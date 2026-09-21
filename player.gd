@@ -15,23 +15,23 @@ var fire_rate_mult := 1.0
 var bullet_damage := 1
 var pickup_radius := Balance.PICKUP_RADIUS
 
-# 武器被动状态由各武器节点自己保存（Gun / OrbitBlades / Aura / ChainLightning）；
+# 法宝被动状态由各法宝节点自己保存（Gun / OrbitBlades / Aura / ChainLightning）；
 # 等级的唯一来源是 weapons 数组里的 level（P6 模型 B），这里不再重复存一份。
 
 # 受伤音效节流：被怪围着时每 0.6 秒最多响一次，不然太吵
 var hurt_sound_cooldown := 0.0
 
-# 法力与主动技能（P6）：4 个技能槽对应键位 1/2/3/4，施放消耗蓝条
+# 灵力与主动技能（P6）：4 个技能槽对应键位 1/2/3/4，施放消耗蓝条
 var mana: float = Balance.MANA_START
 var mana_max: float = Balance.MANA_MAX
 var skill_slots := ["", "", "", ""]   # 空字符串 = 该槽没装技能
 var _skill_cd := {}                    # 技能 id -> 剩余冷却（秒）
 
-# 武器与材料（P6）：武器最多 4 把；每把武器有多个技能但每场只选一个激活。
-# 捡到技能切换书可换成本武器的另一个技能。
+# 法宝与材料（P6）：法宝最多 4 把；每把法宝有多个技能但每场只选一个激活。
+# 捡到神通残卷可换成本法宝的另一个技能。
 var weapons: Array = []                # [{id, level, active_skill, kills}]
 var materials := {}                    # {材料id: 数量}
-var skill_books := 0                   # 技能切换书数量
+var skill_books := 0                   # 神通残卷数量
 
 
 func _ready():
@@ -39,11 +39,11 @@ func _ready():
 	%HealthBar.max_value = max_health
 	%ManaBar.max_value = mana_max
 	%ManaBar.value = mana
-	# 开局自带手枪（算一把武器，占一个武器位）
+	# 开局自带手枪（算一把法宝，占一个法宝位）
 	add_weapon("shuriken")
 
 
-## 法力回复 + 技能冷却 + 键位 1/2/3/4 施放
+## 灵力回复 + 技能冷却 + 键位 1/2/3/4 施放
 func _process(delta: float) -> void:
 	mana = minf(mana + Balance.MANA_REGEN * delta, mana_max)
 	%ManaBar.value = mana
@@ -54,7 +54,7 @@ func _process(delta: float) -> void:
 			cast_skill(i)
 
 
-## ---------- 武器与材料（P6） ----------
+## ---------- 法宝与材料（P6） ----------
 
 func weapon_count() -> int:
 	return weapons.size()
@@ -74,8 +74,8 @@ func get_weapon(id: String) -> Dictionary:
 	return {}
 
 
-## 获得武器：装进空位 → **激活它的被动效果** → 把默认技能同步到技能槽。
-## 武器位已满时返回 false（由上层弹替换面板）。
+## 获得法宝：装进空位 → **激活它的被动效果** → 把默认技能同步到技能槽。
+## 法宝位已满时返回 false（由上层弹替换面板）。
 func add_weapon(id: String) -> bool:
 	var def: Dictionary = Weapons.get_def(id)
 	if def.is_empty():
@@ -96,8 +96,8 @@ func add_weapon(id: String) -> bool:
 	return true
 
 
-## 开局选武器（P6）：手里剑是固定基础武器（保证有自动攻击），
-## 选它 = 起手直接给到 START_WEAPON_LEVEL；选其它武器 = 追加装备（武器位与技能槽各 +1）。
+## 开局选法宝（P6）：本命飞剑是固定基础法宝（保证有自动攻击），
+## 选它 = 起手直接给到 START_WEAPON_LEVEL；选其它法宝 = 追加装备（法宝位与技能槽各 +1）。
 func apply_start_weapon(id: String) -> void:
 	var w: Dictionary = get_weapon(id)
 	if w.is_empty():
@@ -111,7 +111,7 @@ func apply_start_weapon(id: String) -> void:
 	VFX.levelup_burst(global_position, VFX.C_CYAN)
 
 
-## 丢弃武器（替换面板用）：同时卸下它的被动效果
+## 丢弃法宝（替换面板用）：同时卸下它的被动效果
 func drop_weapon(id: String) -> void:
 	for i in weapons.size():
 		if weapons[i]["id"] == id:
@@ -121,8 +121,8 @@ func drop_weapon(id: String) -> void:
 	_sync_skill_slots()
 
 
-## ---------- 武器被动（P6 模型 B：武器 = 被动效果 + 提供技能）----------
-## 被动等级 = 武器等级。加武器时这里加一个分支即可（武器节点自己处理数值曲线）。
+## ---------- 法宝被动（P6 模型 B：法宝 = 被动效果 + 提供技能）----------
+## 被动等级 = 法宝等级。加法宝时这里加一个分支即可（法宝节点自己处理数值曲线）。
 
 func _apply_weapon_passive(id: String) -> void:
 	var w: Dictionary = get_weapon(id)
@@ -150,7 +150,7 @@ func _clear_weapon_passive(id: String) -> void:
 			%ChainLightning.configure(0)
 
 
-## 满级进化：把该武器的被动切到强化形态（手里剑大师 / 刃风暴 / 烈日领域 / 雷神之怒）
+## 满级进化：把该法宝的被动切到强化形态（剑光化灵 / 刃风暴 / 烈日领域 / 雷神之怒）
 func _evolve_weapon(id: String) -> void:
 	match id:
 		"shuriken":
@@ -163,7 +163,7 @@ func _evolve_weapon(id: String) -> void:
 			%ChainLightning.evolve()
 
 
-## 设置某把武器的"本场激活技能"。需要消耗一本切换书（swap=false 时不消耗，用于首次选择）
+## 设置某把法宝的"本场激活技能"。需要消耗一本切换书（swap=false 时不消耗，用于首次选择）
 func set_active_skill(weapon_id: String, skill_id: String, use_book := true) -> bool:
 	var w: Dictionary = get_weapon(weapon_id)
 	if w.is_empty():
@@ -182,7 +182,7 @@ func set_active_skill(weapon_id: String, skill_id: String, use_book := true) -> 
 	return true
 
 
-## 把武器的激活技能同步进技能槽（槽位顺序 = 武器顺序）
+## 把法宝的激活技能同步进技能槽（槽位顺序 = 法宝顺序）
 func _sync_skill_slots() -> void:
 	for i in skill_slots.size():
 		if i < weapons.size():
@@ -191,9 +191,9 @@ func _sync_skill_slots() -> void:
 			skill_slots[i] = ""
 
 
-## 每击杀一只怪，给所有携带武器累积 1 点"击杀经验"（武器升级条件之一）。
-## 说明：目前不区分"是谁打死的"——所有携带武器同时累积，简单直观；
-## 将来要精确归属，需要在 take_damage 里带上来源武器 id。
+## 每斩妖一只怪，给所有携带法宝累积 1 点"斩妖经验"（法宝升级条件之一）。
+## 说明：目前不区分"是谁打死的"——所有携带法宝同时累积，简单直观；
+## 将来要精确归属，需要在 take_damage 里带上来源法宝 id。
 func add_kill_credit() -> void:
 	for w in weapons:
 		w["kills"] = int(w["kills"]) + 1
@@ -207,7 +207,7 @@ func material_count(id: String) -> int:
 	return int(materials.get(id, 0))
 
 
-## 武器升级：材料够 且 击杀数够 才成功
+## 法宝升级：材料够 且 斩妖数够 才成功
 func can_upgrade_weapon(id: String) -> bool:
 	var w: Dictionary = get_weapon(id)
 	if w.is_empty():
@@ -239,7 +239,7 @@ func upgrade_weapon(id: String) -> bool:
 	return true
 
 
-## 宝箱奖励：无视材料与击杀数，直接给一把已持有武器 +1 级
+## 宝箱奖励：无视材料与斩妖数，直接给一把已持有法宝 +1 级
 func force_upgrade_weapon(id: String) -> bool:
 	var w: Dictionary = get_weapon(id)
 	if w.is_empty():
@@ -255,7 +255,7 @@ func force_upgrade_weapon(id: String) -> bool:
 	return true
 
 
-## 随机一把**还没满级**的已持有武器（宝箱用）；都满级或没武器返回空串
+## 随机一把**还没满级**的已持有法宝（宝箱用）；都满级或没法宝返回空串
 func random_upgradable_weapon() -> String:
 	var pool: Array = []
 	for w in weapons:
@@ -324,7 +324,7 @@ func _run_skill_effect(id: String) -> void:
 			%ChainLightning.cast_ultimate()
 
 
-## 手里剑乱舞：以自身为中心放射一圈子弹
+## 万剑归宗：以自身为中心放射一圈子弹
 func _shuriken_burst() -> void:
 	const BULLET = preload("res://bullet_2d.tscn")
 	var n: int = Balance.SKILL_SHURIKEN_COUNT
@@ -423,7 +423,7 @@ func apply_upgrade(id: String) -> void:
 	%HealthBar.value = health
 
 
-## 任意武器命中敌人时调用（bullet_2d / orbit_blades），
+## 任意法宝命中敌人时调用（bullet_2d / orbit_blades），
 ## 由链式闪电自己判断等级与冷却——没有这张卡时这里等于空操作。
 func on_weapon_hit(pos: Vector2, exclude_id := 0) -> void:
 	%ChainLightning.on_hit(pos, exclude_id)

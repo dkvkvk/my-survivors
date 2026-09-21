@@ -21,7 +21,7 @@ const STUCK_CHECK := 0.6          # 每 0.6 秒检查一次"有没有靠近玩�
 const STUCK_CHECKS := 4           # 连续 4 次没进展（约 2.4 秒）判定卡墙
 const STUCK_MIN_PROGRESS := 12.0  # 每次检查至少要靠近这么多像素
 const STUCK_PHASE_TIME := 2.0     # 卡墙后临时穿墙的时长
-var _phasing := false             # 该变体天生穿墙（飞行的机械蝙蝠 / 首领）
+var _phasing := false             # 该变体天生穿墙（飞行的机械蝙蝠 / 妖王）
 var _phase_timer := 0.0
 var _stuck_check := 0.0
 var _stuck_count := 0
@@ -45,7 +45,7 @@ var _dash_time := 0.0
 var _dash_speed_mult := 1.0
 var _dash_flash := Color(2, 2, 2)
 
-# 首领模式（P4）：三段循环 AI + 头顶血条 + 击退抗性
+# 妖王模式（P4）：三段循环 AI + 头顶血条 + 击退抗性
 var is_boss := false
 var _charge_state := 0  # 0=追击 1=蓄力 2=冲锋
 var _charge_timer := 0.0
@@ -57,13 +57,13 @@ var _charge_dir := Vector2.ZERO
 
 
 func _ready():
-	# 供链式闪电等 AoE 武器快速索敌
+	# 供链式闪电等 AoE 法宝快速索敌
 	add_to_group("mobs")
 	%Slime.play_walk()
 
 
 ## 把精灵"脚底"对齐到判定圆心（y=0）。
-## 素材高矮不一（史莱姆 24px、首领 32px，还各自乘变体缩放），
+## 素材高矮不一（史莱姆 24px、妖王 32px，还各自乘变体缩放），
 ## 用固定偏移会让大个子悬空、小个子陷地，所以按实际贴图高度算。
 func _ground_sprite() -> void:
 	var tex: Texture2D = %Slime.sprite_frames.get_frame_texture(%Slime.animation, 0)
@@ -109,7 +109,7 @@ func setup(variant_name: String) -> void:
 	_ground_sprite()
 
 
-## 升格为首领（P4）：属性覆盖 + 头顶血条。hp_bonus 为按击杀数递增的血量。
+## 升格为妖王（P4）：属性覆盖 + 头顶血条。hp_bonus 为按斩妖数递增的血量。
 func setup_boss(hp_bonus: int) -> void:
 	is_boss = true
 	setup("tank")  # 回退贴图：重甲兵放大染色
@@ -125,7 +125,7 @@ func setup_boss(hp_bonus: int) -> void:
 		var paths: Array = Balance.BOSS_SPRITES
 		%Slime.set_variant(paths)
 		%Slime.modulate = Color(1, 1, 1)
-	# 首领天生穿墙：它的判定圆远大于视觉体型（BOSS_HIT_RADIUS x BOSS_SCALE），
+	# 妖王天生穿墙：它的判定圆远大于视觉体型（BOSS_HIT_RADIUS x BOSS_SCALE），
 	# 若被墙挡会停在离墙一百多像素的地方，看着像卡住
 	_apply_phasing(true)
 	ability = ""
@@ -300,7 +300,7 @@ func _smash_walls(delta: float) -> void:
 		return
 
 
-## 首领能力：把以自己为中心、半径内的瓦片全部撞碎
+## 妖王能力：把以自己为中心、半径内的瓦片全部撞碎
 func _smash_around(radius: float, delta: float) -> void:
 	_break_cd = maxf(0.0, _break_cd - delta)
 	if _break_cd > 0.0:
@@ -328,7 +328,7 @@ func _smash_around(radius: float, delta: float) -> void:
 
 
 ## 机械史莱姆能力：死亡时分裂成更小更快的子体。
-## 子体不再分裂、不掉经验/金币/材料/武器（否则经验与掉落经济会成倍膨胀）。
+## 子体不再分裂、不掉经验/灵石/材料/法宝（否则经验与掉落经济会成倍膨胀）。
 func _split() -> void:
 	if ability != "split" or _split_depth >= 1:
 		return
@@ -345,7 +345,7 @@ func _split() -> void:
 		child.setup(variant)
 		child.setup_split(float(cfg["scale"]), child_hp, _split_depth + 1)
 	VFX.burst(global_position, 8, VFX.C_GREEN, 200.0, 0.5, "spark", 1.8, 200.0)
-	Juice.damage_number(get_parent(), global_position + Vector2(0, -70), "分裂",
+	Juice.damage_number(get_parent(), global_position + Vector2(0, -70), "溃分",
 		{"color": Color(0.6, 1.0, 0.85), "scale": 1.2})
 
 
@@ -362,7 +362,7 @@ func setup_split(scale_mult: float, hp: int, depth: int) -> void:
 	_ground_sprite()
 
 
-## 首领三段循环：追击 → 蓄力（闪白预示）→ 直线冲锋
+## 妖王三段循环：追击 → 蓄力（闪白预示）→ 直线冲锋
 func _boss_ai(delta):
 	_charge_timer -= delta
 	match _charge_state:
@@ -385,7 +385,7 @@ func _boss_ai(delta):
 				Audio.play("res://sounds/hurt.wav", false, 0.7, 0.15)
 		2:
 			velocity = _charge_dir * speed * Balance.BOSS_CHARGE_SPEED_MULT
-			# 冲锋沿途把瓦片撞碎：首领自己穿墙，但顺手给玩家和杂兵开路（也更有破坏感）
+			# 冲锋沿途把瓦片撞碎：妖王自己穿墙，但顺手给玩家和杂兵开路（也更有破坏感）
 			_smash_around(Balance.BOSS_BREAK_RADIUS, delta)
 			if _charge_timer <= 0.0:
 				_charge_state = 0
@@ -443,7 +443,7 @@ func drop_xp_gem():
 	gem.global_position = global_position
 
 
-## 按变体概率掉金币（P2 局外经济），散落成小圈避免叠成一枚
+## 按变体概率掉灵石（P2 局外经济），散落成小圈避免叠成一枚
 func drop_coins():
 	if not can_drop_loot:
 		return
@@ -457,21 +457,21 @@ func drop_coins():
 		coin.global_position = global_position + offset
 
 
-## 首领死亡必掉宝箱（P4）
+## 妖王死亡必掉宝箱（P4）
 ## 材料与切换书掉落（P6）：材料按概率掉，切换书稀有。
-## 首领一次给较多材料。
+## 妖王一次给较多材料。
 func drop_materials() -> void:
 	if not can_drop_loot:
 		return
-	# 铁屑：常见
+	# 玄铁：常见
 	if is_boss or randf() < Balance.MATERIAL_DROP_CHANCE:
 		var n: int = 4 if is_boss else 1
 		for i in n:
 			_drop_pickup("material", "scrap")
-	# 雷晶：稀有（首领必给）
+	# 雷魄：稀有（妖王必给）
 	if is_boss or randf() < Balance.CRYSTAL_DROP_CHANCE:
 		_drop_pickup("material", "crystal")
-	# 技能切换书：很稀有
+	# 神通残卷：很稀有
 	if randf() < Balance.SKILL_BOOK_DROP_CHANCE:
 		_drop_pickup("book", "")
 
@@ -483,13 +483,13 @@ func _drop_pickup(kind: String, mat: String) -> void:
 	p.setup(kind, mat)
 
 
-## 武器掉落（P6）：普通怪小概率，首领必掉。地上生成 weapon_drop，走近按 F 拾取。
+## 法宝掉落（P6）：普通怪小概率，妖王必掉。地上生成 weapon_drop，走近按 F 拾取。
 func drop_weapon() -> void:
 	if not can_drop_loot:
 		return
 	var game = get_parent()
 	var chance: float = 1.0 if is_boss else Balance.WEAPON_DROP_CHANCE
-	# 开局保底：前 WEAPON_PITY_TIME 秒内杀够数还没掉够武器，就必掉一把（否则开局两分钟一把都没有）
+	# 开局保底：前 WEAPON_PITY_TIME 秒内杀够数还没掉够法宝，就必掉一把（否则开局两分钟一把都没有）
 	if not is_boss and game != null and game.has_method("weapon_pity_ready") and game.weapon_pity_ready():
 		chance = 1.0
 	if randf() > chance:
@@ -517,7 +517,7 @@ func drop_chest():
 	chest.global_position = global_position
 
 
-## 该怪的特效配色：首领赤红，其余按变体区分（史莱姆青绿 / 蝙蝠紫 / 重甲钢蓝 / 野兽猩红）
+## 该怪的特效配色：妖王赤红，其余按变体区分（史莱姆青绿 / 蝙蝠紫 / 重甲钢蓝 / 野兽猩红）
 func _fx_color() -> Color:
 	if is_boss:
 		return Color(1.0, 0.42, 0.35)

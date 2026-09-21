@@ -33,7 +33,7 @@ static func load_records() -> Dictionary:
 	return records
 
 
-## 提交一局战绩：刷新最高纪录、把本局金币存入余额。返回各项是否为新纪录。
+## 提交一局战绩：刷新最高纪录、把本局灵石存入余额。返回各项是否为新纪录。
 static func submit_run(kills: int, survived: float, level: int, coins: int) -> Dictionary:
 	var records := load_records()
 	var new_flags := {"time": false, "kills": false, "level": false}
@@ -57,7 +57,7 @@ static func get_upgrade_level(id: String) -> int:
 	return int(upgrades.get(id, 0))
 
 
-## 当前金币余额
+## 当前灵石余额
 static func get_coins() -> int:
 	return int(load_records()["coins"])
 

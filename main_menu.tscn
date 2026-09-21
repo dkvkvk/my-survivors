@@ -103,7 +103,7 @@ grow_vertical = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
 theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 36
-text = "最高纪录　存活 0:00　击杀 0　Lv 1"
+text = "最高纪录　守夜 0:00　斩妖 0　修为 1"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -135,7 +135,7 @@ offset_bottom = 330.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 48
-text = "忍具商店"
+text = "坊市 · 万宝楼"
 
 [node name="QuitButton" type="Button" parent="."]
 unique_name_in_owner = true
@@ -166,7 +166,7 @@ offset_bottom = 510.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 24
-text = "WASD 移动 · 枪自动瞄准 · Esc 暂停"
+text = "WASD 移动 · 御剑自动杀敌 · Esc 暂停"
 horizontal_alignment = 1
 vertical_alignment = 1
 

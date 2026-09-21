@@ -1,6 +1,6 @@
 extends Node2D
 
-## 忍者角色外观（素材：Ninja Adventure，CC0）。
+## 守山人角色外观（素材：Ninja Adventure，CC0）。
 ## 自动读取父节点（Player）的速度，按主轴方向播放四向走路/待机动画。
 ## 物理与碰撞仍在 player.tscn 上，这里只负责外观。
 

@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-## 商店（P2 局外成长）：花死亡结算存下的金币买永久强化。
+## 商店（P2 局外成长）：花死亡结算存下的灵石买永久强化。
 ## 数据全部来自 balance.gd 的 SHOP 表，购买/校验走 SaveGame。
 
 
@@ -11,17 +11,17 @@ func _ready():
 
 func _refresh() -> void:
 	var coins := SaveGame.get_coins()
-	%CoinsLabel.text = "金币 %d" % coins
+	%CoinsLabel.text = "灵石 %d" % coins
 	for i in Balance.SHOP.size():
 		var def: Dictionary = Balance.SHOP[i]
 		var level := SaveGame.get_upgrade_level(def["id"])
 		var button: Button = get_node("BuyButton%d" % i)
 		if level >= def["max"]:
-			button.text = "%s　Lv %d/%d　%s　已满级" % [def["name"], level, def["max"], def["desc"]]
+			button.text = "%s　%d/%d 阶　%s　已满" % [def["name"], level, def["max"], def["desc"]]
 			button.disabled = true
 			continue
 		var cost := int(def["cost"]) * (level + 1)
-		button.text = "%s　Lv %d/%d　%s　—　%d 金币" % [def["name"], level, def["max"], def["desc"], cost]
+		button.text = "%s　%d/%d 阶　%s　—　%d 灵石" % [def["name"], level, def["max"], def["desc"], cost]
 		button.disabled = coins < cost
 
 

@@ -1,12 +1,12 @@
 extends CanvasLayer
 
-## 背包（P6）：按 B 开关，暂停游戏。纯代码构建面板，避免往场景塞几十个节点。
+## 乾坤袋（P6）：按 B 开关，暂停游戏。纯代码构建面板，避免往场景塞几十个节点。
 ##
 ## 布局：
-##   左  = 武器 4 格（点击选中）
-##   中  = 选中武器的技能列表（点击设为"本场激活技能"，需消耗切换书）
+##   左  = 法宝 4 格（点击选中）
+##   中  = 选中法宝的技能列表（点击设为"本场激活技能"，需消耗切换书）
 ##         + 升级信息与 [升级] 按钮
-##   右  = 当前技能配装 1/2/3/4 + 材料 + 法力
+##   右  = 当前技能配装 1/2/3/4 + 材料 + 灵力
 ##
 ## 图标缺失时用文字占位，等美术出图自动替换。
 
@@ -15,7 +15,7 @@ const H := 700.0
 const SLOT := 120.0
 
 var _player: Node
-var _selected := ""      # 当前选中的武器 id
+var _selected := ""      # 当前选中的法宝 id
 var _root: Control
 var _weapon_boxes: Array = []
 var _skill_rows: Array = []
@@ -85,25 +85,25 @@ func _build() -> void:
 	panel.add_theme_stylebox_override("panel", sb)
 	_root.add_child(panel)
 
-	_title(panel, "背 包", Vector2(28, 14))
+	_title(panel, "乾 坤 袋", Vector2(28, 14))
 	_hint(panel, "B / Esc 关闭", Vector2(W - 220, 26))
 
-	# ---- 左：武器 4 格 ----
-	_label(panel, "武器", Vector2(28, 70), 30)
+	# ---- 左：法宝 4 格 ----
+	_label(panel, "法宝", Vector2(28, 70), 30)
 	for i in Weapons.MAX_SLOTS:
 		_weapon_boxes.append(_make_weapon_box(panel, i, Vector2(28 + i * (SLOT + 12), 112)))
 
-	# ---- 中：选中武器的技能 + 升级 ----
-	_label(panel, "技能（每场只能选 1 个 · 切换需消耗切换书）", Vector2(560, 70), 26)
+	# ---- 中：选中法宝的技能 + 升级 ----
+	_label(panel, "神通（每夜只用 1 门 · 改换需耗神通残卷）", Vector2(560, 70), 26)
 	for i in 4:
 		_skill_rows.append(_make_skill_row(panel, i, Vector2(560, 112 + i * 52)))
 	_upgrade_info = _label(panel, "", Vector2(560, 360), 24)
-	_upgrade_btn = _button(panel, "升级", Vector2(560, 410), Vector2(180, 54), _on_upgrade)
+	_upgrade_btn = _button(panel, "升阶", Vector2(560, 410), Vector2(180, 54), _on_upgrade)
 
-	# ---- 右：配装 / 材料 / 法力 ----
-	_label(panel, "当前配装", Vector2(960, 70), 30)
+	# ---- 右：配装 / 材料 / 灵力 ----
+	_label(panel, "本命神通", Vector2(960, 70), 30)
 	_slot_label = _label(panel, "", Vector2(960, 112), 26)
-	_label(panel, "材料", Vector2(960, 430), 30)
+	_label(panel, "炼材", Vector2(960, 430), 30)
 	_mat_label = _label(panel, "", Vector2(960, 474), 24)
 	_mana_label = _label(panel, "", Vector2(960, 610), 26)
 
@@ -175,7 +175,7 @@ func _make_skill_row(p: Control, i: int, pos: Vector2) -> Button:
 func _refresh() -> void:
 	if _player == null:
 		return
-	# 武器格
+	# 法宝格
 	for i in _weapon_boxes.size():
 		var box: Dictionary = _weapon_boxes[i]
 		if i < _player.weapons.size():
@@ -191,7 +191,7 @@ func _refresh() -> void:
 			box["icon"].texture = null
 			box["name"].text = "空"
 			box["btn"].modulate = Color(1, 1, 1, 0.4)
-	# 选中武器的技能
+	# 选中法宝的技能
 	var w2: Dictionary = _player.get_weapon(_selected)
 	var def2: Dictionary = Weapons.get_def(_selected)
 	var skills: Array = def2.get("skills", [])
@@ -209,7 +209,7 @@ func _refresh() -> void:
 			row.disabled = true
 	# 升级信息
 	if w2.is_empty():
-		_upgrade_info.text = "未选中武器"
+		_upgrade_info.text = "未选中法宝"
 		_upgrade_btn.disabled = true
 	else:
 		var mat: String = def2.get("upgrade_material", "scrap")
@@ -217,9 +217,9 @@ func _refresh() -> void:
 		var need_kills := int(def2.get("kills_per_level", 100)) * int(w2["level"])
 		var maxed: bool = int(w2["level"]) >= int(def2.get("max_level", 5))
 		if maxed:
-			_upgrade_info.text = "已满级"
+			_upgrade_info.text = "已至五阶"
 		else:
-			_upgrade_info.text = "升级需：%s x%d（现有 %d）  击杀 %d/%d" % [
+			_upgrade_info.text = "升阶需：%s x%d（现有 %d）  剑饮妖血 %d/%d" % [
 				Weapons.material_name(mat), cost, _player.material_count(mat),
 				int(w2["kills"]), need_kills,
 			]
@@ -235,9 +235,9 @@ func _refresh() -> void:
 	var mlines := []
 	for mid in Weapons.MATERIALS.keys():
 		mlines.append("  %s x%d" % [Weapons.material_name(mid), _player.material_count(mid)])
-	mlines.append("  技能切换书 x%d" % _player.skill_books)
+	mlines.append("  神通残卷 x%d" % _player.skill_books)
 	_mat_label.text = "\n".join(mlines)
-	_mana_label.text = "法力  %d / %d" % [int(_player.mana), int(_player.mana_max)]
+	_mana_label.text = "灵力  %d / %d" % [int(_player.mana), int(_player.mana_max)]
 
 
 func _on_weapon_clicked(i: int) -> void:
@@ -263,14 +263,14 @@ func _on_skill_clicked(i: int) -> void:
 	_refresh()
 
 
-## ---------- 替换面板（武器位满时，从掉落物调用） ----------
+## ---------- 替换面板（法宝位满时，从掉落物调用） ----------
 
 var _pending_id := ""
 var _pending_drop: Node = null
 var _replace_root: Control
 
 
-## 弹替换面板：列出当前 4 把武器 + 放弃选项
+## 弹替换面板：列出当前 4 把法宝 + 放弃选项
 func ask_replace(new_id: String, drop_node: Node) -> void:
 	_pending_id = new_id
 	_pending_drop = drop_node
@@ -298,7 +298,7 @@ func ask_replace(new_id: String, drop_node: Node) -> void:
 	_replace_root.add_child(panel)
 
 	var new_def: Dictionary = Weapons.get_def(new_id)
-	var t := _label(panel, "武器已满，要替换吗？", Vector2(28, 18), 34)
+	var t := _label(panel, "法宝已满，要替换吗？", Vector2(28, 18), 34)
 	t.add_theme_color_override("font_color", Color(1, 0.92, 0.6))
 	_label(panel, "新：%s" % new_def.get("name", new_id), Vector2(28, 70), 26)
 
@@ -306,7 +306,7 @@ func ask_replace(new_id: String, drop_node: Node) -> void:
 	for i in _player.weapons.size():
 		var w: Dictionary = _player.weapons[i]
 		var def: Dictionary = Weapons.get_def(w["id"])
-		var b := _button(panel, "替换 → %s Lv%d" % [def.get("name", w["id"]), w["level"]], Vector2(28, y), Vector2(400, 52), _on_replace_pick.bind(i))
+		var b := _button(panel, "替换 → %s %d 阶" % [def.get("name", w["id"]), w["level"]], Vector2(28, y), Vector2(400, 52), _on_replace_pick.bind(i))
 		b.add_theme_font_size_override("font_size", 24)
 		y += 62.0
 	var give := _button(panel, "放弃（留在地上）", Vector2(28, y + 10), Vector2(400, 52), _on_replace_cancel)
@@ -331,7 +331,7 @@ func _on_replace_pick(index: int) -> void:
 	var ok: bool = _player.add_weapon(_pending_id)
 	Audio.play("res://sounds/pickup.wav", false, 1.4, 0.4)
 	if ok and _pending_drop != null and is_instance_valid(_pending_drop):
-		# 把换下来的武器掉在原地，形成循环
+		# 把换下来的法宝掉在原地，形成循环
 		var back: Node = load("res://weapon_drop.tscn").instantiate()
 		get_node("/root/Game").add_child(back)
 		back.global_position = _pending_drop.global_position + Vector2(70, 0)

@@ -55,7 +55,7 @@ func configure(p_level: int) -> void:
 	_timer.start()
 
 
-## 卸下武器时调用：停止灼烧并隐藏（被动等级 = 武器等级，丢武器就归零）
+## 卸下法宝时调用：停止灼烧并隐藏（被动等级 = 法宝等级，丢法宝就归零）
 func deactivate() -> void:
 	_setup()
 	level = 0
