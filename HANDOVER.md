@@ -111,7 +111,10 @@ func _process(_delta) -> bool:  # 必须有返回值，否则 Parse Error
 - 用户用**网页版 Nano Banana**生成（无 API），流程：我给提示词 → 用户生成 → 放 `E:\games` → 我处理接入。
 - 比例铁律：单体精灵/图标 1:1；两帧动画=第一帧 1:1 + 参考图改姿势（不要双格表，格子会压扁）；4×4 方向表 1:1；背景/封面 16:9。
 - 提示词必带：`solid magenta background (#FF00FF)` + `no text, no watermark` + `crisp pixels`。
-- 处理管线：python tools/import_ai_art.py（洋红抠底 → bbox → 等比装 box → 两帧统一量化 → 画布对齐）→ tileset 额外跑 tools/postprocess_tiles.py → headless 验证 → 实机截图核对。规格表在脚本末尾，改素材只改那张表。
+- 处理管线：python tools/import_ai_art.py（洋红抠底 → bbox → 等比装 box → 两帧统一量化 → 画布对齐）
+  → tileset 额外跑 tools/postprocess_tiles.py（阴影描边）
+  → 妖物额外跑 tools/postprocess_mobs.py（提亮 1.18x + 提饱和 1.08x + 1px 暗描边；修仙素材夜色基调，不提亮会看不见怪）
+  → headless 验证 → 实机截图核对。规格表在脚本末尾，改素材只改那张表。
 - 新怪贴图：改 `balance.gd` 变体表的 sprites 路径即可；妖王放 `assets/mobs/boss_0/1.png` 自动生效。
 - AI 素材商用条款遵循 Gemini API 条款，NOTICE.md 已登记。
 
