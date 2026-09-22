@@ -129,7 +129,7 @@ func _process(_delta) -> bool:  # 必须有返回值，否则 Parse Error
 7. 怪物碰撞圆/受击框几何要保证"攻击环最远停点 + 碰撞半径 > 受击框半宽"，否则掉血链路断（HurtBox mask 必须=2）。
 8. **项目改名会改 user:// 目录**。原来只设了 `config/custom_user_dir_name` 而**漏了 `config/use_custom_user_dir=true`**，所以设置一直没生效——存档实际落在 `app_userdata/不退/`（历史遗留 `My Survivors/`、`忍者今天也在割韭菜/` 都是改名留下的孤儿目录）。**2026-09-21 已补上该开关**，现在固定为 `%APPDATA%/my-survivors/`（注意：开启 use_custom_user_dir 后**不再**放在 `Godot/app_userdata/` 下）。
 9. 窗口标题=project.godot 的 config/name（**不退**）；仓库名/导出文件名仍是 my-survivors。
-10. **贴图放错文件**：曾有"道具在乱跑"——AI 生成的是 3×3 升级卡图标九宫格，却被写进了 `assets/hero/ninja_sheet.png`，`hero.gd` 按 16px 切成 4×4 方向表，于是玩家身上显示的是图标碎片（同时 2c39948 那版提交的这张表 sha=1f5e0af1…，是坏的那张）。`ninja_sheet.png` 必须是 64×64 的 4×4 方向行走表（当前是 Ninja Adventure CC0 的忍者表，修仙化后换成守山人，**路径不变**），已从 `97e93c6` 恢复，正确 sha256=`ea03e60f906dbab72a5be39bba04a8ad0d23854a9b6af8df48df45abf306bcb6`。**教训**：接入素材后必须实机截图核对"是谁在用这张图"，别只看文件名。
+10. **贴图放错文件**：曾有"道具在乱跑"——AI 生成的是 3×3 升级卡图标九宫格，却被写进了 `assets/hero/ninja_sheet.png`，`hero.gd` 按 16px 切成 4×4 方向表，于是玩家身上显示的是图标碎片（同时 2c39948 那版提交的这张表 sha=1f5e0af1…，是坏的那张）。`ninja_sheet.png` 必须是 64×64 的 4×4 方向行走表（当前是 Ninja Adventure CC0 的忍者表，修仙化后换成守山人，**路径不变**），已从 `97e93c6` 恢复，正确 sha256=`e0e7f05107190e2b5f5d650e4479c3e84d051e4826d7bb9ff69f4be56db34aaa`（2026-09-21 修仙化后换成守山人表，哈希随之更新）。**教训**：接入素材后必须实机截图核对"是谁在用这张图"，别只看文件名。
 10b. **弹窗层级必须高于 HUD**：`HUD` 是 `layer = 10`，而 GameOver/LevelUpUI/PauseUI/VictoryUI 原来都是默认 `layer = 1`，
     于是结算界面上还显示斩妖/守夜/经验条/等级/灵石/蓝条，技能栏直接压在"回到主菜单"按钮上；
     HUD 里的低血量红色脉冲也会盖在结算背景上（截图看起来整张偏红）。**已把四个弹窗改成 `layer = 30`，乾坤袋 `25`**，

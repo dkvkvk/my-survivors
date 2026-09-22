@@ -31,4 +31,17 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 
 ## 结果（loop 写）
 
-（暂无）
+### 2026-09-22 · L0 判定：pass
+
+- 判定：@@python tools/qa/loop_judge.py@@（全量，含 240 帧运行）→ **退出码 0**，5/5 PASS
+  （headless-import / headless-runtime / asset-contract 4 项 / import-hygiene 孤儿=0 / sprite-refs 10 项）
+- 产物：@@tools/qa/judge-report.json@@
+
+### 2026-09-22 · 待办处理：awaiting-human
+
+| 待办 | 结果 | 状态 |
+|---|---|---|
+| 修 HANDOVER §6 坑 #10 的过期 sha256 | 已更新为 @@e0e7f05107190e2b5f5d650e4479c3e84d051e4826d7bb9ff69f4be56db34aaa@@（修仙化后的守山人表），并注明哈希为何变 | awaiting-human |
+| 清掉 @@assets/check.png.import@@ 孤儿 | 已删除；import-hygiene 孤儿计数 1 → 0 | awaiting-human |
+
+> 本轮未修改"待办（人写）"列；判定脚本与规格表未改动（边界 must-not）。

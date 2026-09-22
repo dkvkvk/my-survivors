@@ -1,0 +1,253 @@
+#!/usr/bin/env python3
+"""my-survivors L0 judge: headless smoke + asset contract.
+
+Exit code 0 = all checks pass. Writes tools/qa/judge-report.json.
+
+Usage:
+    python tools/qa/loop_judge.py            # full run
+    python tools/qa/loop_judge.py --fast     # skip the 240-frame headless run
+    python tools/qa/loop_judge.py --json     # print the report to stdout
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import re
+import struct
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+QA_DIR = ROOT / "tools" / "qa"
+REPORT_PATH = QA_DIR / "judge-report.json"
+
+GODOT = os.environ.get(
+    "GODOT_BIN",
+    "D:/Downloads/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.exe",
+)
+
+# 编辑器插件的已知无害噪音（见 HANDOVER §3）
+NOISE = re.compile(r"Out of bounds", re.IGNORECASE)
+IMPORT_BAD = re.compile(r"Parse Error|Failed to load|non-existent", re.IGNORECASE)
+RUNTIME_BAD = re.compile(r"SCRIPT ERROR|SHADER ERROR|no animation")
+
+# 素材契约规格表：改素材只改这里
+ASSET_SPEC = {
+    "assets/hero/ninja_sheet.png": {"size": (64, 64), "note": "4x4 方向行走表，禁止换成图标九宫格（坑 #10）"},
+    "assets/ui/cover.png": {"size": (1920, 1080), "note": "封面 16:9"},
+    "assets/ui/menu_bg.png": {"size": (1920, 1080), "note": "菜单背景 16:9", "optional": True},
+    "assets/ui/gameover_bg.png": {"size": (1920, 1080), "note": "结算背景 16:9", "optional": True},
+}
+
+
+def read_image_size(path: Path):
+    """零依赖读取 png/jpg 尺寸。"""
+    with path.open("rb") as fh:
+        head = fh.read(32)
+        if head[:8] == b"\x89PNG\r\n\x1a\n":
+            w, h = struct.unpack(">II", head[16:24])
+            return (w, h)
+        if head[:2] == b"\xff\xd8":
+            fh.seek(2)
+            while True:
+                b = fh.read(1)
+                if not b:
+                    return None
+                if b != b"\xff":
+                    continue
+                marker = fh.read(1)
+                while marker == b"\xff":
+                    marker = fh.read(1)
+                if marker in (b"\xc0", b"\xc1", b"\xc2", b"\xc3"):
+                    fh.read(3)
+                    h, w = struct.unpack(">HH", fh.read(4))
+                    return (w, h)
+                seg = fh.read(2)
+                if len(seg) < 2:
+                    return None
+                fh.seek(struct.unpack(">H", seg)[0] - 2, os.SEEK_CUR)
+        if head[:4] == b"RIFF" and head[8:12] == b"WEBP":
+            fmt = head[12:16]
+            if fmt == b"VP8X":
+                w = int.from_bytes(head[24:27], "little") + 1
+                h = int.from_bytes(head[27:30], "little") + 1
+                return (w, h)
+            if fmt == b"VP8 ":
+                w = int.from_bytes(head[26:28], "little") & 0x3FFF
+                h = int.from_bytes(head[28:30], "little") & 0x3FFF
+                return (w, h)
+    return None
+
+
+def sha256_of(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def run_godot(args, timeout=420):
+    cmd = [GODOT, "--headless", "--path", str(ROOT)] + args
+    started = time.time()
+    try:
+        proc = subprocess.run(cmd, capture_output=True, timeout=timeout)
+        out = (proc.stdout or b"").decode("utf-8", "replace") + (proc.stderr or b"").decode("utf-8", "replace")
+        return proc.returncode, out, time.time() - started
+    except subprocess.TimeoutExpired as exc:
+        out = (exc.stdout or b"").decode("utf-8", "replace") if exc.stdout else ""
+        return None, out, time.time() - started
+    except FileNotFoundError:
+        return "missing", "", time.time() - started
+
+
+def check_import():
+    code, out, secs = run_godot(["--import"])
+    if code == "missing":
+        return {"id": "headless-import", "determinism": "grep", "pass": False,
+                "reason": "找不到 Godot 可执行文件，设置 GODOT_BIN 环境变量", "godot": GODOT}
+    bad = [ln for ln in out.splitlines() if IMPORT_BAD.search(ln) and not NOISE.search(ln)]
+    return {
+        "id": "headless-import",
+        "determinism": "grep",
+        "pass": code == 0 and not bad,
+        "exit_code": code,
+        "bad_lines": bad[:10],
+        "bad_count": len(bad),
+        "seconds": round(secs, 1),
+    }
+
+
+def check_runtime(frames=240):
+    code, out, secs = run_godot(["--quit-after", str(frames)])
+    if code == "missing":
+        return {"id": "headless-runtime", "determinism": "grep", "pass": False,
+                "reason": "找不到 Godot 可执行文件", "godot": GODOT}
+    bad = [ln for ln in out.splitlines() if RUNTIME_BAD.search(ln)]
+    return {
+        "id": "headless-runtime",
+        "determinism": "grep",
+        "pass": code == 0 and not bad,
+        "exit_code": code,
+        "frames": frames,
+        "bad_count": len(bad),
+        "bad_lines": bad[:10],
+        "seconds": round(secs, 1),
+    }
+
+
+def check_asset_contract():
+    problems = []
+    checked = []
+    for rel, spec in ASSET_SPEC.items():
+        path = ROOT / rel
+        if not path.exists():
+            if spec.get("optional"):
+                continue
+            problems.append(f"{rel}: 文件不存在")
+            continue
+        size = read_image_size(path)
+        if size is None:
+            problems.append(f"{rel}: 无法读取尺寸（格式不支持）")
+            continue
+        checked.append({"path": rel, "size": list(size), "expected": list(spec["size"]),
+                        "sha256": sha256_of(path)[:16]})
+        if size != tuple(spec["size"]):
+            problems.append(f"{rel}: 尺寸 {size[0]}x{size[1]} != 期望 {spec['size'][0]}x{spec['size'][1]}（{spec['note']}）")
+    return {
+        "id": "asset-contract",
+        "determinism": "contract",
+        "pass": not problems,
+        "checked": checked,
+        "problems": problems,
+    }
+
+
+def check_import_hygiene():
+    pngs = [p for p in ROOT.glob("assets/**/*.png")]
+    imports = [p for p in ROOT.glob("assets/**/*.png.import")]
+    orphans = [str(p.relative_to(ROOT)) for p in imports if not p.with_suffix("").exists()]
+    missing = [str(p.relative_to(ROOT)) for p in pngs if not Path(str(p) + ".import").exists()]
+    return {
+        "id": "import-hygiene",
+        "determinism": "filesystem",
+        "pass": not missing,
+        "png_count": len(pngs),
+        "orphan_imports": orphans,
+        "missing_imports": missing,
+        "warnings": [f"孤儿 .import：{o}" for o in orphans],
+    }
+
+
+def check_sprite_refs():
+    """balance.gd 里引用的贴图路径必须真实存在（坑 #10 的机器版）。"""
+    balance = ROOT / "balance.gd"
+    if not balance.exists():
+        return {"id": "sprite-refs", "determinism": "filesystem", "pass": True, "reason": "无 balance.gd，跳过"}
+    text = balance.read_text(encoding="utf-8", errors="replace")
+    refs = sorted(set(re.findall(r'res://([A-Za-z0-9_./\-]+\.(?:png|webp|jpg))', text)))
+    missing = [r for r in refs if not (ROOT / r).exists()]
+    return {
+        "id": "sprite-refs",
+        "determinism": "filesystem",
+        "pass": not missing,
+        "ref_count": len(refs),
+        "missing": missing,
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--fast", action="store_true", help="跳过 240 帧 headless 运行")
+    parser.add_argument("--json", action="store_true", help="把报告打到 stdout")
+    args = parser.parse_args()
+
+    checks = [check_import(), check_asset_contract(), check_import_hygiene(), check_sprite_refs()]
+    if not args.fast:
+        checks.insert(1, check_runtime())
+
+    failed = [c for c in checks if not c.get("pass")]
+    warnings = [w for c in checks for w in c.get("warnings", [])]
+    report = {
+        "judge": "my-survivors L0 (smoke + asset contract)",
+        "round_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "root": str(ROOT),
+        "verdict": "pass" if not failed else "fail",
+        "checks": checks,
+        "warnings": warnings,
+        "failed_checks": [c["id"] for c in failed],
+        "next_action_for_build": None if not failed else "; ".join(
+            f"{c['id']}: " + str(c.get("problems") or c.get("bad_lines") or c.get("missing")) for c in failed
+        ),
+    }
+
+    QA_DIR.mkdir(parents=True, exist_ok=True)
+    REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    for c in checks:
+        mark = "PASS" if c.get("pass") else "FAIL"
+        extra = ""
+        if c["id"] == "asset-contract":
+            extra = f" ({len(c.get('checked', []))} 项)"
+        if c["id"] == "import-hygiene":
+            extra = f" (png={c.get('png_count')}, 孤儿={len(c.get('orphan_imports', []))})"
+        if c["id"] == "sprite-refs":
+            extra = f" (引用 {c.get('ref_count', 0)} 个)"
+        print(f"[{mark}] {c['id']}{extra}")
+        for p in c.get("problems", [])[:5]:
+            print(f"       - {p}")
+        for w in c.get("warnings", [])[:5]:
+            print(f"       ! {w}")
+    print(f"verdict={report['verdict']}  报告={REPORT_PATH}")
+
+    if args.json:
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0 if report["verdict"] == "pass" else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
