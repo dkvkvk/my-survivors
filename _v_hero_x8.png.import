@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://by4rx1ykxytrp"
-path="res://.godot/imported/card_orbit_blade.png-9011d88968f47419c96efe73c8f6c67b.ctex"
+uid="uid://djbo2powf8ocp"
+path="res://.godot/imported/_v_hero_x8.png-d911f4b39803c228e07fa9000fd53a32.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/card_orbit_blade.png"
-dest_files=["res://.godot/imported/card_orbit_blade.png-9011d88968f47419c96efe73c8f6c67b.ctex"]
+source_file="res://_v_hero_x8.png"
+dest_files=["res://.godot/imported/_v_hero_x8.png-d911f4b39803c228e07fa9000fd53a32.ctex"]
 
 [params]
 

@@ -3,8 +3,8 @@
 > 《不退》（NO RETREAT，repo 名 my-survivors）——Godot 4.7 割草幸存者游戏。
 > 世界观：中国修仙世界（魔渊妖潮 · 青冥山守夜）。胜利条件：活满 15 分钟（守到黎明）或击破 3 只妖王。
 
-> **修仙化改版进度**：批次 A（文案与系统命名）**已完成**；批次 B~E（图标 / 地图 / 角色 / 背景美术）**待素材**；
-> 批次 F（文档术语清洗）**已做**。世界观见 `WORLDVIEW.md`，改造清单见 `REFACTOR_XIANXIA.md`，生图清单见 `XIANXIA_ART_PROMPTS.md`。
+> **修仙化改版进度（2026-09-21 全部完成）**：批次 A（文案与系统命名）✅、批次 B~E（图标 / 地图 / 角色 / 背景美术）✅、批次 F（文档术语清洗）✅。
+> 38 张生图经 `tools/import_ai_art.py` 入库，实机截图逐张验收通过。世界观见 `WORLDVIEW.md`，改造清单见 `REFACTOR_XIANXIA.md`，生图清单见 `XIANXIA_ART_PROMPTS.md`。
 > 本文写给接手的 AI agent / 开发者：环境、架构、约定、坑、验证与发布流程、待办。
 
 ## 0. 快速上手
@@ -111,7 +111,7 @@ func _process(_delta) -> bool:  # 必须有返回值，否则 Parse Error
 - 用户用**网页版 Nano Banana**生成（无 API），流程：我给提示词 → 用户生成 → 放 `E:\games` → 我处理接入。
 - 比例铁律：单体精灵/图标 1:1；两帧动画=第一帧 1:1 + 参考图改姿势（不要双格表，格子会压扁）；4×4 方向表 1:1；背景/封面 16:9。
 - 提示词必带：`solid magenta background (#FF00FF)` + `no text, no watermark` + `crisp pixels`。
-- 处理管线：洋红抠底（r>150 且 b>100 且 g<min(r,b)-60）→ bbox 裁剪 → 像素化（怪 24px/16 色，妖王 32px，表整缩 64×64）→ 接入 → 实机截图验证。
+- 处理管线：python tools/import_ai_art.py（洋红抠底 → bbox → 等比装 box → 两帧统一量化 → 画布对齐）→ tileset 额外跑 tools/postprocess_tiles.py → headless 验证 → 实机截图核对。规格表在脚本末尾，改素材只改那张表。
 - 新怪贴图：改 `balance.gd` 变体表的 sprites 路径即可；妖王放 `assets/mobs/boss_0/1.png` 自动生效。
 - AI 素材商用条款遵循 Gemini API 条款，NOTICE.md 已登记。
 

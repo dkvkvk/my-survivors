@@ -17,7 +17,7 @@ const LIST := [
 	{
 		"id": "shuriken",
 		"name": "本命飞剑",
-		"icon": "res://assets/ui/icon_shuriken.png",
+		"icon": "res://assets/ui/icon_fa_sword.png",
 		"max_level": 5,
 		"passive": "gun",
 		"skills": ["shuriken_burst"],
@@ -29,7 +29,7 @@ const LIST := [
 	{
 		"id": "orbit_blade",
 		"name": "周天剑环",
-		"icon": "res://assets/ui/card_orbit_blade.png",
+		"icon": "res://assets/ui/icon_fa_ring.png",
 		"max_level": 5,
 		"passive": "orbit_blade",
 		"skills": ["blade_storm"],
@@ -41,7 +41,7 @@ const LIST := [
 	{
 		"id": "aura",
 		"name": "离火法环",
-		"icon": "res://assets/ui/card_aura.png",
+		"icon": "res://assets/ui/icon_fa_fire.png",
 		"max_level": 5,
 		"passive": "aura",
 		"skills": ["sunburst"],
@@ -53,7 +53,7 @@ const LIST := [
 	{
 		"id": "chain_lightning",
 		"name": "连环雷符",
-		"icon": "res://assets/ui/card_chain_lightning.png",
+		"icon": "res://assets/ui/icon_fa_talisman.png",
 		"max_level": 5,
 		"passive": "chain_lightning",
 		"skills": ["thunder"],

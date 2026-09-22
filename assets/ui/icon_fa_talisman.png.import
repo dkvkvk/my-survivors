@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://chullfpsg4kwf"
-path="res://.godot/imported/card_aura.png-9599619e7934544f00509664fc5682cc.ctex"
+uid="uid://bgfohtlsxyq0y"
+path="res://.godot/imported/icon_fa_talisman.png-c2fe1226981ae61ac96cb154bbd14cc1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/card_aura.png"
-dest_files=["res://.godot/imported/card_aura.png-9599619e7934544f00509664fc5682cc.ctex"]
+source_file="res://assets/ui/icon_fa_talisman.png"
+dest_files=["res://.godot/imported/icon_fa_talisman.png-c2fe1226981ae61ac96cb154bbd14cc1.ctex"]
 
 [params]
 

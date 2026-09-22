@@ -4,8 +4,8 @@
 
 **胜利条件**：活满 **15 分钟**，或击破 **3 只妖王**——站着不退才是活路。**全部美术素材为 CC0/OFL 可商用**。
 
-> ⚠️ **修仙化改版进行中**（2026-09-21）：**文案与系统命名已全部改为修仙口径**（法宝 / 神通 / 道法 / 坊市 / 妖物……，设定见 `WORLDVIEW.md`）；
-> **美术素材仍是旧的和风 / 科技素材**，正按 `XIANXIA_ART_PROMPTS.md` 分批替换（改造清单见 `REFACTOR_XIANXIA.md`）。
+> ✅ **修仙化改版已完成**（2026-09-21）：**文案与系统命名**（法宝 / 神通 / 道法 / 坊市 / 妖物……）与**全部美术素材**（主角 / 妖物 / 瓦片 / 地面 / 图标 / 背景）均已换成中国修仙口径。
+> 世界观见 `WORLDVIEW.md`，改造清单见 `REFACTOR_XIANXIA.md`，素材清单见 `ASSETS.md`。
 
 > 基于 [GDQuest](https://www.gdquest.com/) 的开源教学项目 [getting-started-with-godot-4](https://github.com/gdquest-demos/getting-started-with-godot-4) 二次开发。
 

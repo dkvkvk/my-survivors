@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b7g2q2davibnf"
-path="res://.godot/imported/card_split_shot.png-160c0cfbec0eabd6f3c9602eb0fc066c.ctex"
+uid="uid://qtnykwr0o02d"
+path="res://.godot/imported/icon_fa_fire.png-26517a076b92d3e15e260c2c9e46e442.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/card_split_shot.png"
-dest_files=["res://.godot/imported/card_split_shot.png-160c0cfbec0eabd6f3c9602eb0fc066c.ctex"]
+source_file="res://assets/ui/icon_fa_fire.png"
+dest_files=["res://.godot/imported/icon_fa_fire.png-26517a076b92d3e15e260c2c9e46e442.ctex"]
 
 [params]
 

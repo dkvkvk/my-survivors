@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cfl7f60v6uq37"
-path="res://.godot/imported/card_chain_lightning.png-a2351e0e55c90d0ee58e3ec636b68935.ctex"
+uid="uid://bofvyh3bld5h7"
+path="res://.godot/imported/icon_fa_sword.png-1eae81a372f9dc5bea656487582e18f6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/card_chain_lightning.png"
-dest_files=["res://.godot/imported/card_chain_lightning.png-a2351e0e55c90d0ee58e3ec636b68935.ctex"]
+source_file="res://assets/ui/icon_fa_sword.png"
+dest_files=["res://.godot/imported/icon_fa_sword.png-1eae81a372f9dc5bea656487582e18f6.ctex"]
 
 [params]
 
