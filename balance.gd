@@ -176,6 +176,14 @@ const MANA_MAX := 100.0
 const MANA_START := 100.0
 const MANA_REGEN := 6.0  # 每秒回复
 
+# 摄像机抖动（Juice.shake 的 4/5 号参数）：**只保留位移，关掉旋转**。
+# 为什么关旋转：Juice 默认 max_roll=0.08 弧度（4.6°），而我们的 shake 由"打中/被撞"高频触发，
+# 实测战斗中摄像机在 -3.4°~+1.1° 之间每 0.12 秒随机跳变——画面绕中心转，玩家看到的是"人物在转"
+# （侧面走路时最明显）。位移抖动保留，打击感不受影响。
+const CAMERA_SHAKE_OFFSET := Vector2(22, 14)
+const CAMERA_SHAKE_ROLL := 0.0
+const CAMERA_SHAKE_DECAY := 1.4
+
 # 胜利条件（P5）：活满 SURVIVE_WIN_TIME 秒，或斩妖 VICTORY_BOSS_KILLS 只妖王，任一达成即胜利。
 const SURVIVE_WIN_TIME := 900.0  # 15 分钟
 const VICTORY_BOSS_KILLS := 3

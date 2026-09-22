@@ -153,6 +153,9 @@ func _process(_delta) -> bool:  # 必须有返回值，否则 Parse Error
 13. **`.tscn` 里父节点必须先声明**：`Card1Icon`/`Card2Icon` 曾被写在父节点 `Card1`/`Card2` **之前**，Godot 无法挂载，直接把它们丢到场景根并改名成 `LevelUpUI_Card2#Card2Icon`，于是 `level_up_ui.gd` 的 `get_node("Card1/Card1Icon")` 拿到 null，升级卡图标永远不显示（还每局刷 SCRIPT ERROR）。**手工编辑 `.tscn` 后必须确认节点块是父先子后**。
 14. **验证素材要固定输入再截图**：`SendKeys` 的 `{A DOWN}` 语法无效（会报 repeat count），用 `keybd_event`；且 harness 场景根节点必须叫 `Game`，否则脚本里写死的 `/root/Game/Player` 全部解析成 null。
 
+13. **摄像机旋转会被玩家读成"人物在转"**：Juice.shake 的 max_roll 默认 0.08 弧度（4.6°），而我们的 shake 由"打中/被撞"高频触发——实测战斗中摄像机在 **-3.4°~+1.1°** 之间每 0.12 秒随机跳变，画面绕中心转，玩家看到的就是"人物在旋转"（**侧面走路时最明显**，因为侧脸一倾斜特别像转头）。**已改成只位移不旋转**：@@Balance.CAMERA_SHAKE_ROLL = 0.0@@，6 个调用点显式传参（位移抖动保留，打击感不受影响）。想恢复旋转感就把那个常量调大。
+    ⚠️ 排查手法备忘：怀疑"角色在转"时，先打印 @@cam.rotation@@（相机是 Player 的子节点：@@Player/Camera2D@@），别急着去改精灵表。
+
 ## 7. 待办与机会（按建议优先级）
 
 1. **Web 版瘦身**：wasm 39MB 首载慢。字体子集化（Fusion Pixel 4.9MB → 用 pyftsubset 按游戏实际用字裁剪到几百 KB）收益最大。
