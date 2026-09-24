@@ -41,6 +41,11 @@ jobs:
         with:
           name: my-survivors-windows
           path: build/
+          # ⚠️ 免费额度只有 0.5GB 产物存储：每次推送都会产出一个 ~44MB 的 exe，
+          # 默认保留 90 天会迅速撑爆（2026-09-24 踩过：87 个产物 3.1GB，Actions 存储 100%）。
+          # 这里锁死 1 天；网页版的 github-pages 产物由 upload-pages-artifact 生成、
+          # 不接这个参数，靠仓库默认保留期（也已设为 1 天）。
+          retention-days: 1
 
   web:
     runs-on: ubuntu-latest

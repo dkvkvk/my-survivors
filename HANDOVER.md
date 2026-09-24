@@ -151,6 +151,32 @@ MS_TOUCH=1 MS_TOUCH_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 900 2
   `python tools/gh_push_proxy.py --probe` 可先看哪些候选 IP 可达（2026-09-24 实测 140.82.113.4 可用）。
   想常驻就在自己的终端里跑，别用一次性 bash 工具。
 - 推送 main 自动触发 Actions：Windows exe（Artifact）+ Web（部署 Pages）。**Web 预设的 export_path 不能为空**（踩过：空路径导致 CI 失败）。
+
+### ⚠️ Actions 产物存储只有 0.5GB（免费额度）——2026-09-24 踩过
+
+每次推送产出两个产物：`my-survivors-windows` ≈44MB + `github-pages` ≈17MB。
+**默认保留 90 天**，于是 87 次构建攒到 **3.1GB**，GitHub 发来"You have used 100% of the Actions storage"告警
+（继续超用会按量计费；若账号设了 $0 预算则**后续运行直接被挡住**）。已处理：
+
+1. 仓库默认保留期改 1 天：`gh api -X PUT repos/dkvkvk/my-survivors/actions/permissions/artifact-and-log-retention -F days=1`
+2. 工作流里 `actions/upload-artifact` 显式 `retention-days: 1`
+   （`upload-pages-artifact` 不接这个参数，靠上面的仓库默认值兜底）
+
+**查/清产物**：
+```bash
+# 看现状（数量 + 总量）
+gh api "repos/dkvkvk/my-survivors/actions/artifacts?per_page=100" \
+  --jq '.artifacts | length, (map(.size_in_bytes) | add / 1048576)'
+
+# 删掉除最新 2 个之外的全部
+gh api "repos/dkvkvk/my-survivors/actions/artifacts?per_page=100" \
+  --jq '.artifacts | sort_by(.created_at) | reverse | .[2:] | .[].id' \
+  | while read id; do gh api -X DELETE "repos/dkvkvk/my-survivors/actions/artifacts/$id" >/dev/null; done
+```
+
+**踩过的坑**：想"保留每个名字最新的一个"时，别写成
+`[.artifacts | ... | map(.[0].id)] | .[]` —— 外面多套一层方括号会让 jq 输出**一个数组**，
+于是 `grep -qx` 匹配不上，循环把**全部**产物都删了（含最新的那份，只能重新构建补回来）。
 - 匿名 GitHub API 有限流，查 CI 用 `gh run list --repo dkvkvk/my-survivors`（本机 gh 已认证）。
 
 ## 5. 美术管线（game-art-gen skill）
