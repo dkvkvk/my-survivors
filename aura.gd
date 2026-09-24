@@ -110,7 +110,7 @@ func _on_timer_timeout():
 	var hit_any := false
 	for body in get_overlapping_bodies():
 		if body.has_method("take_damage"):
-			body.call_deferred("take_damage", damage)
+			body.call_deferred("take_damage", damage, Vector2.ZERO, "aura")
 			hit_any = true
 	if hit_any:
 		# 命中时轻微脉冲 + 一圈灼热环，给"灼烧正在生效"的反馈

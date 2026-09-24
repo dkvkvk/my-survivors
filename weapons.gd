@@ -10,6 +10,10 @@ class_name Weapons
 ##
 ## 加法宝：这里加一条 + player._apply_weapon_passive()/_clear_weapon_passive()/_evolve_weapon() 各加分支
 ## 加技能：skills.gd 加一条 + player._run_skill_effect() 加分支
+##
+## kills_per_level 说明：斩妖经验**精确归属**给造成致命一击的法宝（见 mob.take_damage 的 source），
+## 一把法宝只能拿到自己补刀的那部分斩妖数（4 把平分时约 1/4~1/3）。
+## 所以这里的门槛是"归属精确化之后"的数值——2026-09-22 由 100/120/120/150 下调到下面这组。
 
 const MAX_SLOTS := 4          # 法宝上限（与 4 个技能槽对应）
 
@@ -23,7 +27,7 @@ const LIST := [
 		"skills": ["shuriken_burst"],
 		"upgrade_material": "scrap",
 		"base_cost": 5,
-		"kills_per_level": 100,
+		"kills_per_level": 35,
 		"desc": "被动：御剑杀敌，阶高分化多剑",
 	},
 	{
@@ -35,7 +39,7 @@ const LIST := [
 		"skills": ["blade_storm"],
 		"upgrade_material": "scrap",
 		"base_cost": 6,
-		"kills_per_level": 120,
+		"kills_per_level": 40,
 		"desc": "被动：数剑绕体护身，剑数 = 品阶",
 	},
 	{
@@ -47,7 +51,7 @@ const LIST := [
 		"skills": ["sunburst"],
 		"upgrade_material": "crystal",
 		"base_cost": 4,
-		"kills_per_level": 120,
+		"kills_per_level": 40,
 		"desc": "被动：周身三昧真火，灼烧近敌",
 	},
 	{
@@ -59,7 +63,7 @@ const LIST := [
 		"skills": ["thunder"],
 		"upgrade_material": "crystal",
 		"base_cost": 4,
-		"kills_per_level": 150,
+		"kills_per_level": 50,
 		"desc": "被动：杀敌引雷，雷窜敌群",
 	},
 ]

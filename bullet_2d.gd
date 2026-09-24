@@ -5,6 +5,7 @@ extends Area2D
 
 var travelled_distance = 0
 var damage := 1  # 由枪在生成时写入，吃升级加成
+var source := "shuriken"  # 斩妖归属（P6 精确归属）：本命飞剑的弹体
 var _star: Sprite2D
 
 @onready var player: CharacterBody2D = get_node("/root/Game/Player")
@@ -36,6 +37,6 @@ func _on_body_entered(body):
 	if body.has_method("take_damage"):
 		# 沿弹道方向击退
 		var kb := Vector2.RIGHT.rotated(rotation) * Balance.KNOCKBACK_BULLET
-		body.call_deferred("take_damage", damage, kb)
+		body.call_deferred("take_damage", damage, kb, source)
 		# 命中事件喂给链式闪电（没这张卡时是空操作）
 		player.call_deferred("on_weapon_hit", body.global_position, body.get_instance_id())

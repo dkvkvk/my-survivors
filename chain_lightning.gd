@@ -51,7 +51,7 @@ func cast_ultimate() -> void:
 		if id != 0:
 			var mob = instance_from_id(id)
 			if mob != null and is_instance_valid(mob):
-				mob.call_deferred("take_damage", _hit_damage(Balance.SKILL_THUNDER_DAMAGE_BONUS))
+				mob.call_deferred("take_damage", _hit_damage(Balance.SKILL_THUNDER_DAMAGE_BONUS), Vector2.ZERO, "chain_lightning")
 		var exclude := {}
 		if id != 0:
 			exclude[id] = true
@@ -101,7 +101,7 @@ func _strike(origin: Vector2, extra_jumps := 0, damage_bonus := 0, exclude := {}
 		var to: Vector2 = target.global_position
 		_add_arc(from, to)
 		VFX.impact(to, to - from, VFX.C_BLUE)
-		target.call_deferred("take_damage", int(round(damage)))
+		target.call_deferred("take_damage", int(round(damage)), Vector2.ZERO, "chain_lightning")
 		from = to
 		damage *= falloff
 		# 至少保留 1 点伤害，避免高跳数时变成 0

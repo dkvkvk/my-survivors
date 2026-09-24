@@ -87,11 +87,11 @@ func _on_timer_timeout():
 	$Timer.wait_time = current_wave["spawn"]
 
 
-func _on_mob_died():
+func _on_mob_died(source: String) -> void:
 	kill_count += 1
 	%KillLabel.text = "斩妖 %d" % kill_count
-	# 法宝升级条件之一：斩妖数累积（P6）
-	player.add_kill_credit()
+	# 法宝升级条件之一：斩妖数累积（P6），只记给致命一击的法宝
+	player.add_kill_credit(source)
 
 
 ## 灵石拾取入口（coin.gd 延迟调用）
@@ -111,7 +111,7 @@ func _spawn_boss() -> void:
 	_show_boss_warn()
 
 
-func _on_boss_died() -> void:
+func _on_boss_died(_source: String) -> void:
 	boss_kill_count += 1
 	_boss_timer = Balance.BOSS_INTERVAL  # 下一只开始倒计时
 

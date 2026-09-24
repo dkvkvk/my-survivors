@@ -191,10 +191,15 @@ func _sync_skill_slots() -> void:
 			skill_slots[i] = ""
 
 
-## 每斩妖一只怪，给所有携带法宝累积 1 点"斩妖经验"（法宝升级条件之一）。
-## 说明：目前不区分"是谁打死的"——所有携带法宝同时累积，简单直观；
-## 将来要精确归属，需要在 take_damage 里带上来源法宝 id。
-func add_kill_credit() -> void:
+## 斩妖经验（法宝升级条件之一）：只记给**造成致命一击的那把法宝**。
+## 数值门槛见 weapons.gd 的 kills_per_level（归属精确后已按比例下调）。
+## source 为空串 = 来源不明（如场景伤害）：宁可多记不可漏记，记给所有携带法宝。
+func add_kill_credit(source := "") -> void:
+	if source != "":
+		var w: Dictionary = get_weapon(source)
+		if not w.is_empty():
+			w["kills"] = int(w["kills"]) + 1
+			return
 	for w in weapons:
 		w["kills"] = int(w["kills"]) + 1
 
@@ -311,13 +316,13 @@ func _run_skill_effect(id: String) -> void:
 		"blade_storm":
 			VFX.spin_slash(global_position, Balance.SKILL_BLADE_RADIUS, VFX.C_CYAN, 6, 0.5)
 			VFX.shockwave(global_position, Balance.SKILL_BLADE_RADIUS, VFX.C_WHITE, 0.32, 7.0)
-			_hit_all_in_radius(Balance.SKILL_BLADE_RADIUS, Balance.SKILL_BLADE_DAMAGE)
+			_hit_all_in_radius(Balance.SKILL_BLADE_RADIUS, Balance.SKILL_BLADE_DAMAGE, "orbit_blade")
 		"sunburst":
 			VFX.shockwave(global_position, Balance.SKILL_AURA_RADIUS, VFX.C_GOLD, 0.45, 10.0, true)
 			VFX.shockwave(global_position, Balance.SKILL_AURA_RADIUS * 0.6, VFX.C_ORANGE, 0.3, 6.0)
 			VFX.burst(global_position, 16, VFX.C_GOLD, 420.0, 0.7, "star", 2.0, 120.0)
 			VFX.screen_flash(VFX.C_GOLD, 0.26, 0.26)
-			_hit_all_in_radius(Balance.SKILL_AURA_RADIUS, Balance.SKILL_AURA_DAMAGE)
+			_hit_all_in_radius(Balance.SKILL_AURA_RADIUS, Balance.SKILL_AURA_DAMAGE, "aura")
 		"thunder":
 			VFX.shockwave(global_position, Balance.SKILL_AURA_RADIUS, VFX.C_BLUE, 0.4, 8.0)
 			VFX.screen_flash(VFX.C_BLUE, 0.30, 0.22)
@@ -337,14 +342,15 @@ func _shuriken_burst() -> void:
 		VFX.trail(b, VFX.C_CYAN, 9.0, 10, 0.16)
 
 
-## 对半径内所有敌人造成一次伤害（近身爆发类技能共用）
-func _hit_all_in_radius(radius: float, damage: int) -> void:
+## 对半径内所有敌人造成一次伤害（近身爆发类技能共用）。
+## source = 提供该技能的法宝 id，用于斩妖归属
+func _hit_all_in_radius(radius: float, damage: int, source := "") -> void:
 	var hit := 0
 	for mob in get_tree().get_nodes_in_group("mobs"):
 		if not is_instance_valid(mob) or not (mob is Node2D):
 			continue
 		if global_position.distance_to(mob.global_position) <= radius:
-			mob.call_deferred("take_damage", damage)
+			mob.call_deferred("take_damage", damage, Vector2.ZERO, source)
 			# 命中爆点最多画 10 个，避免一次打 40 只怪时刷屏
 			if hit < 10:
 				VFX.impact(mob.global_position, mob.global_position - global_position, VFX.C_GOLD)

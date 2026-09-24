@@ -164,6 +164,28 @@ def check_script_parse():
     }
 
 
+def check_kill_credit():
+    """功能回归：精确斩妖归属（P6）。
+
+    用 tools/qa/check_kill_credit.gd 起真实场景，造怪分别带/不带 source 打死，
+    断言只有致命一击的法宝 +1、来源不明时兜底给所有法宝。
+    """
+    code, out, secs = run_godot(["--script", "res://tools/qa/check_kill_credit.gd"])
+    if code == "missing":
+        return {"id": "kill-credit", "determinism": "assert", "pass": False,
+                "reason": "找不到 Godot 可执行文件", "godot": GODOT}
+    bad = [ln for ln in out.splitlines() if "KILLCHECK FAIL" in ln]
+    passed = "KILLCHECK PASS" in out
+    return {
+        "id": "kill-credit",
+        "determinism": "assert",
+        "pass": passed and not bad,
+        "bad_count": len(bad),
+        "bad_lines": bad[:10],
+        "seconds": round(secs, 1),
+    }
+
+
 def check_asset_contract():
     problems = []
     checked = []
@@ -230,8 +252,8 @@ def main():
     parser.add_argument("--json", action="store_true", help="把报告打到 stdout")
     args = parser.parse_args()
 
-    checks = [check_import(), check_script_parse(), check_asset_contract(),
-              check_import_hygiene(), check_sprite_refs()]
+    checks = [check_import(), check_script_parse(), check_kill_credit(),
+              check_asset_contract(), check_import_hygiene(), check_sprite_refs()]
     if not args.fast:
         checks.insert(1, check_runtime())
 
@@ -256,6 +278,8 @@ def main():
     for c in checks:
         mark = "PASS" if c.get("pass") else "FAIL"
         extra = ""
+        if c["id"] == "kill-credit":
+            extra = " (精确斩妖归属)"
         if c["id"] == "asset-contract":
             extra = f" ({len(c.get('checked', []))} 项)"
         if c["id"] == "import-hygiene":

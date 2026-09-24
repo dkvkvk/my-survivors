@@ -65,7 +65,8 @@ P6 法宝/技能系统（进行中，权威设计见 `WEAPON_SYSTEM.md`）：
 | `assets/` | hero/mobs/ui/tiles/ground —— AI 生成 + 自制，全部可商用（见 NOTICE.md） |
 
 **三条铁律约定**：
-1. 伤害单一入口 `mob.take_damage(amount, knockback)`——新法宝零改动接入
+1. 伤害单一入口 `mob.take_damage(amount, knockback, source)`——新法宝零改动接入；
+   `source` 填自己法宝 id，用于**精确斩妖归属**（致命一击的法宝才 +1 斩妖数，见 `player.add_kill_credit`）
 2. 碰撞层：**1=玩家 · 2=敌人 · 3=障碍**；障碍挡玩家，也挡**不穿墙的怪**（`balance.gd` 变体表的 `phasing`，目前只有会飞的阴风鸮为 true）；**子弹一律穿行**（防自动瞄准浪费）；妖王天生穿墙；地面怪被墙卡住约 2.4 秒会短暂穿墙脱困（`mob.gd` 卡墙自愈）。玩家碰撞是"脚部小碰撞"36×22
 3. 所有可调数值进 `balance.gd`，别散落硬编码
 4. **掉落物可读性**：图标一律垫 `VFX.drop_halo()` 暗色底衬、出现时调 `VFX.drop_spawn_for(self, 颜色)` 出爆点；
@@ -166,7 +167,8 @@ func _process(_delta) -> bool:  # 必须有返回值，否则 Parse Error
 6. 妖王目前一只形象，可加多种（模板机制已支持，见 chunk_map 的做法）。
 7. 手机触屏虚拟摇杆（Web 版手机不可玩）。
 7b. **第 5/6 种法宝 + 给法宝补多技能**：补齐后"替换面板 / 神通残卷 / 法宝掉落"才真正有意义（见 WEAPON_SYSTEM.md 待办）。
-7c. **精确斩妖归属**：现在每斩妖给所有法宝各 +1，需要 `take_damage` 带来源法宝 id。
+7c. ~~**精确斩妖归属**~~：**2026-09-22 已完成**——`take_damage(amount, knockback, source)` + `died(source)`，
+    只给致命一击的法宝 +1；`tools/qa/check_kill_credit.gd` 已接入 L0 判定（判据 `kill-credit`）。
 8. README/ARCHITECTURE 与代码保持同步——每次功能落地后更新（本项目的习惯）。
 
 ## 8. 其他背景

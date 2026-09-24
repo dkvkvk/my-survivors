@@ -100,7 +100,7 @@ func _on_blade_body_entered(body):
 		damage += Balance.BLADE_EVOLVE_DAMAGE_BONUS
 	# 从玩家中心向外击退
 	var kb: Vector2 = (body.global_position - global_position).normalized() * Balance.KNOCKBACK_BLADE
-	body.call_deferred("take_damage", damage, kb)
+	body.call_deferred("take_damage", damage, kb, "orbit_blade")
 	VFX.impact(body.global_position, kb, VFX.C_CYAN)
 	# 命中事件喂给链式闪电（没这张卡时是空操作）
 	get_parent().call_deferred("on_weapon_hit", body.global_position, body.get_instance_id())

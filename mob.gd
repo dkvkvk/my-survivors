@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-signal died
+signal died(source: String)  # source = 造成致命一击的法宝 id（空串 = 来源不明）
 
 var variant := "slime"
 var speed := 250.0
@@ -13,6 +13,8 @@ var attack_range := randf_range(22.0, 36.0)
 var approach_offset := Vector2.from_angle(randf() * TAU) * randf_range(6.0, 26.0)
 # 受击击退的当前速度（px/s），每帧摩擦衰减，数值见 balance.gd 的 KNOCKBACK_*
 var _knockback := Vector2.ZERO
+# 最后一次受伤的来源法宝 id（P6 精确斩妖归属）：死亡时随 died 信号带给 game.gd
+var _last_hit_source := ""
 
 # 穿墙与卡墙自愈（障碍在物理层 3，位值 4；见 chunk_map.gd）
 const OBSTACLE_MASK := 4
@@ -392,7 +394,10 @@ func _boss_ai(delta):
 				_charge_timer = Balance.BOSS_CHARGE_PHASE["chase"]
 
 
-func take_damage(amount := 1, knockback := Vector2.ZERO):
+## source：造成这次伤害的法宝 id（见 Weapons.LIST）；不带则保持上一次的来源。
+func take_damage(amount := 1, knockback := Vector2.ZERO, source := ""):
+	if source != "":
+		_last_hit_source = source
 	%Slime.play_hurt()
 	Audio.play("res://sounds/hit.wav", false, randf_range(0.9, 1.1), 0.3)
 	Juice.flash(%Slime)
@@ -409,7 +414,7 @@ func take_damage(amount := 1, knockback := Vector2.ZERO):
 
 	# 注意用 <=：升伤害卡后可能一枪从 1 血打到 -1，用 == 判断会永远杀不死
 	if health <= 0:
-		died.emit()
+		died.emit(_last_hit_source)
 		Audio.play("res://sounds/enemy-die.wav", true, randf_range(0.9, 1.1), 0.15)
 		Juice.shake(player.get_node("Camera2D"), 0.35, Balance.CAMERA_SHAKE_DECAY, Balance.CAMERA_SHAKE_OFFSET, Balance.CAMERA_SHAKE_ROLL)
 		Juice.hitstop(0.05)

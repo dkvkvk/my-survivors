@@ -92,8 +92,8 @@ Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
 2. **刷怪**：`Timer` 触发 `game.gd:spawn_mob()` → 在跟随玩家的 `PathFollow2D` 环上取随机点（敌人总从屏幕外刷出）→ `mob.setup()` 按更次权重选变体；刷怪间隔由 `Balance.current_wave(run_time)` 从五档更次表动态改写。
 3. **敌人 AI**：`mob.gd` 按变体速度追击 `玩家位置 + 环形偏移`（软分离，不会叠成一点），进入攻击距离后停下贴身。
 4. **索敌开火**：`gun.gd` 对 Area2D 内第一个敌人 `look_at()`；开火时按 `1 + 玩家额外弹丸` 生成扇形散射子弹（分裂弹头卡）。
-5. **伤害汇入口**：子弹 `body_entered`、飞刀 `body_entered`、光环 Timer 周期扫描，最终都调 `mob.take_damage()`（`has_method` 鸭子类型判断，完全解耦——新法宝不需要动敌人代码）。飞刀伤害额外吃"重装弹药"加成。
-6. **受击/死亡**：`take_damage()` 播放受击动画、伤害数字（Juice 插件）、扣血；归零时发 `died` 信号（game.gd 计斩妖数）、掉灵珠、生成烟雾特效并自毁。
+5. **伤害汇入口**：子弹 `body_entered`、飞刀 `body_entered`、光环 Timer 周期扫描，最终都调 `mob.take_damage(amount, knockback, source)`（第三个参数 = 来源法宝 id，用于精确斩妖归属）（`has_method` 鸭子类型判断，完全解耦——新法宝不需要动敌人代码）。飞刀伤害额外吃"重装弹药"加成。
+6. **受击/死亡**：`take_damage()` 播放受击动画、伤害数字（Juice 插件）、扣血、记下最后来源法宝；归零时发 `died(source)` 信号（game.gd 计斩妖数 + `player.add_kill_credit(source)` 只记给致命一击的法宝）、掉灵珠、生成烟雾特效并自毁。
 7. **成长（两条线）**：
    - **属性线**：宝石被磁吸拾取 → `player.add_xp()` → 升级发 `leveled_up` → `LevelUpUI.present()` 暂停弹 3 张属性卡 → `player.apply_upgrade(id)` 应用。
    - **法宝线（P6 模型 B）**：掉落拾取 → `player.add_weapon()` 装位并激活被动 → 乾坤袋里用**材料 + 斩妖数**升级 → 被动等级同步提升 → 满级自动进化（见 `balance.gd` 的 `*_EVOLVE_*`）。
@@ -155,7 +155,7 @@ Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
 - **★ UI 层级（CanvasLayer.layer）**：世界 0 · HUD **10** · 全屏闪 **12** · 乾坤袋 **25** · 弹窗（升级/暂停/失败/胜利）**30** · Fader **128**。
   **新增弹窗一律 layer = 30**，否则会被 HUD 压住——踩过：结算界面上还挂着斩妖/守夜/血条/蓝条，技能栏还压在"回到主菜单"按钮上；
   连 HUD 里的低血量红色脉冲都会盖在结算背景上把它染红。结算时另外 `$HUD.hide()` 收干净。
-- **伤害单一入口**：一切法宝最终调 `mob.take_damage(n)`，新法宝零改动接入。
+- **伤害单一入口**：一切法宝最终调 `mob.take_damage(amount, knockback, source)`，新法宝零改动接入；`source` 填法宝 id，斩妖经验按此精确归属。
 - **★ 碰撞层**：**1 = 玩家 · 2 = 敌人 · 3 = 障碍**。瓦片障碍在层 3（`chunk_map.gd` 的 `set_physics_layer_collision_layer(0, 4)`），玩家 mask = 5，怪 mask = 4。
   谁穿墙由 `balance.gd` 变体表的 `phasing` 决定（只有会飞的阴风鸮 + 妖王）；地面怪被墙卡住约 2.4 秒会短暂穿墙脱困
   （`mob.gd` 的 `_update_stuck()`）；**子弹一律穿行**，防自动瞄准浪费。
