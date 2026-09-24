@@ -79,7 +79,10 @@ git clone https://github.com/dkvkvk/my-survivors.git
 # 用 Godot 4.7+ 打开项目，按 F5
 ```
 
-或下载 [Actions](../../actions) 页面最新构建的 Windows 成品（单文件 exe）。
+或到 [Releases](../../releases/latest) 下载 Windows 单文件 exe（**长期可下载**，pck 已内嵌、双击即玩）。
+
+> 打 tag 即自动发版：`git tag v0.6.1 && git push origin v0.6.1`
+> （Actions 里那 44MB 的 Artifact 只是临时构建产物，**只保留 1 天**，别当下载渠道用。）
 
 ## 构建
 
