@@ -137,8 +137,19 @@ MS_TOUCH=1 MS_TOUCH_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 900 2
   `git push` 会报 "Failed to connect to github.com port 443 via 127.0.0.1"。
   **直接绕过它推**：`git -c http.proxy= -c https.proxy= push origin main`
   （想彻底清掉：`git config --unset http.proxy`）
-- 备用方案（直连又断时）：临时 Python CONNECT 代理转发到可达 IP（会轮换，
-  先 `curl -sI -m 6 --resolve github.com:443:<IP> https://github.com` 筛选），脚本模式见 git 历史（ghpush_proxy.py）。
+- ⚠️ 但 DNS 也会时不时被污染：`curl https://github.com` → 000，而
+  `curl --resolve github.com:443:140.82.113.4 https://github.com` → 200。
+  这时用**本地 CONNECT 代理**兜底（已入库，不用再手搓）：
+
+  ```bash
+  # 起代理 + 推送 + 收工，必须在同一条命令里（bash 工具退出会带走后台进程）
+  python tools/gh_push_proxy.py --port 7899 &      # 自动挑一个可达 IP
+  sleep 2
+  git -c http.proxy=http://127.0.0.1:7899 push origin main
+  ```
+
+  `python tools/gh_push_proxy.py --probe` 可先看哪些候选 IP 可达（2026-09-24 实测 140.82.113.4 可用）。
+  想常驻就在自己的终端里跑，别用一次性 bash 工具。
 - 推送 main 自动触发 Actions：Windows exe（Artifact）+ Web（部署 Pages）。**Web 预设的 export_path 不能为空**（踩过：空路径导致 CI 失败）。
 - 匿名 GitHub API 有限流，查 CI 用 `gh run list --repo dkvkvk/my-survivors`（本机 gh 已认证）。
 
