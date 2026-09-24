@@ -114,7 +114,7 @@ audio.gd          # 音效池 + 循环 BGM
 fader.gd          # 全局过渡：黑场淡入淡出 + 暗角后期（autoload）
 theme.tres        # ★ 全局主题：像素字体 + 按钮/进度条样式
 assets/           # 素材：主角表（Ninja Adventure CC0）/ 妖物与图标（AI 生图）/ 瓦片与地面、特效（脚本自制）
-fonts/            # Fusion Pixel 中文像素字体（SIL OFL 1.1）
+fonts/            # Fusion Pixel 中文像素字体（SIL OFL 1.1）——已子集化到 420 字 / 46KB（tools/subset_font.py）
 addons/saltmire_juice/
 ```
 
@@ -147,5 +147,6 @@ addons/saltmire_juice/
 - [x] P4 妖王与藏宝匣（三段冲锋 AI + 随机奖励）
 - [x] P5 胜利条件与结算（守到黎明 / 击破妖王）
 - [x] P6 法宝与神通系统（6 件法宝 + 4 神通槽 + 材料升级 + 精确斩妖归属）
-- [ ] 移动端触屏操作与 Web 首载瘦身
+- [x] 字体子集化（Web 首载瘦身：字体 4.9MB → 46KB）
+- [ ] 移动端触屏操作
 - [ ] 更多角色 / 地图主题 / 成就、itch.io 发布页

@@ -99,6 +99,15 @@ func _process(_delta) -> bool:  # 必须有返回值，否则 Parse Error
 ```
 **坑**：该模式下物理不步进，Area 的 overlapping 查询不可靠；要测物理/检测链路就在场景内用帧计数驱动真实节点（参考历史提交里的 test_boss 做法）。
 
+### 字体子集（改了中文文案必做）
+```bash
+python tools/subset_font.py          # 重新裁剪 + 校验（漏字会打印缺哪个码位）
+python tools/subset_font.py --check  # 只校验（L0 判据 font-coverage 用的就是它）
+```
+扫 `*.gd`（先剥注释）/ `*.tscn` / `*.tres` 收集字符 → `pyftsubset` → 逐码位比对 cmap。
+**注意**：往界面加新汉字（或新符号）后必须重跑，否则运行时是豆腐块；
+原字体若被裁没了，用 `git checkout -- fonts/` 拿回全量版再重裁。
+
 ### 实机点测（无 computer-use 时的替代）
 后台启动 exe → PowerShell `SendKeys`（TAB/ENTER/{D}/{S}…）模拟操作 → `CopyFromScreen` 截图 → `Read` 图片 → 视觉模型核对。历史会话全靠这套验证 UI。
 
@@ -162,7 +171,9 @@ func _process(_delta) -> bool:  # 必须有返回值，否则 Parse Error
 
 ## 7. 待办与机会（按建议优先级）
 
-1. **Web 版瘦身**：wasm 39MB 首载慢。字体子集化（Fusion Pixel 4.9MB → 用 pyftsubset 按游戏实际用字裁剪到几百 KB）收益最大。
+1. ~~**Web 版瘦身**~~：**2026-09-22 字体子集化已完成** —— Fusion Pixel 4.9MB → **46KB / 420 字**
+   （`tools/subset_font.py`，L0 判据 `font-coverage` 守住漏字）。
+   **仍待办**：wasm/pck 本体瘦身（39MB 主要是 Godot Web 模板，可换 custom template 去掉未用模块）。
 2. **itch.io 发布页**：封面已备好（`assets/ui/cover.png`），README 可嵌的素材齐全。
 3. 玩法 P5：更多法宝/多角色/成就；卡池可加权重与稀有度。
 4. 主菜单/商店/暂停按钮加图标（`assets/ui/star.png` 现成备用，八张卡图标可复用）。

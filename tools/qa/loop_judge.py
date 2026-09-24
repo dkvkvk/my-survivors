@@ -210,6 +210,35 @@ def check_weapons():
     }
 
 
+def check_font_coverage():
+    """中文字体子集必须覆盖全仓用到的字符（漏字 = 界面出现豆腐块）。
+
+    字体是子集化的（Web 首载瘦身），所以"改了中文文案忘了重新裁剪"必须被拦住。
+    校验逻辑在 tools/subset_font.py --check（零依赖部分只有码位比对）。
+    """
+    script = ROOT / "tools" / "subset_font.py"
+    if not script.exists():
+        return {"id": "font-coverage", "determinism": "assert", "pass": True, "reason": "无子集脚本，跳过"}
+    started = time.time()
+    try:
+        proc = subprocess.run([sys.executable, str(script), "--check"],
+                              capture_output=True, cwd=str(ROOT), timeout=120)
+        out = (proc.stdout or b"").decode("utf-8", "replace") + (proc.stderr or b"").decode("utf-8", "replace")
+    except Exception as exc:  # noqa: BLE001
+        return {"id": "font-coverage", "determinism": "assert", "pass": False,
+                "reason": "跑不动 subset_font.py --check：%s" % exc}
+    bad = [ln for ln in out.splitlines() if "SUBSET FAIL" in ln]
+    return {
+        "id": "font-coverage",
+        "determinism": "assert",
+        "pass": "SUBSET PASS" in out and not bad,
+        "bad_count": len(bad),
+        "bad_lines": bad[:5],
+        "info": [ln.strip() for ln in out.splitlines() if "SUBSET PASS" in ln][:1],
+        "seconds": round(time.time() - started, 1),
+    }
+
+
 def check_asset_contract():
     problems = []
     checked = []
@@ -277,7 +306,8 @@ def main():
     args = parser.parse_args()
 
     checks = [check_import(), check_script_parse(), check_kill_credit(), check_weapons(),
-              check_asset_contract(), check_import_hygiene(), check_sprite_refs()]
+              check_asset_contract(), check_import_hygiene(), check_sprite_refs(),
+              check_font_coverage()]
     if not args.fast:
         checks.insert(1, check_runtime())
 
@@ -307,6 +337,10 @@ def main():
         if c["id"] == "weapons-smoke":
             extra = " (6 把法宝被动/技能/进化/归属)"
             for line in c.get("info", [])[:2]:
+                print(f"       {line}")
+        if c["id"] == "font-coverage":
+            extra = " (中文字体子集覆盖全仓文案)"
+            for line in c.get("info", [])[:1]:
                 print(f"       {line}")
         if c["id"] == "asset-contract":
             extra = f" ({len(c.get('checked', []))} 项)"
