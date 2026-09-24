@@ -210,6 +210,35 @@ def check_weapons():
     }
 
 
+def check_hero_columns():
+    """主角四向走路用的精灵表列必须「帧间自洽 + 朝向正确」。
+
+    踩过：修仙化换表后，右向列（col3）的 row0 与其余 3 帧朝向相反且整体右移 2px，
+    而左向是镜像 col3 —— 于是往左往右走都像"边走边转身"（人眼很难发现，质心一量就出来）。
+    校验逻辑在 tools/qa/check_hero_columns.py（零依赖 PNG 解码 + 质心分析）。
+    """
+    script = ROOT / "tools" / "qa" / "check_hero_columns.py"
+    if not script.exists():
+        return {"id": "hero-columns", "determinism": "assert", "pass": True, "reason": "无校验脚本，跳过"}
+    started = time.time()
+    try:
+        proc = subprocess.run([sys.executable, str(script)], capture_output=True, cwd=str(ROOT), timeout=120)
+        out = (proc.stdout or b"").decode("utf-8", "replace") + (proc.stderr or b"").decode("utf-8", "replace")
+    except Exception as exc:  # noqa: BLE001
+        return {"id": "hero-columns", "determinism": "assert", "pass": False,
+                "reason": "跑不动 check_hero_columns.py：%s" % exc}
+    bad = [ln.strip() for ln in out.splitlines() if "HEROCOL FAIL" in ln]
+    return {
+        "id": "hero-columns",
+        "determinism": "assert",
+        "pass": "HEROCOL PASS" in out and not bad,
+        "bad_count": len(bad),
+        "bad_lines": bad[:5],
+        "info": [ln.strip() for ln in out.splitlines() if "col" in ln][:4],
+        "seconds": round(time.time() - started, 1),
+    }
+
+
 def check_touch():
     """功能回归：触屏操作（P2b）。
 
@@ -336,7 +365,7 @@ def main():
 
     checks = [check_import(), check_script_parse(), check_kill_credit(), check_weapons(),
               check_asset_contract(), check_import_hygiene(), check_sprite_refs(),
-              check_touch(), check_font_coverage()]
+              check_touch(), check_hero_columns(), check_font_coverage()]
     if not args.fast:
         checks.insert(1, check_runtime())
 
@@ -367,6 +396,8 @@ def main():
             extra = " (6 把法宝被动/技能/进化/归属)"
             for line in c.get("info", [])[:2]:
                 print(f"       {line}")
+        if c["id"] == "hero-columns":
+            extra = " (四向走路列自洽+朝向)"
         if c["id"] == "touch-controls":
             extra = " (触屏摇杆/神通按钮)"
         if c["id"] == "font-coverage":

@@ -111,12 +111,27 @@ func _process(_delta: float) -> void:
 		_player = get_node_or_null("/root/Game/Player")
 		if _player == null:
 			return
-	# 调试/验证钩子（本机没有触摸屏时用）：MS_TOUCH_PROBE=1 让摇杆固定朝右并打印角色坐标，
-	# 用来验证"摇杆真的推得动角色"。见 HANDOVER §3「触屏与移动端验证」。
+	# 调试/验证钩子（本机没有触摸屏时用）：MS_TOUCH_PROBE=1
+	#   ① 摇杆每 90 帧在"右/左"之间交替（复现左右走路）
+	#   ② 每 15 帧打印速度/动画/flip/精灵与相机的 rotation
+	# 用途：验证"摇杆真的推得动角色"，以及判断"画面在转"到底是相机还是帧的问题
+	#（2026-09-24 就是靠它排除相机旋转、定位到精灵表 col3 帧间朝向不一致）。
+	# 见 HANDOVER §3「触屏与移动端验证」。
 	if OS.get_environment("MS_TOUCH_PROBE") == "1":
-		direction = Vector2.RIGHT
-		if Engine.get_process_frames() % 30 == 0:
-			print("TOUCHPROBE x=%.1f frames=%d" % [_player.global_position.x, Engine.get_process_frames()])
+		var phase: int = int(Engine.get_process_frames() / 90) % 2
+		direction = Vector2.RIGHT if phase == 0 else Vector2.LEFT
+		if Engine.get_process_frames() % 15 == 0:
+			var hero = _player.get_node_or_null("Hero")
+			var cam = _player.get_node_or_null("Camera2D")
+			var spr = hero._sprite if hero != null else null
+			print("PROBE f=%d v=%s anim=%s flip=%s spr_rot=%.4f spr_scale=%s hero_rot=%.4f cam_rot=%.4f" % [
+				Engine.get_process_frames(), str(_player.velocity),
+				str(spr.animation) if spr != null else "-",
+				str(spr.flip_h) if spr != null else "-",
+				spr.rotation if spr != null else 0.0,
+				str(spr.scale) if spr != null else "-",
+				hero.rotation if hero != null else 0.0,
+				cam.rotation if cam != null else 0.0])
 	var slots: Array = _player.skill_slots
 	for b in _buttons:
 		var i: int = int(b["index"])

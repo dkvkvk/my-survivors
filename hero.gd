@@ -7,12 +7,19 @@ extends Node2D
 const SHEET := preload("res://assets/hero/ninja_sheet.png")
 const SHADOW := preload("res://assets/hero/shadow.png")
 const FRAME := 16
-# 精灵表列 = 朝向（下0 上1 左2 右3；行 0=待机帧，0-3=走路循环）
-# ⚠️ 但 col2（左）那 4 帧朝向并不统一（实测脸部横坐标 9.2/7.0/3.3/10.0 乱跳），
-#    当成走路循环播会像"原地转身"。所以左向不用 col2，改为镜像 col3（右向）——
-#    col3 四帧朝向稳定（8.7/7.5/8.5/9.5），镜像后就是一致的左向走路。
-const DIR_COL := {"down": 0, "up": 1, "right": 3}
-const MIRROR_OF := {"left": "right"}
+# 精灵表列 = 朝向（下0 上1 左2 右3；行 0=待机帧，行 0-3=走路循环）
+#
+# ⚠️ 朝向列必须"帧间自洽"才拿来当走路循环——否则播起来像边走边转身。
+# 2026-09-24 在**当前的守山人表**上重测（每帧不透明像素质心 + 肤色质心）：
+#   col0 质心 7.1/7.1/7.1/7.0  ✅ 自洽
+#   col1 质心 6.7/6.6/6.7/6.7  ✅ 自洽
+#   col2 质心 6.5/6.4/6.5/6.5，脸一律在左  ✅ 自洽（面朝左）
+#   col3 质心 8.5/6.4/6.5/6.5，**row0 整体右移 2px 且脸朝右，其余 3 帧脸朝左**  ❌ 这一列不能用来播走路
+# 所以：左向直接用 col2，右向**镜像 col2**（镜像自洽的列 = 自洽的反向走路），
+# 坏掉的 col3 整个不用。HANDOVER 坑 #11b 的"col2 坏 / col3 好"是**旧忍者表**上的结论，
+# 换表后失效——L0 判据 hero-columns 现在会机器校验这件事（自洽性 + 朝向符号）。
+const DIR_COL := {"down": 0, "up": 1, "left": 2}
+const MIRROR_OF := {"right": "left"}
 # 6.0：新敌人素材比旧素材高大，主角同步放大才不会显得是"小不点"
 const SPRITE_SCALE := 6.6
 
@@ -78,7 +85,7 @@ func _process(_delta):
 	elif absf(v.y) > 10.0:
 		_last_dir = "down" if v.y > 0.0 else "up"
 	var want := ("walk_" if moving else "idle_") + _last_dir
-	# 左向是右向的镜像，播放时水平翻转
-	_sprite.flip_h = _last_dir == "left"
+	# 右向是左向（col2）的镜像，播放时水平翻转
+	_sprite.flip_h = _last_dir == "right"
 	if _sprite.animation != want or not _sprite.is_playing():
 		_sprite.play(want)

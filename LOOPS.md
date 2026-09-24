@@ -99,3 +99,21 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 
 状态：awaiting-human
 
+### 2026-09-24 · 修复「向左/向右走都像在旋转」
+
+- 报障：往左或往右走，角色边走边"转身"
+- 排查（三步量化，不靠肉眼）：
+  1. 探针打印 500 帧：`hero.rotation` / `sprite.rotation` / `cam.rotation` **全程为 0**、`scale` 恒定
+     → 排除相机（坑 #13 已修）与节点变换，问题在**帧**
+  2. 量精灵表每帧"不透明像素质心 x"：col0/col1/col2 四帧自洽（极差 0.1px），
+     **col3 极差 2.1px**（row0 整体右移 2px），且 **row0 脸朝右、其余 3 帧脸朝左**
+  3. 而 `hero.gd` 当时正是"右向用 col3 + 左向镜像 col3" → **左右两个方向都**每循环翻一次朝向
+- 修复：`DIR_COL = {down:0, up:1, left:2}` + `MIRROR_OF = {right:"left"}`（坏列整个不用）
+- 新增判据 ⑨ `hero-columns`：@@tools/qa/check_hero_columns.py@@ ——
+  零依赖解 PNG，校验四向列的"帧间质心极差"与"朝向符号一致性"，可 `--preview` 导出四向帧预览图
+- **反向测试**：把映射改回旧值 → 判据 FAIL 且报出 `col3 质心 8.5/6.4/6.5/6.5 极差 2.1` + 朝向不一致
+- 文档更正：HANDOVER 坑 #11b 的"col2 坏 / col3 好"是**旧忍者表**结论，换表后失效，已改写并注明教训
+- 全量判定：@@python tools/qa/loop_judge.py@@ → **退出码 0**，**11/11 PASS**
+
+状态：awaiting-human
+

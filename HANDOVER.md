@@ -119,8 +119,9 @@ python tools/subset_font.py --check  # 只校验（L0 判据 font-coverage 用�
 # 强制开启触屏层（桌面调试/截图）：命令行 --touch，或环境变量 MS_TOUCH=1
 G="/d/Downloads/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.exe"
 MS_TOUCH=1 "$G" --path /e/games/my-survivors --resolution 1280x720 --position 0,0
-# 验证"摇杆真的推得动角色"（摇杆固定朝右并打印角色坐标）
-MS_TOUCH=1 MS_TOUCH_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 700 2>&1 | grep TOUCHPROBE
+# 验证"摇杆真的推得动角色" + 排查"画面在转"
+# 探针会每 90 帧在右/左之间交替，并每 15 帧打印 速度/动画/flip/精灵与相机的 rotation
+MS_TOUCH=1 MS_TOUCH_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 900 2>&1 | grep PROBE
 ```
 **坑**：headless `--script` 模式下**合成 InputEvent 投递不可靠**（`Input.parse_input_event` + flush 后仍时有时无），
 且 CharacterBody2D 不会真的位移。所以 L0 判据 `touch-controls` 直接驱动触屏层的方法，
@@ -178,8 +179,18 @@ MS_TOUCH=1 MS_TOUCH_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 700 2
     于是 get_cell_source_id() 返回 -1，撞墙逻辑被 continue 掉——现象是"滑动碰撞明明有，墙却永远碎不了"（蛮石傀就这么哑了一轮）。
     正解：沿碰撞法线往瓦片内部挪半格再取格，并做 3x3 邻域兜底。另外实测：运行时 set_cell() / erase_cell() 的物理体是会同步刷新的，不会留空气墙。
 11. **左右列映射别乱改**：上面那张坏图标表曾让人以为"新表左右列相反"，于是 `hero.gd` 的 `DIR_COL` 被改成 `left:3, right:2`——结果向左走时人是倒着走的。恢复正版表后已改回标准顺序 `{"down":0,"up":1,"left":2,"right":3}`（col2 面朝左、col3 面朝右，已验证）。**换方向表后必须重新核对左右**：把该朝向的行走帧渲染出来看脸朝哪边，不要凭围巾位置猜。
-11b. **精灵表某列"帧间朝向不一致"**：主角表 col2（左向）4 帧的脸部横坐标实测 9.2/7.0/3.3/10.0 乱跳——它根本不是一套连贯的左向走路，当循环播会像"原地转身"。**别靠对调左右来绕**（那只是把问题换到右边），正解是**镜像正常的右向列**：`hero.gd` 用 `MIRROR_OF = {"left": "right"}` + 播放时 `_sprite.flip_h = (_last_dir == "left")`。
-    **判断某列能不能用**：量该列 4 帧的"脸/眼"横坐标，方差大就是坏的（col0 全是 7.5 → 好；col3 是 8.7/7.5/8.5/9.5 → 好；col2 乱跳 → 坏）。
+11b. **精灵表某列"帧间朝向不一致"**：坏列当走路循环播会像"边走边转身"（往左往右都像）。`hero.gd` 的
+    `DIR_COL` / `MIRROR_OF` 就是为绕开坏列而设的**镜像机制**（坏列不用，改镜像好列）。
+    **判断某列能不能用**：量该列 4 帧的"身体质心 x 极差"（>1.5px 就是坏的）与"肤色质心相对身体质心的符号"
+    （侧向帧的朝向；4 帧符号必须一致）。现在有机器判据：`python tools/qa/check_hero_columns.py`
+    （L0 判据 `hero-columns`，还能 `--preview out.png` 导出四向帧预览图肉眼核对）。
+
+    ⚠️ **2026-09-24 更正（重要）**：上面"col2 坏 / col3 好"是**旧忍者表**上的实测结论，
+    **修仙化换成守山人表后失效了**——换表后实际是 col2 自洽（6.5/6.4/6.5/6.5，脸一律朝左）、
+    **col3 的 row0 坏**（8.5 vs 6.4/6.5/6.5，且脸朝右而其余 3 帧朝左）。旧映射（用 col3 并镜像它当左向）
+    于是让**左右两个方向都**出现"每循环翻一次朝向 + 跳 2px"的旋转感（用户报障："向左走或向右都会旋转的走"）。
+    现在改成 `DIR_COL = {down:0, up:1, left:2}` + `MIRROR_OF = {right:"left"}`。
+    **教训**：换方向表后必须重新量化核对，别信文档里的旧结论。
 12. **一整批素材互相错位**（2c39948 那批 AI 生成）：
     - `ninja_sheet.png` 装的是升级卡图标九宫格 → 已换回正版主角表（见第 10 条）；
     - 8 张 `card_*.png` 装的是主角表碎片 → 已从九宫格里按格裁出正确图标（每张 21~22px）；
