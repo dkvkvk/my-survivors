@@ -117,3 +117,24 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 
 状态：awaiting-human
 
+### 2026-09-24 · 修复「游戏抖动过大」
+
+- 报障：画面抖动过大。先量化（新增手感探针 @@MS_FEEL_PROBE=1@@，每 120 帧汇报）
+  - 相机偏移：平均 1.3~9.7px、**51%~84% 的帧 >4px**、最多 45% 的帧 >10px → 一直在抖
+  - `time_scale` 被 hitstop 钉在 0 的帧占比 **6%~22%** → 同时一直在卡
+- 根因：`Juice.shake` 是 trauma 制（累加，抖动 = trauma²），而**每斩一只怪 +0.35**；
+  妖王冲锋**逐格撞碎瓦片每帧都震**；**每只怪死亡都 hitstop(0.05)**。怪一多就顶到上限
+- 修法：
+  - 新增 **VFX 统一入口** `VFX.shake(camera, amount)` / `VFX.hitstop(sec, priority)`，
+    7 个震屏点 + 1 个定帧点全部改走它
+  - 连杀"热度"（0~1）让小抖自动衰减到 `SWARM_FLOOR`；大抖（妖王 0.9 / 玩家受击 0.5）不受限
+  - hitstop 加最小间隔（0.45s）并缩短（0.05→0.03）；撞碎瓦片这类重复事件量级压低
+  - 新增判据 ⑩ `fx-entry`：禁止在 VFX 之外直接调 `Juice.shake`/`Juice.hitstop`（反向测试通过）
+- 结果（同一条探针命令实测）：日常战斗 mean 0.1~0.8px / >4px 0~3%；
+  妖王期 mean 2~3.7px / 峰值 13~17px（该有的分量保留）；定帧冻结 **3~7%**
+- ⚠️ 标定教训：`trauma²` 非线性，第一版把 GAIN 降到 0.7 后 max 从 23px 掉到 2.7px（几乎没打击感），
+  已重新标定并把"想整体更抖/更稳"收敛到**一个旋钮** `Balance.CAMERA_SHAKE_GAIN`
+- 全量判定：@@python tools/qa/loop_judge.py@@ → **退出码 0**，**12/12 PASS**
+
+状态：awaiting-human
+

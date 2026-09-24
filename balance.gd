@@ -221,9 +221,25 @@ const MANA_REGEN := 6.0  # 每秒回复
 # 为什么关旋转：Juice 默认 max_roll=0.08 弧度（4.6°），而我们的 shake 由"打中/被撞"高频触发，
 # 实测战斗中摄像机在 -3.4°~+1.1° 之间每 0.12 秒随机跳变——画面绕中心转，玩家看到的是"人物在转"
 # （侧面走路时最明显）。位移抖动保留，打击感不受影响。
-const CAMERA_SHAKE_OFFSET := Vector2(22, 14)
+const CAMERA_SHAKE_OFFSET := Vector2(18, 11)
 const CAMERA_SHAKE_ROLL := 0.0
-const CAMERA_SHAKE_DECAY := 1.4
+const CAMERA_SHAKE_DECAY := 1.6
+
+# 抖动总闸（2026-09-24 调手感）：抖动是 trauma 制（累加、实际抖动 = trauma²），
+# 而**每斩一只怪都 +0.35**——实测两分钟战斗里 51%~84% 的帧画面偏移 >4px，也就是"一直在抖"。
+# 对策三件：整体强度 GAIN、连杀时小抖自动变弱（热度）、大抖（妖王）不受影响。
+# 想整体更抖/更稳：只改 CAMERA_SHAKE_GAIN。
+const CAMERA_SHAKE_GAIN := 1.0          # 全局强度倍率
+const CAMERA_SHAKE_BIG := 0.5           # >= 这个量级算"大抖"，不吃连杀衰减
+const CAMERA_SHAKE_HEAT_STEP := 0.4     # 每次小抖加热度（0~1）
+const CAMERA_SHAKE_HEAT_DECAY := 1.1    # 热度每秒衰减
+const CAMERA_SHAKE_SWARM_FLOOR := 0.35  # 热度满时，小抖只剩这个比例
+
+# 定帧 hitstop（2026-09-24）：原来**每斩一只怪**都冻结 0.05s，
+# 实测战斗中有 6%~22% 的帧 time_scale 被钉在 0（连杀时等于一直卡着）。
+# 现在普通斩妖有最小间隔，且时长缩短；priority（妖王）不受限。
+const HITSTOP_MIN_INTERVAL := 0.45
+const HITSTOP_MOB_DEATH := 0.03
 
 # 胜利条件（P5）：活满 SURVIVE_WIN_TIME 秒，或斩妖 VICTORY_BOSS_KILLS 只妖王，任一达成即胜利。
 const SURVIVE_WIN_TIME := 900.0  # 15 分钟

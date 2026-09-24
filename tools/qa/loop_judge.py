@@ -210,6 +210,31 @@ def check_weapons():
     }
 
 
+def check_fx_entry():
+    """震屏 / 定帧必须走 VFX 统一入口（VFX.shake / VFX.hitstop）。
+
+    踩过：每只怪死亡都直接 Juice.shake(0.35) + Juice.hitstop(0.05)——
+    trauma 制是累加的，连杀时被顶在 1.0（实测 51%~84% 的帧画面偏移 >4px = "一直在抖"），
+    而 hitstop 让 6%~22% 的帧 time_scale 钉在 0（= "一直卡"）。
+    统一入口才能统一强度（CAMERA_SHAKE_GAIN）与统一限流。
+    """
+    bad = []
+    for path in sorted(ROOT.glob("*.gd")):
+        if path.name == "vfx.gd":
+            continue
+        for i, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+            code = line.split("#", 1)[0]
+            if "Juice.shake(" in code or "Juice.hitstop(" in code:
+                bad.append("%s:%d" % (path.name, i))
+    return {
+        "id": "fx-entry",
+        "determinism": "grep",
+        "pass": not bad,
+        "bad_count": len(bad),
+        "bad_lines": ["绕开统一入口直接调 Juice：" + b for b in bad[:10]],
+    }
+
+
 def check_hero_columns():
     """主角四向走路用的精灵表列必须「帧间自洽 + 朝向正确」。
 
@@ -365,7 +390,7 @@ def main():
 
     checks = [check_import(), check_script_parse(), check_kill_credit(), check_weapons(),
               check_asset_contract(), check_import_hygiene(), check_sprite_refs(),
-              check_touch(), check_hero_columns(), check_font_coverage()]
+              check_touch(), check_hero_columns(), check_fx_entry(), check_font_coverage()]
     if not args.fast:
         checks.insert(1, check_runtime())
 
@@ -396,6 +421,8 @@ def main():
             extra = " (6 把法宝被动/技能/进化/归属)"
             for line in c.get("info", [])[:2]:
                 print(f"       {line}")
+        if c["id"] == "fx-entry":
+            extra = " (震屏/定帧统一入口)"
         if c["id"] == "hero-columns":
             extra = " (四向走路列自洽+朝向)"
         if c["id"] == "touch-controls":

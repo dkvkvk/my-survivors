@@ -33,6 +33,9 @@ var _spark: Texture2D
 var _smoke: Texture2D
 var _flash_rect: ColorRect = null
 var _flash_tween: Tween = null
+# 抖动"热度"（0~1）：连杀时升高，小抖随之变弱，避免画面被一直顶在最大抖动
+var _shake_heat := 0.0
+var _hitstop_last_ms := 0
 
 
 func _ready() -> void:
@@ -40,6 +43,38 @@ func _ready() -> void:
 	_star = _try_load("star_64.png")
 	_spark = _try_load("spark_32.png")
 	_smoke = _try_load("smoke_64.png")
+
+
+func _process(delta: float) -> void:
+	if _shake_heat > 0.0:
+		_shake_heat = maxf(0.0, _shake_heat - Balance.CAMERA_SHAKE_HEAT_DECAY * delta)
+
+
+## 屏幕抖动**唯一入口**（和特效一样：统一入口才能统一强度、统一限流）。
+##   camera：一般是 Player/Camera2D
+##   amount：0~1，>= Balance.CAMERA_SHAKE_BIG 视为"大抖"（妖王死亡那种），不吃连杀衰减
+## 连杀（斩妖/符雷）会累积"热度"，小抖随之衰减到 SWARM_FLOOR——画面保持稳定，
+## 但打击反馈不会完全消失；妖王/受击这类大事件照常震。
+func shake(camera: Node, amount: float) -> void:
+	if camera == null:
+		return
+	var big: bool = amount >= Balance.CAMERA_SHAKE_BIG
+	var scaled: float = amount * Balance.CAMERA_SHAKE_GAIN
+	if not big:
+		scaled *= lerpf(1.0, Balance.CAMERA_SHAKE_SWARM_FLOOR, _shake_heat)
+		_shake_heat = minf(1.0, _shake_heat + Balance.CAMERA_SHAKE_HEAT_STEP)
+	Juice.shake(camera, scaled, Balance.CAMERA_SHAKE_DECAY,
+		Balance.CAMERA_SHAKE_OFFSET, Balance.CAMERA_SHAKE_ROLL)
+
+
+## 定帧（hitstop）**唯一入口**：普通斩妖有最小间隔（否则连杀时 time_scale 一直贴 0，
+## 画面像卡住）；priority=true（妖王）不受限。
+func hitstop(duration: float, priority := false) -> void:
+	var now: int = Time.get_ticks_msec()
+	if not priority and float(now - _hitstop_last_ms) < Balance.HITSTOP_MIN_INTERVAL * 1000.0:
+		return
+	_hitstop_last_ms = now
+	Juice.hitstop(duration)
 
 
 func _try_load(f: String) -> Texture2D:

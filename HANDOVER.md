@@ -79,6 +79,9 @@ P6 法宝/技能系统（进行中，权威设计见 `WEAPON_SYSTEM.md`）：
    重要掉落（法宝/藏宝匣）再加一根光柱。⚠️ `drop_spawn_for` 是**延迟一帧**取坐标的——掉落物 `_ready()` 时坐标还没被调用方赋值
 5. **加特效走 `VFX` 原语**（`VFX.impact` / `shockwave` / `slash_arc` / `burst` / `screen_flash` / `trail`），
    别在各处手搓特效节点——统一入口才能统一风格、统一限流（`FX_LIMIT`）
+5b. **震屏/定帧也必须走统一入口**：`VFX.shake(camera, amount)` / `VFX.hitstop(sec, priority)`，
+   **不要直接调 `Juice.shake` / `Juice.hitstop`**（L0 判据 `fx-entry` 会拦）。
+   原因见坑 #15：trauma 是累加的，散落的高频调用会把画面顶在最大抖动、把 time_scale 钉在 0。
 6. **加一种怪/一个能力** = `balance.gd` 的 `MOB_VARIANTS` 加一行（含 `ability` / `phasing`）+ `ABILITIES` 加一条数值
    + `mob.gd` 的 `_apply_ability()` / `_update_ability()` 加一个分支。数值一律进 `ABILITIES`，别写死在 mob.gd
 
@@ -113,6 +116,21 @@ python tools/subset_font.py --check  # 只校验（L0 判据 font-coverage 用�
 扫 `*.gd`（先剥注释）/ `*.tscn` / `*.tres` 收集字符 → `pyftsubset` → 逐码位比对 cmap。
 **注意**：往界面加新汉字（或新符号）后必须重跑，否则运行时是豆腐块；
 原字体若被裁没了，用 `git checkout -- fonts/` 拿回全量版再重裁。
+
+### 调手感（抖动 / 定帧）——别靠感觉，看数
+```bash
+# 自动开局（本机调试用，免得手点菜单）+ 手感探针：每 120 帧汇报一次
+G="/d/Downloads/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.exe"
+MS_FEEL_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 1800 2>&1 | grep FEELSTAT
+# 输出：mean/max 相机偏移像素、>4px 与 >10px 的帧占比、time_scale 被冻结的帧占比
+```
+实测基线（2026-09-24 修复前）→ 修复后：
+| 指标 | 修复前 | 修复后（日常战斗 / 妖王期） |
+|---|---|---|
+| 平均偏移 | 1.3~9.7px | 0.1~0.8px / 2~3.7px |
+| >4px 帧占比 | 0~84% | 0~3% / 21~38% |
+| 定帧冻结占比 | 6~22% | 3~7% |
+调参入口只有一个：`balance.gd` 的 `CAMERA_SHAKE_GAIN`（整体强度）。
 
 ### 触屏与移动端验证（本机没有触摸屏）
 ```bash
@@ -252,6 +270,14 @@ gh api "repos/dkvkvk/my-survivors/actions/artifacts?per_page=100" \
 13. **`.tscn` 里父节点必须先声明**：`Card1Icon`/`Card2Icon` 曾被写在父节点 `Card1`/`Card2` **之前**，Godot 无法挂载，直接把它们丢到场景根并改名成 `LevelUpUI_Card2#Card2Icon`，于是 `level_up_ui.gd` 的 `get_node("Card1/Card1Icon")` 拿到 null，升级卡图标永远不显示（还每局刷 SCRIPT ERROR）。**手工编辑 `.tscn` 后必须确认节点块是父先子后**。
 14. **验证素材要固定输入再截图**：`SendKeys` 的 `{A DOWN}` 语法无效（会报 repeat count），用 `keybd_event`；且 harness 场景根节点必须叫 `Game`，否则脚本里写死的 `/root/Game/Player` 全部解析成 null。
 
+15. **抖动/定帧散落各处 → "游戏一直在抖 + 卡"**（2026-09-24）：`Juice.shake` 是 trauma 制
+    （`trauma = min(1, trauma + amount)`，实际抖动 = `trauma²`），而**每斩一只怪都 +0.35**、
+    妖王冲锋沿途**逐格撞碎瓦片每帧都震**——怪一多 trauma 就被顶在 1.0，画面 51%~84% 的帧偏移 >4px；
+    同时**每只怪死亡都 hitstop(0.05)**，连杀时 `time_scale` 有 6%~22% 的帧钉在 0。
+    **修法**：`VFX.shake` / `VFX.hitstop` 统一入口 + 连杀"热度"让小抖自动衰减
+    （`CAMERA_SHAKE_HEAT_* / SWARM_FLOOR`）+ 大抖（妖王/玩家受击）不受限 + hitstop 最小间隔。
+    ⚠️ 标定时注意 `trauma²` 是非线性的：trauma 0.25 只有 0.06×max_offset ≈ 1px，
+    所以"降一半 GAIN"会让抖动**几乎消失**（第一版就调过头了，max 从 23px 掉到 2.7px）。
 13. **摄像机旋转会被玩家读成"人物在转"**：Juice.shake 的 max_roll 默认 0.08 弧度（4.6°），而我们的 shake 由"打中/被撞"高频触发——实测战斗中摄像机在 **-3.4°~+1.1°** 之间每 0.12 秒随机跳变，画面绕中心转，玩家看到的就是"人物在旋转"（**侧面走路时最明显**，因为侧脸一倾斜特别像转头）。**已改成只位移不旋转**：@@Balance.CAMERA_SHAKE_ROLL = 0.0@@，6 个调用点显式传参（位移抖动保留，打击感不受影响）。想恢复旋转感就把那个常量调大。
     ⚠️ 排查手法备忘：怀疑"角色在转"时，先打印 @@cam.rotation@@（相机是 Player 的子节点：@@Player/Camera2D@@），别急着去改精灵表。
 

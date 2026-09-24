@@ -9,6 +9,14 @@ var weapon_drops := 0     # 已掉出的法宝数（开局保底用，见 weapon
 var _boss_timer := 0.0
 var _run_ended := false  # 已结算（胜利或失败），防止重复触发
 
+# 手感探针（开发用，见 HANDOVER §3）：MS_FEEL_PROBE=1 时统计相机抖动与定帧冻结比例
+var _probe_n := 0
+var _probe_sum := 0.0
+var _probe_max := 0.0
+var _probe_over4 := 0
+var _probe_over10 := 0
+var _probe_frozen := 0
+
 @onready var player = $Player
 
 # 分块地图（chunk_map.gd）：预设计小地图随机拼接，碰撞挂在瓦片上。
@@ -62,6 +70,38 @@ func _process(delta):
 			_win("time")
 		elif boss_kill_count >= Balance.VICTORY_BOSS_KILLS:
 			_win("boss")
+	if OS.get_environment("MS_FEEL_PROBE") == "1":
+		_feel_probe()
+
+
+## 手感探针（开发用）：每 120 帧汇报一次"相机抖动强度分布 + 定帧冻结比例"。
+## 调抖动/hitstop 时用它对比前后，别靠感觉（见 HANDOVER §3）。
+func _feel_probe() -> void:
+	var cam = player.get_node_or_null("Camera2D")
+	if cam == null:
+		return
+	_probe_n += 1
+	var off: float = cam.offset.length()
+	_probe_sum += off
+	_probe_max = maxf(_probe_max, off)
+	if off > 4.0:
+		_probe_over4 += 1
+	if off > 10.0:
+		_probe_over10 += 1
+	if Engine.time_scale < 1.0:
+		_probe_frozen += 1
+	if _probe_n % 120 == 0:
+		print("FEELSTAT frames=%d mean=%.2f max=%.2f over4=%.0f%% over10=%.0f%% frozen=%.0f%%" % [
+			_probe_n, _probe_sum / float(_probe_n), _probe_max,
+			100.0 * float(_probe_over4) / float(_probe_n),
+			100.0 * float(_probe_over10) / float(_probe_n),
+			100.0 * float(_probe_frozen) / float(_probe_n)])
+		_probe_n = 0
+		_probe_sum = 0.0
+		_probe_max = 0.0
+		_probe_over4 = 0
+		_probe_over10 = 0
+		_probe_frozen = 0
 
 
 ## 开局保底判定：前 WEAPON_PITY_TIME 秒内，每攒够 WEAPON_PITY_KILLS 次斩妖还没掉够法宝就返回 true

@@ -118,6 +118,7 @@ func _process(_delta: float) -> void:
 	#（2026-09-24 就是靠它排除相机旋转、定位到精灵表 col3 帧间朝向不一致）。
 	# 见 HANDOVER §3「触屏与移动端验证」。
 	if OS.get_environment("MS_TOUCH_PROBE") == "1":
+		_player.health = _player.max_health
 		var phase: int = int(Engine.get_process_frames() / 90) % 2
 		direction = Vector2.RIGHT if phase == 0 else Vector2.LEFT
 		if Engine.get_process_frames() % 15 == 0:

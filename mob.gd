@@ -298,7 +298,8 @@ func _smash_walls(delta: float) -> void:
 		VFX.impact(point, -col.get_normal(), VFX.C_ORANGE, true)
 		VFX.burst(point, 7, Color(0.62, 0.46, 0.32), 190.0, 0.5, "smoke", 2.2, 420.0)
 		Audio.play("res://sounds/hit.wav", false, 0.7, 0.25)
-		Juice.shake(player.get_node("Camera2D"), 0.2, Balance.CAMERA_SHAKE_DECAY, Balance.CAMERA_SHAKE_OFFSET, Balance.CAMERA_SHAKE_ROLL)
+		# 撞碎瓦片是"沿途逐格"的重复事件，量级压低（否则冲锋时每帧都在震）
+		VFX.shake(player.get_node("Camera2D"), 0.12)
 		return
 
 
@@ -326,7 +327,7 @@ func _smash_around(radius: float, delta: float) -> void:
 					erased += 1
 	if erased > 0:
 		VFX.burst(global_position, 10, Color(0.62, 0.46, 0.32), 260.0, 0.6, "smoke", 2.6, 420.0)
-		Juice.shake(player.get_node("Camera2D"), 0.3, Balance.CAMERA_SHAKE_DECAY, Balance.CAMERA_SHAKE_OFFSET, Balance.CAMERA_SHAKE_ROLL)
+		VFX.shake(player.get_node("Camera2D"), 0.18)
 
 
 ## 百足虫能力 · 断而不僵：死亡时分裂成更小更快的子体。
@@ -416,8 +417,8 @@ func take_damage(amount := 1, knockback := Vector2.ZERO, source := ""):
 	if health <= 0:
 		died.emit(_last_hit_source)
 		Audio.play("res://sounds/enemy-die.wav", true, randf_range(0.9, 1.1), 0.15)
-		Juice.shake(player.get_node("Camera2D"), 0.35, Balance.CAMERA_SHAKE_DECAY, Balance.CAMERA_SHAKE_OFFSET, Balance.CAMERA_SHAKE_ROLL)
-		Juice.hitstop(0.05)
+		VFX.shake(player.get_node("Camera2D"), 0.35)
+		VFX.hitstop(Balance.HITSTOP_MOB_DEATH)
 		drop_xp_gem()
 		drop_coins()
 		drop_weapon()
@@ -429,7 +430,7 @@ func take_damage(amount := 1, knockback := Vector2.ZERO, source := ""):
 		_split()
 		if is_boss:
 			VFX.screen_flash(VFX.C_RED, 0.34, 0.4)
-			Juice.shake(player.get_node("Camera2D"), 0.9, Balance.CAMERA_SHAKE_DECAY, Balance.CAMERA_SHAKE_OFFSET, Balance.CAMERA_SHAKE_ROLL)
+			VFX.shake(player.get_node("Camera2D"), 0.9)
 		var smoke_scene = preload("res://smoke_explosion/smoke_explosion.tscn")
 		var smoke = smoke_scene.instantiate()
 		get_parent().add_child(smoke)

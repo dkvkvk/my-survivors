@@ -153,6 +153,8 @@ Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
 
 - **`%UniqueName`**：`%XXX` 访问场景内勾选"唯一名称"的节点，重构子树时不用改路径。
 - **信号解耦**：跨场景通信用信号（如 `died`、`health_depleted`、`leveled_up`），连接在 `.tscn` 的 `[connection]` 里。
+- **震屏/定帧单一入口**：一律 `VFX.shake` / `VFX.hitstop`（内部做整体强度 + 连杀限流），
+  禁止散落调用 `Juice.shake`（L0 判据 `fx-entry` 会拦）。
 - **触屏**：摇杆/按钮只在真有触摸（或 `--touch` / `MS_TOUCH=1`）时创建，桌面键鼠下完全不存在；
   玩家读 `touch_input` 组的 `direction`；UI 按钮靠 Godot 默认的"触摸模拟鼠标"直接可用。
 - **数值集中**：全部可调参数在 `balance.gd`（`class_name Balance` 静态常量），卡池在 `upgrades.gd`，法宝/技能表在 `weapons.gd` / `skills.gd`。

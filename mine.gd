@@ -186,7 +186,7 @@ func _detonate(rec: Dictionary) -> void:
 	Audio.play("res://sounds/hit.wav", false, randf_range(0.8, 0.95), 0.35)
 	var cam := get_parent().get_node_or_null("Camera2D")
 	if cam != null:
-		Juice.shake(cam, 0.3, Balance.CAMERA_SHAKE_DECAY, Balance.CAMERA_SHAKE_OFFSET, Balance.CAMERA_SHAKE_ROLL)
+		VFX.shake(cam, 0.3)
 
 
 ## 技能：十方雷网——在身周布下一圈符雷，短引信齐爆

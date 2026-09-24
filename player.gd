@@ -377,7 +377,7 @@ func _hit_all_in_radius(radius: float, damage: int, source := "") -> void:
 				VFX.impact(mob.global_position, mob.global_position - global_position, VFX.C_GOLD)
 			hit += 1
 	if hit > 0:
-		Juice.shake($Camera2D, 0.25, Balance.CAMERA_SHAKE_DECAY, Balance.CAMERA_SHAKE_OFFSET, Balance.CAMERA_SHAKE_ROLL)
+		VFX.shake($Camera2D, 0.4)
 
 
 ## 应用商店局外强化（P2）：改的是初始面板，局内卡牌照常叠加
@@ -421,7 +421,7 @@ func _physics_process(delta):
 		if hurt_sound_cooldown <= 0.0:
 			Audio.play("res://sounds/hurt.wav", false, 1.0, 0.35)
 			Juice.flash(self, Color(4, 0.8, 0.8))
-			Juice.shake($Camera2D, 0.2, Balance.CAMERA_SHAKE_DECAY, Balance.CAMERA_SHAKE_OFFSET, Balance.CAMERA_SHAKE_ROLL)
+			VFX.shake($Camera2D, 0.5)
 			hurt_sound_cooldown = 0.6
 		if health <= 0.0:
 			health_depleted.emit()
