@@ -186,6 +186,30 @@ def check_kill_credit():
     }
 
 
+def check_weapons():
+    """功能回归：6 把法宝的被动 / 技能 / 进化 / 归属（P6）。
+
+    默认的 --quit-after 停在开局选择界面，法宝根本不会跑；这里用 tools/qa/check_weapons.gd
+    装上全部法宝跑真实帧，并直接驱动命中回调验证伤害与斩妖归属。
+    """
+    code, out, secs = run_godot(["--script", "res://tools/qa/check_weapons.gd"])
+    if code == "missing":
+        return {"id": "weapons-smoke", "determinism": "assert", "pass": False,
+                "reason": "找不到 Godot 可执行文件", "godot": GODOT}
+    bad = [ln for ln in out.splitlines() if "WEAPONS FAIL" in ln]
+    passed = "WEAPONS PASS" in out
+    info = [ln.strip() for ln in out.splitlines() if "WEAPONS INFO" in ln]
+    return {
+        "id": "weapons-smoke",
+        "determinism": "assert",
+        "pass": passed and not bad,
+        "bad_count": len(bad),
+        "bad_lines": bad[:10],
+        "info": info,
+        "seconds": round(secs, 1),
+    }
+
+
 def check_asset_contract():
     problems = []
     checked = []
@@ -252,7 +276,7 @@ def main():
     parser.add_argument("--json", action="store_true", help="把报告打到 stdout")
     args = parser.parse_args()
 
-    checks = [check_import(), check_script_parse(), check_kill_credit(),
+    checks = [check_import(), check_script_parse(), check_kill_credit(), check_weapons(),
               check_asset_contract(), check_import_hygiene(), check_sprite_refs()]
     if not args.fast:
         checks.insert(1, check_runtime())
@@ -280,6 +304,10 @@ def main():
         extra = ""
         if c["id"] == "kill-credit":
             extra = " (精确斩妖归属)"
+        if c["id"] == "weapons-smoke":
+            extra = " (6 把法宝被动/技能/进化/归属)"
+            for line in c.get("info", [])[:2]:
+                print(f"       {line}")
         if c["id"] == "asset-contract":
             extra = f" ({len(c.get('checked', []))} 项)"
         if c["id"] == "import-hygiene":

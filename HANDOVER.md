@@ -33,7 +33,10 @@ P6 法宝/技能系统（进行中，权威设计见 `WEAPON_SYSTEM.md`）：
   - 被动由 `player._apply_weapon_passive()` 分发；加法宝要同步改 `_clear_weapon_passive()` / `_evolve_weapon()`
 - 乾坤袋（按 B）、法宝掉落（按 F 拾取 + 替换面板）、材料掉落、法宝升级（材料 + 斩妖数）
 - 升级三选一只出属性卡；藏宝匣奖励改走法宝/材料体系
-- **开局选法宝**（4 选 1，暂停游戏；本命飞剑是固定基础法宝，选它 = 起手 3 阶）+ 掉落率 4%→12% + 开局保底
+- **开局选法宝**（4 张卡 = 本命飞剑 + 随机 3 把，暂停游戏；选本命飞剑 = 起手 3 阶）+ 掉落率 4%→12% + 开局保底
+- **6 把法宝**：本命飞剑 / 周天剑环 / 离火法环 / 连环雷符 / **回风梭** / **地火符阵**
+  （法宝位仍是 4 → 拾到未持有的第 5 把会弹替换面板，"带哪几件"成为真实取舍）
+- **精确斩妖归属**：`take_damage(amount, knockback, source)`，斩妖经验只记给致命一击的法宝
 - **特效系统（`vfx.gd` + `assets/fx/`）**：技能起手冲击环 / 旋转刀光 / 金色爆发 / 天雷落柱、命中爆点、
   斩妖爆炸、拾取星芒、升级光柱、枪口闪光、子弹与飞刀拖尾、妖王蓄力预警圈、技能栏冷却完成闪光
   - ⚠️ 特效节点一律 `PROCESS_MODE_ALWAYS`：升级/结算会暂停游戏，跟着暂停会把短命特效冻在画面上
@@ -53,7 +56,7 @@ P6 法宝/技能系统（进行中，权威设计见 `WEAPON_SYSTEM.md`）：
 | `enemy_sprite.gd` | 怪外观适配器（两帧动画+受击压扁），贴图路径来自 balance 变体表 |
 | `hero.gd` | 守山人：4 列=朝向(下上左右) × 行 0-3=行走帧 的表切帧，速度驱动自动选向 |
 | `chunk_map.gd` | 分块地图：TileSet 代码构建（碰撞挂瓦片）、模板随机拼接、流式加载 |
-| `orbit_blades.gd` / `aura.gd` / `gun.gd` | 三法宝 + 各自 evolve() 进化形态 |
+| `orbit_blades.gd` / `aura.gd` / `gun.gd` / `chain_lightning.gd` / `boomerang.gd` / `mine.gd` | 六法宝 + 各自 evolve() 进化形态（后三把纯代码绘制） |
 | `coin.gd` / `chest.gd` / `xp_gem` | 掉落物（磁吸拾取 / 走近开启随机奖励） |
 | `save.gd` | `class_name SaveGame` 纯静态：records+coins+upgrades 存 `user://records.json` |
 | `main_menu/shop/level_up_ui/pause_ui/game_over` | 各 UI（CanvasLayer + process_mode=3 暂停模式） |
@@ -166,7 +169,8 @@ func _process(_delta) -> bool:  # 必须有返回值，否则 Parse Error
 5. BGM 可换更好的曲子（现在是脚本合成的，生成思路见 git 历史 synth_bgm）。
 6. 妖王目前一只形象，可加多种（模板机制已支持，见 chunk_map 的做法）。
 7. 手机触屏虚拟摇杆（Web 版手机不可玩）。
-7b. **第 5/6 种法宝 + 给法宝补多技能**：补齐后"替换面板 / 神通残卷 / 法宝掉落"才真正有意义（见 WEAPON_SYSTEM.md 待办）。
+7b. ~~**第 5/6 种法宝**~~：**2026-09-22 已完成**（回风梭 / 地火符阵，见 WEAPON_SYSTEM.md）。
+    **仍待办**：给每把法宝补第 2 个技能（现在每把只挂 1 个，多技能 UI 已就绪）。
 7c. ~~**精确斩妖归属**~~：**2026-09-22 已完成**——`take_damage(amount, knockback, source)` + `died(source)`，
     只给致命一击的法宝 +1；`tools/qa/check_kill_credit.gd` 已接入 L0 判定（判据 `kill-credit`）。
 8. README/ARCHITECTURE 与代码保持同步——每次功能落地后更新（本项目的习惯）。

@@ -119,6 +119,36 @@ const CHAIN_FALLOFF := 0.5  # 每跳伤害衰减比例（0.5 = 每跳减半）
 const CHAIN_LINE_LIFE := 0.18  # 电弧残留时间（秒）
 const CHAIN_LINE_JITTER := 9.0  # 电弧抖动幅度（像素）
 
+# 回风梭（P6 第 5 把法宝）：掷出后飞出再折返，去程/返程各能命中一次
+const BOOMERANG_INTERVAL := 1.5        # 1 级投掷间隔（秒）
+const BOOMERANG_INTERVAL_STEP := 0.15  # 每级缩短
+const BOOMERANG_INTERVAL_MIN := 0.6    # 间隔下限
+const BOOMERANG_COUNT_STEP := 2        # 每 2 级多掷 1 枚
+const BOOMERANG_SPREAD := 0.30         # 多枚之间的扇形间隔（弧度）
+const BOOMERANG_SPEED := 620.0         # 去程速度
+const BOOMERANG_RETURN_SPEED := 780.0  # 返程速度（略快，手感更利落）
+const BOOMERANG_RANGE := 330.0         # 飞出多远后折返
+const BOOMERANG_RETURN_CATCH := 26.0   # 返回到离玩家多近算接住
+const BOOMERANG_HIT_RADIUS := 20.0     # 命中判定半径
+const BOOMERANG_DAMAGE := 2            # 基础伤害，额外吃"重装弹药"每张 +1
+const BOOMERANG_DAMAGE_STEP := 1
+const BOOMERANG_KNOCKBACK := 200.0
+
+# 地火符阵（P6 第 6 把法宝）：身周布符，妖近即爆
+const MINE_INTERVAL := 2.2             # 1 级布符间隔（秒）
+const MINE_INTERVAL_STEP := 0.22
+const MINE_INTERVAL_MIN := 0.9
+const MINE_MAX := 3                    # 场上符雷上限（每 2 级 +1）
+const MINE_ARM_TIME := 0.35            # 布下到可触发的引信时间
+const MINE_LIFE := 14.0                # 未触发的符雷自动消散
+const MINE_MAX_DISTANCE := 620.0       # 离玩家太远自动失效（防越积越多）
+const MINE_TRIGGER_RADIUS := 44.0      # 触发半径
+const MINE_BLAST_RADIUS := 112.0       # 爆炸伤害半径
+const MINE_DAMAGE := 3                 # 基础伤害，额外吃"重装弹药"每张 +1
+const MINE_DAMAGE_STEP := 2
+const MINE_KNOCKBACK := 260.0
+const MINE_SPAWN_OFFSET := 92.0        # 符雷布在离玩家多远（随机方向）
+
 # 法宝进化（P3→P6）：**法宝升到 weapons.gd 的 max_level 时自动进入进化形态**。
 # （旧版"第 6 张同名卡触发进化"已随法宝卡移出卡池而取消）
 # 环形刀刃 → 刃风暴
@@ -134,6 +164,13 @@ const GUN_EVOLVE_FIRE_RATE_MULT := 1.2
 # 链式闪电 → 雷神之怒
 const CHAIN_EVOLVE_EXTRA_JUMPS := 2  # 跳跃次数 +2
 const CHAIN_EVOLVE_FALLOFF := 0.3  # 衰减放缓（0.3 = 每跳只减三成）
+# 回风梭 → 风卷残云
+const BOOMERANG_EVOLVE_SPEED_MULT := 1.3
+const BOOMERANG_EVOLVE_RANGE_BONUS := 90.0
+const BOOMERANG_EVOLVE_DAMAGE := 3
+# 地火符阵 → 天罗地网
+const MINE_EVOLVE_RADIUS_BONUS := 40.0
+const MINE_EVOLVE_DAMAGE := 4
 
 # 主动技能数值（P6）
 const SKILL_SHURIKEN_COUNT := 10      # 万剑归宗放射数量
@@ -142,6 +179,10 @@ const SKILL_BLADE_RADIUS := 260.0     # 刃风暴横扫半径
 const SKILL_BLADE_DAMAGE := 8
 const SKILL_AURA_RADIUS := 420.0      # 烈日爆发范围
 const SKILL_AURA_DAMAGE := 12
+const SKILL_WHIRLWIND_COUNT := 10      # 风卷残云：向四周掷出的飞梭数量
+const SKILL_THUNDERNET_COUNT := 8      # 十方雷网：一圈符雷数量
+const SKILL_THUNDERNET_RADIUS := 130.0 # 符雷布下的圈半径
+const SKILL_THUNDERNET_FUSE := 0.7     # 布下后多久齐爆
 
 # 法宝掉落（P6）：普通怪小概率掉；妖王必掉（见 mob.gd）
 const WEAPON_DROP_CHANCE := 0.12

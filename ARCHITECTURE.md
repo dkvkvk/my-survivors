@@ -14,6 +14,8 @@
 | `orbit_blades.tscn` + `orbit_blades.gd` | 法宝"环形刀刃"的被动：刀刃绕玩家公转撞击伤害，刀刃数 = 法宝品阶（纯代码绘制） |
 | `aura.tscn` + `aura.gd` | 法宝"灼热光环"的被动：周期性灼烧范围内敌人，半径/伤害随法宝品阶（碰撞与外观代码生成） |
 | `chain_lightning.gd` | 法宝"链式闪电"的被动 + 技能"雷神之怒"：锯齿电弧纯代码绘制（四层辉光） |
+| `boomerang.tscn` + `boomerang.gd` | 法宝"回风梭"的被动 + 技能"风卷残云"：掷出后折返，去程/返程各命中一次（纯代码绘制） |
+| `mine.tscn` + `mine.gd` | 法宝"地火符阵"的被动 + 技能"十方雷网"：身周布符雷，妖近即爆（纯代码绘制） |
 | `bullet_2d.tscn` + `bullet_2d.gd` | 子弹：直线飞行、超程销毁、命中回调 |
 | `mob.tscn` + `mob.gd` | 敌人：四种变体、追击与软分离围圈、受击、死亡烟雾、掉灵珠、**专属能力**（见三·六节） |
 | `xp_gem.tscn` + `xp_gem.gd` | 灵珠：磁吸 + 缓慢滚动（外观代码绘制菱形） |
@@ -25,13 +27,13 @@
 | `coin.tscn` + `coin.gd` | 灵石掉落物（P2）：磁吸拾取，死亡时入账存档余额 |
 | `shop.tscn` + `shop.gd` | 坊市万宝楼（P2）：四种永久强化，数据在 `balance.gd` 的 SHOP 表 |
 | `save.gd` | ★ 存档：`class_name SaveGame` 纯静态，读写 `user://records.json`（最高纪录 + 灵石 + 强化等级） |
-| `balance.gd` | ★ 全部数值：玩家/敌人变体/更次表/经验曲线/三种法宝的常量 |
+| `balance.gd` | ★ 全部数值：玩家/敌人变体/更次表/经验曲线/六种法宝的常量 |
 | `upgrades.gd` | ★ 强化卡池：**5 张属性卡**（P6 起法宝卡已移出，法宝改为掉落物） |
-| `weapons.gd` | ★ 法宝数据表：4 把法宝（被动类型 / 技能列表 / 升级成本 / max_level） |
+| `weapons.gd` | ★ 法宝数据表：6 把法宝（被动类型 / 技能列表 / 升级成本 / `kills_per_level` / max_level） |
 | `skills.gd` | ★ 主动技能表：4 个技能（耗蓝 / 冷却 / 图标 / 描述）+ `FUSIONS` 融合占位表 |
 | `skill_bar.gd` | 技能槽 HUD（4 槽 + 冷却遮罩 + 蓝不够变暗），纯代码构建 |
 | `inventory_ui.gd` | 乾坤袋（按 B，纯代码构建）：法宝 4 格 / 技能选择 / 材料 / 升级按钮 / 替换面板 |
-| `start_select_ui.gd` | 开局选法宝（进战斗时弹 4 张卡并暂停；本命飞剑为固定基础法宝） |
+| `start_select_ui.gd` | 开局选法宝（弹 4 张卡并暂停；本命飞剑固定占一张，其余从另外 5 把里随机抽） |
 | `weapon_drop.gd` + `pickup_drop.gd` | 掉落物：法宝（按 F 拾取）、材料（玄铁/雷魄）、神通残卷 |
 | `audio.gd` | 音效池 autoload（12 播放器，防重叠、变调随机）+ `play_music()` 循环 BGM |
 | `fader.gd` | 全局过渡 autoload：场景切换黑场淡入淡出 + 全屏暗角后期 |
@@ -72,6 +74,8 @@ Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
 │   ├─ Aura (aura.tscn, z=-1)            灼热光环被动：默认隐藏，捡到法宝后 configure(等级) 激活
 │   ├─ OrbitBlades (orbit_blades.tscn)   环形刀刃被动：默认 0 把，刀刃数 = 法宝品阶
 │   ├─ ChainLightning (chain_lightning.gd) 链式闪电被动 + 雷神之怒技能（纯代码电弧）
+│   ├─ Boomerang (boomerang.tscn)        回风梭被动 + 风卷残云技能（纯代码飞梭）
+│   ├─ Mine (mine.tscn)                  地火符阵被动 + 十方雷网技能（纯代码符雷）
 │   ├─ HurtBox (Area2D) / HealthBar      受击范围与头顶血条
 │   └─ Path2D / PathFollow2D             刷怪环（挂在 Player 下，跟随玩家移动）
 ├─ GameOver (CanvasLayer, layer=30)       结算遮罩：战绩/新纪录/重开(R)/回主菜单
@@ -87,7 +91,7 @@ Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
 ## 三、核心循环与数据流
 
 1. **启动**：`main_menu.tscn` 展示最高纪录 → 开始游戏切到战斗场景 →
-   **先弹「开局选法宝」（4 选 1，暂停游戏，见 `start_select_ui.gd`）** → 选完解除暂停正式开打；
+   **先弹「开局选法宝」（4 张卡 = 本命飞剑 + 随机 3 把，暂停游戏，见 `start_select_ui.gd`）** → 选完解除暂停正式开打；
    Esc 随时打开暂停菜单（升级/结算/乾坤袋/选法宝界面打开时忽略，避免状态叠加）。
 2. **刷怪**：`Timer` 触发 `game.gd:spawn_mob()` → 在跟随玩家的 `PathFollow2D` 环上取随机点（敌人总从屏幕外刷出）→ `mob.setup()` 按更次权重选变体；刷怪间隔由 `Balance.current_wave(run_time)` 从五档更次表动态改写。
 3. **敌人 AI**：`mob.gd` 按变体速度追击 `玩家位置 + 环形偏移`（软分离，不会叠成一点），进入攻击距离后停下贴身。
@@ -182,6 +186,7 @@ Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
 - [x] **U4** 四种敌人变体 + 五档更次难度曲线（balance.gd 两张表）
 - [x] **U5** 主菜单、Esc 暂停菜单、最高纪录存档（user://records.json）
 - [x] **U6** 更多法宝：环绕飞刀 / 灼热光环 / 分裂弹头（可叠加卡）
+- [x] **P6** 法宝/技能系统（模型 B）：6 把法宝 + 4 技能槽 + 材料升级 + 精确斩妖归属
 - [ ] 主题换皮（替换全部非商用美术）、正式发布页
 
 ## 七、参考资料

@@ -36,6 +36,22 @@ const LIST := [
 		"from": "aura",
 	},
 	{
+		"id": "whirlwind_volley",
+		"name": "风卷残云",
+		"icon": "res://assets/ui/skill_boomerang.png",
+		"mana": 25.0, "cd": 8.0,
+		"desc": "万梭齐出，向四方激射（伤害吃回风梭品阶）",
+		"from": "boomerang",
+	},
+	{
+		"id": "thunder_net",
+		"name": "十方雷网",
+		"icon": "res://assets/ui/skill_mine.png",
+		"mana": 30.0, "cd": 10.0,
+		"desc": "周身布下一圈符雷，齐爆成网",
+		"from": "mine",
+	},
+	{
 		"id": "thunder",
 		"name": "九天神雷",
 		"icon": "res://assets/ui/skill_chain_lightning.png",

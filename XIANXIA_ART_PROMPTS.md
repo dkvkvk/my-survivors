@@ -501,6 +501,57 @@ crisp pixels, clean readable silhouette, no text, no watermark, no border
 
 ---
 
+### P6 补充图标（2 件法宝 + 2 个神通，**当前是代码生成的占位，可随时替换**）
+
+> 第 5/6 把法宝（回风梭 / 地火符阵）的图标暂时由 `tools/gen_weapon_icons.py` 用代码绘制，
+> 风格与上面 4 张同规格（32×32 / 64×64、1px 暗描边）。想要更精细就按下表生成后**覆盖同名文件**，
+> 不用改任何代码（`weapons.gd` / `skills.gd` 里的路径已经指向它们）。
+
+#### 30. `icon_fa_boomerang.png` —— 回风梭（32×32）
+
+```text
+pixel art game asset icon, a single jade-cyan boomerang seen from the side, two tapered arms with
+sharp pointed tips meeting at a thick elbow, a thin white highlight along the upper edge, two short
+pale-cyan wind streaks trailing below it,
+color palette: jade-cyan (#55E0C8) body, deeper teal (#2E9E9C) shade, white highlight,
+solid magenta background (#FF00FF), single object only, pixel art, 16-bit retro game style,
+crisp pixels, clean readable silhouette, no text, no watermark, no border
+```
+
+#### 31. `icon_fa_mine.png` —— 地火符阵（32×32）
+
+```text
+pixel art game asset icon, a hexagonal dark iron rune plate seen from above, its center holding a
+bright paper-yellow talisman face with a bold cinnabar-red thunder sigil, three tiny gold sparks
+floating around the rim,
+color palette: dark slate steel (#4E5C6E) plate, paper yellow (#FFD98A) face, cinnabar (#B5352C) sigil,
+solid magenta background (#FF00FF), single object only, pixel art, 16-bit retro game style,
+crisp pixels, clean readable silhouette, no text, no watermark, no border
+```
+
+#### 32. `skill_boomerang.png` —— 风卷残云（64×64）
+
+```text
+pixel art game skill icon, one large jade-cyan boomerang spinning at the center with three pairs of
+short pale wind streaks sweeping outward on both sides, thin motion arcs behind it,
+color palette: jade-cyan (#55E0C8) body, deeper teal (#2E9E9C) shade, white highlights, dark ink-blue outline,
+solid magenta background (#FF00FF), single object only, pixel art, 16-bit retro game style,
+crisp pixels, clean readable silhouette, no text, no watermark, no border
+```
+
+#### 33. `skill_mine.png` —— 十方雷网（64×64）
+
+```text
+pixel art game skill icon, six small iron rune mines arranged in a hexagon ring, connected to each other
+by crackling pale-cyan lightning lines, a larger bright rune core in the middle,
+color palette: dark slate steel (#4E5C6E), paper yellow (#FFD98A), cinnabar (#B5352C) sigils,
+jade-cyan (#55E0C8) lightning, dark ink-blue outline,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style,
+crisp pixels, clean readable silhouette, no text, no watermark, no border
+```
+
+---
+
 ## 六、背景（4 张，1920×1080，16:9，**无洋红底、无文字**）
 
 ### 30. `menu_bg.png` —— 主菜单 · 青冥山夜景全景

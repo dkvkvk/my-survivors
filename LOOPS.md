@@ -58,3 +58,16 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 
 状态：awaiting-human
 
+### 2026-09-22 · P1 玩法深度：第 5/6 把法宝 + 精确斩妖归属
+
+- 新增判据 ⑤ `kill-credit`：@@tools/qa/check_kill_credit.gd@@ —— 起真实场景造怪打死，
+  断言"只有致命一击的法宝 +1 斩妖数、来源不明时兜底给所有法宝"
+- 新增判据 ⑥ `weapons-smoke`：@@tools/qa/check_weapons.gd@@ —— 装上 6 把法宝跑真实帧
+  （轮换卸装、升满进化、轮放技能），并直接驱动命中回调验证伤害与归属
+  （默认 @@--quit-after@@ 停在开局选择界面，法宝根本不会跑）
+- 全量判定：@@python tools/qa/loop_judge.py@@ → **退出码 0**，8/8 PASS
+- 实测信息：飞梭峰值 20、符雷峰值 5、自然斩妖 5（--script 模式下物理也会步进）
+- 边界合规：只**新增**判据，未放宽任何既有判据与规格表
+
+状态：awaiting-human
+

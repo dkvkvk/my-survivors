@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://bjpua3hfywlnl" path="res://player.gd" id="1_73bic"]
 [ext_resource type="PackedScene" uid="uid://cphcr81upg72i" path="res://gun.tscn" id="3_bt0kc"]
+[ext_resource type="PackedScene" path="res://boomerang.tscn" id="7_boom"]
+[ext_resource type="PackedScene" path="res://mine.tscn" id="8_mine"]
 [ext_resource type="PackedScene" path="res://hero.tscn" id="4_hero"]
 [ext_resource type="PackedScene" path="res://orbit_blades.tscn" id="4_orbit"]
 [ext_resource type="PackedScene" path="res://aura.tscn" id="5_aura"]
@@ -46,6 +48,14 @@ z_index = 5
 [node name="ChainLightning" parent="." instance=ExtResource("6_chain")]
 unique_name_in_owner = true
 z_index = 6
+
+[node name="Boomerang" parent="." instance=ExtResource("7_boom")]
+unique_name_in_owner = true
+z_index = 4
+
+[node name="Mine" parent="." instance=ExtResource("8_mine")]
+unique_name_in_owner = true
+z_index = 2
 
 [node name="HurtBox" type="Area2D" parent="." unique_id=698633368]
 unique_name_in_owner = true

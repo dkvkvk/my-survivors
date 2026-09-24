@@ -138,6 +138,10 @@ func _apply_weapon_passive(id: String) -> void:
 			%Aura.configure(lv)
 		"chain_lightning":
 			%ChainLightning.configure(lv)
+		"boomerang":
+			%Boomerang.configure(lv)
+		"mine":
+			%Mine.configure(lv)
 
 
 func _clear_weapon_passive(id: String) -> void:
@@ -148,6 +152,10 @@ func _clear_weapon_passive(id: String) -> void:
 			%Aura.deactivate()
 		"chain_lightning":
 			%ChainLightning.configure(0)
+		"boomerang":
+			%Boomerang.configure(0)
+		"mine":
+			%Mine.configure(0)
 
 
 ## 满级进化：把该法宝的被动切到强化形态（剑光化灵 / 刃风暴 / 烈日领域 / 雷神之怒）
@@ -161,6 +169,10 @@ func _evolve_weapon(id: String) -> void:
 			%Aura.evolve()
 		"chain_lightning":
 			%ChainLightning.evolve()
+		"boomerang":
+			%Boomerang.evolve()
+		"mine":
+			%Mine.evolve()
 
 
 ## 设置某把法宝的"本场激活技能"。需要消耗一本神通残卷（swap=false 时不消耗，用于首次选择）
@@ -327,6 +339,15 @@ func _run_skill_effect(id: String) -> void:
 			VFX.shockwave(global_position, Balance.SKILL_AURA_RADIUS, VFX.C_BLUE, 0.4, 8.0)
 			VFX.screen_flash(VFX.C_BLUE, 0.30, 0.22)
 			%ChainLightning.cast_ultimate()
+		"whirlwind_volley":
+			VFX.shockwave(global_position, 240.0, VFX.C_CYAN, 0.34, 7.0)
+			VFX.burst(global_position, 14, VFX.C_CYAN, 460.0, 0.6, "star", 1.6, 200.0)
+			VFX.screen_flash(VFX.C_CYAN, 0.14, 0.18)
+			%Boomerang.cast_ultimate()
+		"thunder_net":
+			VFX.shockwave(global_position, Balance.SKILL_THUNDERNET_RADIUS + 60.0, VFX.C_GOLD, 0.4, 9.0, true)
+			VFX.screen_flash(VFX.C_GOLD, 0.18, 0.2)
+			%Mine.cast_ultimate()
 
 
 ## 万剑归宗：以自身为中心放射一圈子弹
