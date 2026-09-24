@@ -83,3 +83,19 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 
 状态：awaiting-human
 
+### 2026-09-22 · P2b 触屏操作：虚拟摇杆 + 神通按钮
+
+- 新增 `touch_controls.gd`：左下虚拟摇杆（Line2D 圆环 + 光晕）+ 右下 4 个神通按钮；
+  **只在真有触摸时创建**（移动端 / Web 移动端 / 系统报有触摸屏），桌面键鼠下自毁，不抢输入
+- 玩家侧：`player._physics_process` 把摇杆方向叠加进 `Input.get_vector(...)`（`touch_input` 组）
+- 触屏时技能栏隐藏按键提示（1/2/3/4 没意义）
+- 新增判据 ⑧ `touch-controls`：@@tools/qa/check_touch.gd@@（MS_TOUCH=1 强制开启）
+  —— 断言摇杆满程/半程模拟量/死区归零、松手归零、神通按钮扣蓝进冷却、按键提示隐藏
+- **真实运行验证**：`MS_TOUCH_PROBE=1` 让摇杆固定朝右，角色坐标 ~300px/s 稳定右移
+- 已知限制：headless `--script` 下**合成 InputEvent 投递不可靠**，故判据直接驱动触屏层方法；
+  CharacterBody2D 在该模式也不位移，所以"真的推得动"必须走真实运行探针
+- 全量判定：@@python tools/qa/loop_judge.py@@ → **退出码 0**，**10/10 PASS**
+- 边界合规：只**新增**判据，未放宽任何既有判据与规格表
+
+状态：awaiting-human
+

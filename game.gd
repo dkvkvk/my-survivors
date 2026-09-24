@@ -21,6 +21,8 @@ func _ready():
 	player.leveled_up.connect(_on_player_leveled_up)
 	_chunk_map = preload("res://chunk_map.gd").new()
 	add_child(_chunk_map)
+	# 触屏操作（P2b）：只有真有触摸时才存在，桌面键鼠下自毁（不抢输入）
+	add_child(preload("res://touch_controls.gd").new())
 	_boss_timer = Balance.BOSS_FIRST_DELAY  # 妖王倒计时（P4）
 	# 开局选法宝（P6）：弹 4 张卡并暂停游戏，选完才正式开打
 	%StartSelectUI.call_deferred("open", player)

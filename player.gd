@@ -389,10 +389,21 @@ func _apply_shop_upgrades() -> void:
 	pickup_radius *= 1.0 + Balance.SHOP_MAG_PER_LEVEL * SaveGame.get_upgrade_level("mag")
 
 
+## 触屏虚拟摇杆方向（touch_controls.gd 挂在 "touch_input" 组；没有触屏时返回零向量）
+func _touch_dir() -> Vector2:
+	var nodes: Array = get_tree().get_nodes_in_group("touch_input")
+	if nodes.is_empty():
+		return Vector2.ZERO
+	var d: Vector2 = nodes[0].direction
+	return d
+
+
 func _physics_process(delta):
 	hurt_sound_cooldown = maxf(0.0, hurt_sound_cooldown - delta)
 
-	var direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var direction: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	# 触屏：叠加虚拟摇杆（没有触屏时是零向量，见 touch_controls.gd）
+	direction = (direction + _touch_dir()).limit_length(1.0)
 	velocity = direction * Balance.PLAYER_SPEED * speed_mult
 
 	move_and_slide()

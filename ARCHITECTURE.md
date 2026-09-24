@@ -35,6 +35,7 @@
 | `inventory_ui.gd` | 乾坤袋（按 B，纯代码构建）：法宝 4 格 / 技能选择 / 材料 / 升级按钮 / 替换面板 |
 | `start_select_ui.gd` | 开局选法宝（弹 4 张卡并暂停；本命飞剑固定占一张，其余从另外 5 把里随机抽） |
 | `weapon_drop.gd` + `pickup_drop.gd` | 掉落物：法宝（按 F 拾取）、材料（玄铁/雷魄）、神通残卷 |
+| `touch_controls.gd` | 触屏操作层（P2b）：虚拟摇杆 + 4 个神通按钮（Line2D 圆环 + 光晕，纯代码）；无触摸时自毁 |
 | `audio.gd` | 音效池 autoload（12 播放器，防重叠、变调随机）+ `play_music()` 循环 BGM |
 | `fader.gd` | 全局过渡 autoload：场景切换黑场淡入淡出 + 全屏暗角后期 |
 | `vfx.gd` + `assets/fx/` | ★ autoload `VFX`：全局特效库（见下方"特效系统"），纯代码绘制 + 程序化生成的像素贴图 |
@@ -85,6 +86,7 @@ Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
 ├─ LevelUpUI (CanvasLayer, layer=30)      升级三选一
 ├─ PauseUI (CanvasLayer, layer=30)        暂停菜单（Esc）
 ├─ InventoryUI (CanvasLayer, layer=25)    乾坤袋（按 B）
+├─ TouchControls (CanvasLayer, layer=20)  触屏操作（P2b）：只在真有触摸时存在，桌面下自毁
 └─ StartSelectUI (CanvasLayer, layer=30)  开局选法宝（进战斗即弹出，选完才解除暂停）
 ```
 
@@ -151,6 +153,8 @@ Game (game.gd, y_sort_enabled)           ← 战斗场景根节点
 
 - **`%UniqueName`**：`%XXX` 访问场景内勾选"唯一名称"的节点，重构子树时不用改路径。
 - **信号解耦**：跨场景通信用信号（如 `died`、`health_depleted`、`leveled_up`），连接在 `.tscn` 的 `[connection]` 里。
+- **触屏**：摇杆/按钮只在真有触摸（或 `--touch` / `MS_TOUCH=1`）时创建，桌面键鼠下完全不存在；
+  玩家读 `touch_input` 组的 `direction`；UI 按钮靠 Godot 默认的"触摸模拟鼠标"直接可用。
 - **数值集中**：全部可调参数在 `balance.gd`（`class_name Balance` 静态常量），卡池在 `upgrades.gd`，法宝/技能表在 `weapons.gd` / `skills.gd`。
   **加一张属性卡** = upgrades.gd 加一行 + `player.apply_upgrade()` 加一个分支；
   **加一把法宝** = weapons.gd 加一行 + `player` 的三个分发分支（`_apply_weapon_passive` / `_clear_weapon_passive` / `_evolve_weapon`）；

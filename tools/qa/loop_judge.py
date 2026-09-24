@@ -210,6 +210,35 @@ def check_weapons():
     }
 
 
+def check_touch():
+    """功能回归：触屏操作（P2b）。
+
+    本机没有触摸屏，用环境变量 MS_TOUCH=1 强制开启触屏层，
+    再断言摇杆方向（含模拟量/死区）、松手归零、神通按钮能放技能、触屏时隐藏按键提示。
+    """
+    env = dict(os.environ)
+    env["MS_TOUCH"] = "1"
+    cmd = [GODOT, "--headless", "--path", str(ROOT), "--script", "res://tools/qa/check_touch.gd"]
+    started = time.time()
+    try:
+        proc = subprocess.run(cmd, capture_output=True, timeout=300, env=env)
+    except FileNotFoundError:
+        return {"id": "touch-controls", "determinism": "assert", "pass": False,
+                "reason": "找不到 Godot 可执行文件", "godot": GODOT}
+    except subprocess.TimeoutExpired:
+        return {"id": "touch-controls", "determinism": "assert", "pass": False, "reason": "超时"}
+    out = (proc.stdout or b"").decode("utf-8", "replace") + (proc.stderr or b"").decode("utf-8", "replace")
+    bad = [ln for ln in out.splitlines() if "TOUCH FAIL" in ln]
+    return {
+        "id": "touch-controls",
+        "determinism": "assert",
+        "pass": "TOUCH PASS" in out and not bad,
+        "bad_count": len(bad),
+        "bad_lines": bad[:10],
+        "seconds": round(time.time() - started, 1),
+    }
+
+
 def check_font_coverage():
     """中文字体子集必须覆盖全仓用到的字符（漏字 = 界面出现豆腐块）。
 
@@ -307,7 +336,7 @@ def main():
 
     checks = [check_import(), check_script_parse(), check_kill_credit(), check_weapons(),
               check_asset_contract(), check_import_hygiene(), check_sprite_refs(),
-              check_font_coverage()]
+              check_touch(), check_font_coverage()]
     if not args.fast:
         checks.insert(1, check_runtime())
 
@@ -338,6 +367,8 @@ def main():
             extra = " (6 把法宝被动/技能/进化/归属)"
             for line in c.get("info", [])[:2]:
                 print(f"       {line}")
+        if c["id"] == "touch-controls":
+            extra = " (触屏摇杆/神通按钮)"
         if c["id"] == "font-coverage":
             extra = " (中文字体子集覆盖全仓文案)"
             for line in c.get("info", [])[:1]:

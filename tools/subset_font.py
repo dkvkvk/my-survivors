@@ -63,7 +63,8 @@ def collect_chars():
     """扫源码收集所有字符（含注释——多留几个字比漏字便宜得多）。"""
     chars = set(BASE)
     for root, dirs, files in os.walk(ROOT):
-        dirs[:] = [d for d in dirs if d not in (".git", ".godot", "build", "_shots", "addons")]
+        # tools/ 是开发脚本，里面的中文只打到控制台、不进游戏界面，所以不进字体
+        dirs[:] = [d for d in dirs if d not in (".git", ".godot", "build", "_shots", "addons", "tools")]
         for name in files:
             if not name.endswith((".gd", ".tscn", ".tres")) and name != "project.godot":
                 continue

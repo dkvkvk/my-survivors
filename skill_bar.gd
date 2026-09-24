@@ -77,9 +77,12 @@ func _process(_delta: float) -> void:
 	if _player == null:
 		return
 	var slots: Array = _player.skill_slots
+	# 触屏时按键提示（1/2/3/4）没意义，改成点按钮，直接隐藏
+	var touch_on: bool = not get_tree().get_nodes_in_group("touch_input").is_empty()
 	for i in SLOT_COUNT:
 		var s: Dictionary = _slots[i]
 		var id: String = slots[i] if i < slots.size() else ""
+		s["key"].visible = not touch_on
 		if id == "":
 			s["icon"].texture = null
 			s["name"].text = "—"

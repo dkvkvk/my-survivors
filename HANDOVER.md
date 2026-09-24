@@ -37,6 +37,8 @@ P6 法宝/技能系统（进行中，权威设计见 `WEAPON_SYSTEM.md`）：
 - **6 把法宝**：本命飞剑 / 周天剑环 / 离火法环 / 连环雷符 / **回风梭** / **地火符阵**
   （法宝位仍是 4 → 拾到未持有的第 5 把会弹替换面板，"带哪几件"成为真实取舍）
 - **精确斩妖归属**：`take_damage(amount, knockback, source)`，斩妖经验只记给致命一击的法宝
+- **触屏操作（P2b）**：左下虚拟摇杆 + 右下神通按钮（纯代码 Line2D 圆环 + 光晕），
+  只在真有触摸时存在（桌面键鼠下自毁）；Web 版手机现在可玩
 - **特效系统（`vfx.gd` + `assets/fx/`）**：技能起手冲击环 / 旋转刀光 / 金色爆发 / 天雷落柱、命中爆点、
   斩妖爆炸、拾取星芒、升级光柱、枪口闪光、子弹与飞刀拖尾、妖王蓄力预警圈、技能栏冷却完成闪光
   - ⚠️ 特效节点一律 `PROCESS_MODE_ALWAYS`：升级/结算会暂停游戏，跟着暂停会把短命特效冻在画面上
@@ -63,6 +65,7 @@ P6 法宝/技能系统（进行中，权威设计见 `WEAPON_SYSTEM.md`）：
 | `victory_ui.gd` | 胜利结算（P5）：活满 `SURVIVE_WIN_TIME` 或击破 `VICTORY_BOSS_KILLS` 只妖王触发 |
 | `fader.gd` | autoload：黑场过渡 + 暗角后期（切场景统一走 `Fader.fade_to_scene()`） |
 | `audio.gd` | autoload：12 池音效 + `play_music()` 循环 BGM |
+| `touch_controls.gd` | 触屏操作层（P2b）：虚拟摇杆 + 神通按钮；桌面下自毁；玩家通过 `touch_input` 组读方向 |
 | `vfx.gd` | ★ autoload `VFX`：**全局特效库**（冲击环/斩击弧/爆散粒子/拖尾/全屏闪/天雷落点/掉落物底衬与爆点），纯代码绘制 + `assets/fx/` 像素贴图 |
 | `theme.tres` + `fonts/` | 全局像素主题；字号取 12 的倍数 |
 | `assets/` | hero/mobs/ui/tiles/ground —— AI 生成 + 自制，全部可商用（见 NOTICE.md） |
@@ -107,6 +110,18 @@ python tools/subset_font.py --check  # 只校验（L0 判据 font-coverage 用�
 扫 `*.gd`（先剥注释）/ `*.tscn` / `*.tres` 收集字符 → `pyftsubset` → 逐码位比对 cmap。
 **注意**：往界面加新汉字（或新符号）后必须重跑，否则运行时是豆腐块；
 原字体若被裁没了，用 `git checkout -- fonts/` 拿回全量版再重裁。
+
+### 触屏与移动端验证（本机没有触摸屏）
+```bash
+# 强制开启触屏层（桌面调试/截图）：命令行 --touch，或环境变量 MS_TOUCH=1
+G="/d/Downloads/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.exe"
+MS_TOUCH=1 "$G" --path /e/games/my-survivors --resolution 1280x720 --position 0,0
+# 验证"摇杆真的推得动角色"（摇杆固定朝右并打印角色坐标）
+MS_TOUCH=1 MS_TOUCH_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 700 2>&1 | grep TOUCHPROBE
+```
+**坑**：headless `--script` 模式下**合成 InputEvent 投递不可靠**（`Input.parse_input_event` + flush 后仍时有时无），
+且 CharacterBody2D 不会真的位移。所以 L0 判据 `touch-controls` 直接驱动触屏层的方法，
+"角色真的被摇杆推着走"用上面的 `MS_TOUCH_PROBE` 在**真实运行**里看坐标（实测 ~300px/s）。
 
 ### 实机点测（无 computer-use 时的替代）
 后台启动 exe → PowerShell `SendKeys`（TAB/ENTER/{D}/{S}…）模拟操作 → `CopyFromScreen` 截图 → `Read` 图片 → 视觉模型核对。历史会话全靠这套验证 UI。
@@ -179,7 +194,8 @@ python tools/subset_font.py --check  # 只校验（L0 判据 font-coverage 用�
 4. 主菜单/商店/暂停按钮加图标（`assets/ui/star.png` 现成备用，八张卡图标可复用）。
 5. BGM 可换更好的曲子（现在是脚本合成的，生成思路见 git 历史 synth_bgm）。
 6. 妖王目前一只形象，可加多种（模板机制已支持，见 chunk_map 的做法）。
-7. 手机触屏虚拟摇杆（Web 版手机不可玩）。
+7. ~~手机触屏虚拟摇杆~~：**2026-09-22 已完成**（`touch_controls.gd`：虚拟摇杆 + 神通按钮，桌面下自毁）。
+   **仍待办**：竖屏/横屏布局适配（现在只有横屏布局，手机竖屏会很小）。
 7b. ~~**第 5/6 种法宝**~~：**2026-09-22 已完成**（回风梭 / 地火符阵，见 WEAPON_SYSTEM.md）。
     **仍待办**：给每把法宝补第 2 个技能（现在每把只挂 1 个，多技能 UI 已就绪）。
 7c. ~~**精确斩妖归属**~~：**2026-09-22 已完成**——`take_damage(amount, knockback, source)` + `died(source)`，
