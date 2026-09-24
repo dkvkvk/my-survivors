@@ -152,6 +152,21 @@ MS_TOUCH=1 MS_TOUCH_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 900 2
   想常驻就在自己的终端里跑，别用一次性 bash 工具。
 - 推送 main 自动触发 Actions：Windows exe（Artifact）+ Web（部署 Pages）。**Web 预设的 export_path 不能为空**（踩过：空路径导致 CI 失败）。
 
+### 发正式版（长期可下载）——`release.yml`
+
+产物（Artifact）只保留 1 天、且占 Actions 配额，**不适合当"可下载的正式版"**。
+要发长期版本就打 tag：
+
+```bash
+git tag v0.6.0 && git push origin v0.6.0     # 打 tag 即自动构建 + 建 Release + 附 exe
+```
+
+- 触发：`.github/workflows/release.yml`（`push tags: v*`，也可在 Actions 页手动触发并填 tag）
+- 产物：**单文件 `my-survivors.exe`**（`binary_format/embed_pck=true`，无需附带 pck）
+- Release 附件走**仓库存储**，不占 Actions 配额、不受保留期限制
+- 同一 tag 重跑：已存在 Release 时只更新说明与附件（`--clobber`）
+- 版本号只是 tag 名（`project.godot` 没有版本字段），随便改；重发就删 tag 重打
+
 ### ⚠️ Actions 产物存储只有 0.5GB（免费额度）——2026-09-24 踩过
 
 每次推送产出两个产物：`my-survivors-windows` ≈44MB + `github-pages` ≈17MB。

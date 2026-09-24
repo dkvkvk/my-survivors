@@ -1,0 +1,89 @@
+name: 发布正式版
+
+# 打 tag（v*）时自动构建 Windows 版，并作为 **Release 附件**上传（长期可下载）。
+#
+# 为什么另起一个工作流、不复用 build.yml 的产物：
+#   Actions 产物存储只有 0.5GB 免费额度，所以 build.yml 的产物只留 1 天；
+#   Release 附件走的是**仓库存储**（不占 Actions 配额、不受保留期限制），
+#   两者定位不同，各管一段。
+#
+# 用法：
+#   git tag v0.6.0 && git push origin v0.6.0        # 打 tag 即发布
+#   或在 Actions 页面手动触发并填一个已存在的 tag
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '要发布的 tag（需已存在，如 v0.6.0）'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # 说明里要列提交记录
+
+      - name: 下载 Godot 引擎
+        run: |
+          wget -q https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          unzip -q Godot_v4.7.2-stable_linux.x86_64.zip -d godot
+          chmod +x godot/Godot_v4.7.2-stable_linux.x86_64
+
+      - name: 下载导出模板
+        run: |
+          wget -q https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz
+          mkdir -p ~/.local/share/godot/export_templates/4.7.2.stable
+          unzip -q Godot_v4.7.2-stable_export_templates.tpz -d tpz
+          mv tpz/templates/* ~/.local/share/godot/export_templates/4.7.2.stable/
+
+      - name: 导入资源并导出游戏
+        run: |
+          godot/Godot_v4.7.2-stable_linux.x86_64 --headless --path . --import
+          mkdir -p build
+          godot/Godot_v4.7.2-stable_linux.x86_64 --headless --path . --export-release "Windows Desktop"
+
+      - name: 校验成品
+        run: |
+          ls -la build/
+          test -f build/my-survivors.exe   # 预设是 embed_pck=true，单文件即可分发
+
+      - name: 生成 Release 说明
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if [ "${GITHUB_REF_TYPE}" != "tag" ]; then TAG="${{ inputs.tag }}"; fi
+          {
+            echo "## 不退（NO RETREAT）· Windows 单文件版"
+            echo
+            echo "- 平台：Windows x86_64，**单文件 exe**（pck 已内嵌），双击即玩、无需安装"
+            echo "- 操作：WASD 移动 · 1/2/3/4 神通 · B 乾坤袋 · F 拾取法宝 · Esc 暂停 · R 重开"
+            echo "- 触屏设备会自动出现左下虚拟摇杆与右下神通按钮"
+            echo "- 在线试玩（Web 版）：https://dkvkvk.github.io/my-survivors/"
+            echo
+            echo "## 本次包含的提交"
+            git log --pretty='- %s' -25
+          } > RELEASE_NOTES.md
+          cat RELEASE_NOTES.md
+
+      - name: 创建 Release 并附上 exe
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if [ "${GITHUB_REF_TYPE}" != "tag" ]; then TAG="${{ inputs.tag }}"; fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG 已存在，只更新附件"
+            gh release edit "$TAG" --notes-file RELEASE_NOTES.md
+          else
+            gh release create "$TAG" --title "不退 $TAG" --notes-file RELEASE_NOTES.md
+          fi
+          gh release upload "$TAG" build/my-survivors.exe --clobber
+          gh release view "$TAG" --json tagName,assets --jq '{tag: .tagName, assets: [.assets[].name]}'
