@@ -11,3 +11,6 @@
 # 操作系统杂项
 .DS_Store
 Thumbs.db
+# 本地产物（判定报告 / 临时验收截图）
+tools/qa/judge-report.json
+/_shots/

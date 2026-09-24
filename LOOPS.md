@@ -45,3 +45,16 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 | 清掉 @@assets/check.png.import@@ 孤儿 | 已删除；import-hygiene 孤儿计数 1 → 0 | awaiting-human |
 
 > 本轮未修改"待办（人写）"列；判定脚本与规格表未改动（边界 must-not）。
+
+### 2026-09-22 · L0 判据增强：script-parse
+
+- 背景：`--import` **不会编译脚本**，没被任何场景引用的坏 `.gd` 抓不到（反向测试实测漏判）
+- 判定新增 ③ `script-parse`：用 @@tools/qa/check_scripts.gd@@ 以 SceneTree 逐个 `load()` 全部 38 个 `.gd`，
+  抓 @@Parse Error / Failed to load script / SCRIPT ERROR@@ 计数，必须为 0
+- 全量判定：@@python tools/qa/loop_judge.py@@ → **退出码 0**，6/6 PASS
+  （headless-import / headless-runtime / **script-parse 38 个脚本** / asset-contract 4 项 / import-hygiene 孤儿=0 / sprite-refs 10 项）
+- 仓库卫生：@@tools/qa/judge-report.json@@ 与临时验收图 @@_shots/@@ 加入 @@.gitignore@@（本地产物，不再污染 git status）
+- 边界合规：只**新增**判据，未放宽任何既有判据与规格表
+
+状态：awaiting-human
+

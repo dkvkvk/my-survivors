@@ -140,6 +140,30 @@ def check_runtime(frames=240):
     }
 
 
+def check_script_parse():
+    """全量解析每个 .gd。
+
+    --import 不会编译脚本，未被场景引用的坏脚本抓不到（2026-09-22 反向测试发现）。
+    这里用一个 SceneTree 脚本 load() 全部 .gd 逼 Godot 解析，再抓 stderr 的确定信号。
+    """
+    code, out, secs = run_godot(["--script", "res://tools/qa/check_scripts.gd"])
+    if code == "missing":
+        return {"id": "script-parse", "determinism": "grep", "pass": False,
+                "reason": "找不到 Godot 可执行文件", "godot": GODOT}
+    bad = [ln for ln in out.splitlines()
+           if re.search(r"Parse Error|Failed to load script|SCRIPT ERROR", ln)]
+    match = re.search(r"SCRIPT_CHECK_LOADED=(\d+)", out)
+    return {
+        "id": "script-parse",
+        "determinism": "grep",
+        "pass": not bad,
+        "loaded": int(match.group(1)) if match else None,
+        "bad_count": len(bad),
+        "bad_lines": bad[:10],
+        "seconds": round(secs, 1),
+    }
+
+
 def check_asset_contract():
     problems = []
     checked = []
@@ -206,7 +230,8 @@ def main():
     parser.add_argument("--json", action="store_true", help="把报告打到 stdout")
     args = parser.parse_args()
 
-    checks = [check_import(), check_asset_contract(), check_import_hygiene(), check_sprite_refs()]
+    checks = [check_import(), check_script_parse(), check_asset_contract(),
+              check_import_hygiene(), check_sprite_refs()]
     if not args.fast:
         checks.insert(1, check_runtime())
 
