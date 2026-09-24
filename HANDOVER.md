@@ -100,7 +100,10 @@ func _initialize() -> void: change_scene_to_file("res://survivors_game.tscn")
 func _process(_delta) -> bool:  # 必须有返回值，否则 Parse Error
     # 按帧计数推进，用 root.get_node("Game")... 断言后 return true 退出
 ```
-**坑**：该模式下物理不步进，Area 的 overlapping 查询不可靠；要测物理/检测链路就在场景内用帧计数驱动真实节点（参考历史提交里的 test_boss 做法）。
+**坑**：该模式下 CharacterBody2D 不会真的位移（Area 的 body_entered 倒是会触发）；
+要测"真的动起来了"就在真实运行里用 `--quit-after` + 打印坐标（见下面的触屏探针做法）。
+另外 **合成 InputEvent 投递不可靠**（`Input.parse_input_event` + `flush_buffered_events` 后仍时有时无），
+要测输入逻辑就直接调目标节点的方法。
 
 ### 字体子集（改了中文文案必做）
 ```bash
@@ -128,8 +131,13 @@ MS_TOUCH=1 MS_TOUCH_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 700 2
 
 ## 4. 发布流程（推送 GitHub）
 
-- 直连 github.com 被墙；用户代理（Clash，127.0.0.1:7897）经常没开。
-- 可用方案：临时 Python CONNECT 代理转发到可达 IP（会轮换，先 `curl -sI -m 6 --resolve github.com:443:<IP> https://github.com` 筛选；近期 20.27.177.113 / 140.82.113.4 多数可用），推送完立即关闭。脚本模式见 git 历史（ghpush_proxy.py）。
+- **2026-09-24 更新：直连 github.com 已可用**（`curl -s -o /dev/null -w '%{http_code}' https://github.com` → 200）。
+- ⚠️ 但本机 git 里存着旧的代理配置 `http.proxy=http://127.0.0.1:7897`，而 Clash 通常没开 →
+  `git push` 会报 "Failed to connect to github.com port 443 via 127.0.0.1"。
+  **直接绕过它推**：`git -c http.proxy= -c https.proxy= push origin main`
+  （想彻底清掉：`git config --unset http.proxy`）
+- 备用方案（直连又断时）：临时 Python CONNECT 代理转发到可达 IP（会轮换，
+  先 `curl -sI -m 6 --resolve github.com:443:<IP> https://github.com` 筛选），脚本模式见 git 历史（ghpush_proxy.py）。
 - 推送 main 自动触发 Actions：Windows exe（Artifact）+ Web（部署 Pages）。**Web 预设的 export_path 不能为空**（踩过：空路径导致 CI 失败）。
 - 匿名 GitHub API 有限流，查 CI 用 `gh run list --repo dkvkvk/my-survivors`（本机 gh 已认证）。
 
@@ -186,9 +194,10 @@ MS_TOUCH=1 MS_TOUCH_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 700 2
 
 ## 7. 待办与机会（按建议优先级）
 
-1. ~~**Web 版瘦身**~~：**2026-09-22 字体子集化已完成** —— Fusion Pixel 4.9MB → **46KB / 420 字**
+1. ~~**Web 版瘦身**~~：**2026-09-24 字体子集化已完成** —— Fusion Pixel 4.9MB → **46KB**（379 字）
    （`tools/subset_font.py`，L0 判据 `font-coverage` 守住漏字）。
-   **仍待办**：wasm/pck 本体瘦身（39MB 主要是 Godot Web 模板，可换 custom template 去掉未用模块）。
+   线上实测：`index.pck` **8.4MB**（裁剪前约 13MB），`index.wasm` 39.5MB。
+   **仍待办**：wasm 本体瘦身（39.5MB 全是 Godot Web 模板，需要自建 custom template 去掉未用模块）。
 2. **itch.io 发布页**：封面已备好（`assets/ui/cover.png`），README 可嵌的素材齐全。
 3. 玩法 P5：更多法宝/多角色/成就；卡池可加权重与稀有度。
 4. 主菜单/商店/暂停按钮加图标（`assets/ui/star.png` 现成备用，八张卡图标可复用）。
