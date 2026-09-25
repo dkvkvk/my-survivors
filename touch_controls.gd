@@ -217,6 +217,11 @@ func _bot_step(delta: float) -> void:
 	if lvl != null and lvl.visible:
 		lvl._choose(randi() % 3)
 		return
+	var inv = get_node_or_null("/root/Game/InventoryUI")
+	if inv != null and inv.visible and inv.has_method("_close_replace"):
+		# 法宝位满时捡法宝会弹替换面板：机器人选择"不换"（保留现有配装）
+		inv._close_replace()
+		return
 	var t: float = float(game.run_time)
 	_bot_wobble += delta * 1.7
 	var nearest := _nearest_mob()
@@ -229,16 +234,16 @@ func _bot_step(delta: float) -> void:
 		# 妖贴脸时优先脱身：反向拉满
 		if _player.global_position.distance_to(nearest.global_position) < 90.0:
 			direction = away
-	# 脚下有法宝就过去捡（只在有空位时捡，否则会弹替换面板把局面搞乱）
-	if _player.weapon_count() < Weapons.MAX_SLOTS:
-		for drop in get_tree().get_nodes_in_group("weapon_drops"):
-			if not is_instance_valid(drop):
-				continue
-			if _player.global_position.distance_to(drop.global_position) < 260.0:
-				direction = _player.global_position.direction_to(drop.global_position)
-				if drop.has_method("can_touch_pickup") and drop.can_touch_pickup():
-					drop.touch_pickup()
-				break
+	# 有法宝掉在附近就过去捡（真人会回身捡，600px 内都算"顺路"）
+	for drop in get_tree().get_nodes_in_group("weapon_drops"):
+		if not is_instance_valid(drop):
+			continue
+		var dpos: Vector2 = drop.global_position
+		if _player.global_position.distance_to(dpos) < 600.0:
+			direction = _player.global_position.direction_to(dpos)
+			if drop.has_method("can_touch_pickup") and drop.can_touch_pickup():
+				drop.touch_pickup()
+			break
 	# 神通：蓝够、不在冷却就放
 	for i in _player.skill_slots.size():
 		var id: String = str(_player.skill_slots[i])

@@ -30,6 +30,7 @@ var _skill_cd := {}                    # 技能 id -> 剩余冷却（秒）
 # 法宝与材料（P6）：法宝最多 4 把；每把法宝有多个技能但每场只选一个激活。
 # 捡到神通残卷可换成本法宝的另一个技能。
 var weapons: Array = []                # [{id, level, active_skill, kills}]
+var _char: Dictionary = {}             # 当前身份定义（Characters.get_def，P7 多角色）
 var materials := {}                    # {材料id: 数量}
 var skill_books := 0                   # 神通残卷数量
 
@@ -39,12 +40,14 @@ var _dash_hits := {}                   # 本次疾奔已撞过的敌人 id（一
 
 
 func _ready():
+	_char = Characters.current_def()
 	_apply_shop_upgrades()
+	# 本命飞剑是每个身份都有的基础法宝（没有它就没有自动攻击）
+	add_weapon("shuriken")
+	_apply_character()
 	%HealthBar.max_value = max_health
 	%ManaBar.max_value = mana_max
 	%ManaBar.value = mana
-	# 开局自带手枪（算一把法宝，占一个法宝位）
-	add_weapon("shuriken")
 
 
 ## 灵力回复 + 技能冷却 + 键位 1/2/3/4 施放
@@ -440,6 +443,23 @@ func _hit_all_in_radius(radius: float, damage: int, source := "") -> void:
 			hit += 1
 	if hit > 0:
 		VFX.shake($Camera2D, 0.4)
+
+
+## 身份修正（P7 多角色）：属性偏向 + 签名法宝（本命飞剑所有身份都自带）
+func _apply_character() -> void:
+	max_health = int(round(max_health * float(_char.get("health_mult", 1.0))))
+	speed_mult *= float(_char.get("speed_mult", 1.0))
+	fire_rate_mult *= float(_char.get("fire_rate_mult", 1.0))
+	mana_max = round(mana_max * float(_char.get("mana_max_mult", 1.0)))
+	health = max_health
+	mana = mana_max
+	var extra: String = str(_char.get("start_extra_weapon", ""))
+	if extra != "":
+		add_weapon(extra)
+
+
+func character_name() -> String:
+	return String(_char.get("name", ""))
 
 
 ## 应用商店局外强化（P2）：改的是初始面板，局内卡牌照常叠加

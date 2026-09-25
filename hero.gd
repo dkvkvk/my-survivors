@@ -32,6 +32,9 @@ func _ready():
 	_sprite.sprite_frames = _build_frames()
 	_sprite.scale = Vector2.ONE * SPRITE_SCALE
 	_sprite.position = Vector2(0, -22)
+	# 身份配色（P7 多角色）：代码调色，不需要额外美术（独立行走表见 XIANXIA_ART_PROMPTS 第八节 B 组）
+	var tint: Color = Characters.current_def().get("tint", Color(1, 1, 1))
+	_sprite.modulate = tint
 	add_child(_sprite)
 	_sprite.play("idle_down")
 

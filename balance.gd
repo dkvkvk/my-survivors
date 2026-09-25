@@ -273,7 +273,9 @@ const HITSTOP_MOB_DEATH := 0.03
 
 # 胜利条件（P5）：活满 SURVIVE_WIN_TIME 秒，或斩妖 VICTORY_BOSS_KILLS 只妖王，任一达成即胜利。
 const SURVIVE_WIN_TIME := 900.0  # 15 分钟
-const VICTORY_BOSS_KILLS := 3
+# 妖王 120/300/480/660/840 秒刷出——5 只的胜利线（~840s+）与 15 分钟线**收拢**。
+# 旧值 3 会让游戏在 480 秒就结算，900 秒那条线永远到不了（机器人实测 3 局全在 8 分钟附近结束）。
+const VICTORY_BOSS_KILLS := 5
 
 # 妖王（P4）：每 BOSS_INTERVAL 秒来袭一只，血量按来过几只递增。
 # 三段循环 AI：追击 3s → 蓄力 0.7s（闪白预示）→ 冲锋 0.8s（3.2 倍速直线）。
@@ -342,4 +344,8 @@ const SHOP_MAG_PER_LEVEL := 0.25
 ## 升到 level 级需要攒的经验：前期轻松（5/7/9……），
 ## 中期稳步上涨，11 级后封顶稳定在 25。
 static func xp_for_level(level: int) -> int:
-	return int(minf(3.0 + level * 2.0, 25.0))
+	# 前期快（头几级一两颗灵珠就升），中后期超线性增长。
+	# ⚠️ 旧版是 min(3+2L, 25)：25 封顶意味着后期每 25 点经验就升一级，
+	# 机器人实测 8 分钟升到 300 级（≈每秒弹一次三选一，属性也跟着爆炸）。
+	# 新曲线下 480 秒约 55 级、900 秒约 75 级（MS_BOT 实测）。
+	return int(3.0 + level * 2.0 + pow(float(level), 1.7) * 0.18)
