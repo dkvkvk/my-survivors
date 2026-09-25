@@ -17,6 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: 安装 ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+
       - name: 转 OGV（去音轨，主菜单有自己的 BGM）
         run: |
           mkdir -p .tmpout
