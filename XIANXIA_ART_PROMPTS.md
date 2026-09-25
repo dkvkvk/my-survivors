@@ -46,8 +46,12 @@ chunky pixels, limited palette, consistent size and framing in all 16 frames.
 solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels, no text, no watermark, no border
 ```
 
-- ⚠️ **只要"右向"那一列画得可靠就够了**——代码会用右列镜像出左向（历史坑：左列帧间朝向乱跳）。
-  如果生成 4 列质量不稳，可以只生成"单列 4 帧行走（面朝右）×1 张"交给我，我拼接成表。
+- ⚠️ **2026-09-24 更正**：原说明写"只要右向列可靠就行，代码镜像右列出左向"——那是**旧忍者表**的结论。
+  当前这张表实测是**右向列（col3）坏了**（row0 整体右移 2px 且脸朝右、其余 3 帧脸朝左），
+  所以代码已改成"左向用 col2、右向镜像 col2"。
+  **重画时请四列都保证帧间自洽**：同一列 4 帧里，身体的水平位置不能跳、脸的朝向不能翻转。
+  我这边有机器校验（L0 判据 `hero-columns`：量每列 4 帧的身体质心极差 + 肤色朝向符号），
+  不合格会直接打回，不用你肉眼挑。
 
 ---
 
@@ -611,3 +615,183 @@ pixel art, 16-bit retro game style, crisp pixels, no text, no watermark, no bord
 6. **最后**：主角表 1 号（最难，留足返工余地；4 列画不好就只出"面朝右一列 4 帧"）
 
 **交付**：放 `E:\games\`，按下表文件名命名（加 `_raw` 后缀也行）→ 告诉我 → 我抠底/像素化/接入/截图验证 → 删原图。
+
+---
+
+## 八、本轮新增（P7 扩展包）· 共 11 张
+
+> **优先级**：A 神通图标 8 张（游戏里已有代码占位图，随时可替换，不挡我推进）
+> → B 新角色方向表 2 张（多角色已用"配色变体"顶着，有图更好看）
+> → C 主角表重画 1 张（可选，纯打磨）。
+>
+> 交付方式同前：放 `E:\games\`，按下表文件名命名（加 `_raw` 后缀也行）→ 告诉我 →
+> 我抠底 / 像素化 / 缩放 / 接入 / 实机截图验证 → 删原图。
+> 每张末尾都要带「〇、总规范」里的通用后缀。
+
+### A. 神通图标（8 张 · 64×64 · 洋红底）
+
+本轮给 6 把法宝各补了**第 2 个神通**，并实装了 **2 个融合神通**。
+
+#### A1. `skill_dash_blade.png` —— 御剑疾影（本命飞剑 · 第 2 神通）
+> 效果：向移动方向疾射一段距离，身后留一串剑光残影。
+
+```text
+pixel art game skill icon, one jade-cyan flying sword lunging to the upper-right with three
+fading afterimages of the same sword trailing behind it along a straight speed streak,
+short white motion lines at the tail,
+color palette: jade-cyan (#55E0C8) blade, gold (#E8B84A) guard, moon-white (#CFE8E0) afterimages,
+solid magenta background (#FF00FF), single object only, pixel art, 16-bit retro game style,
+crisp pixels, clean readable silhouette, no text, no watermark, no border
+```
+
+#### A2. `skill_ring_release.png` —— 剑环外放（周天剑环 · 第 2 神通）
+> 效果：护身剑环一次性向外飞出杀敌，再飞回重新环绕。
+
+```text
+pixel art game skill icon, a broken ring of five small jade-cyan swords bursting outward from a
+hollow center, each blade pointing away from the middle, thin cyan arcs showing the ring breaking apart,
+color palette: jade-cyan (#55E0C8) blades, faint cyan thread arcs, white highlights,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style,
+crisp pixels, clean readable silhouette, no text, no watermark, no border
+```
+
+#### A3. `skill_fire_field.png` —— 焚地火域（离火法环 · 第 2 神通）
+> 效果：在脚下留一片持续燃烧的三昧真火（俯视火海）。
+
+```text
+pixel art game skill icon, a top-down oval pool of alchemy fire burning on the ground,
+tongues of orange-gold flame licking outward from a bright white-hot core,
+a few dark smoke pixels drifting above the pool,
+color palette: orange-gold flame (#FF9A3C), gold (#E8B84A), white-hot core (#FFF2C8), dark ink-blue smoke,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style,
+crisp pixels, clean readable silhouette, no text, no watermark, no border
+```
+
+#### A4. `skill_charge_storm.png` —— 蓄雷引弧（连环雷符 · 第 2 神通）
+> 效果：蓄力一段时间，期间每次命中都自动引出一条电弧。
+
+```text
+pixel art game skill icon, a yellow paper talisman standing upright with a bold cinnabar thunder sigil,
+four short pale-cyan lightning arcs jumping INWARD toward it from the four corners (charging up),
+a bright cyan glow ring around the talisman,
+color palette: paper yellow (#FFD98A), cinnabar (#B5352C) sigil, jade-cyan (#55E0C8) arcs,
+solid magenta background (#FF00FF), single object only, pixel art, 16-bit retro game style,
+crisp pixels, clean readable silhouette, no text, no watermark, no border
+```
+
+#### A5. `skill_pierce_shuttle.png` —— 穿云巨梭（回风梭 · 第 2 神通）
+> 效果：掷出一枚巨型飞梭，走直线穿透全部敌人，不折返。
+
+```text
+pixel art game skill icon, one oversized jade-cyan boomerang-shaped shuttle flying straight to the right,
+piercing through three small dark silhouettes lined up on its path,
+a long straight white drill streak behind it,
+color palette: jade-cyan (#55E0C8) body, deeper teal (#2E9E9C) shade, white streak,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style,
+crisp pixels, clean readable silhouette, no text, no watermark, no border
+```
+
+#### A6. `skill_detonate_all.png` —— 符阵合围（地火符阵 · 第 2 神通）
+> 效果：立刻引爆场上所有已布下的符雷，连锁成一片雷火。
+
+```text
+pixel art game skill icon, six small iron rune mines arranged in a hexagon all detonating at once,
+each bursting into a short orange starburst, thin cyan lightning lines linking the mines,
+color palette: dark slate steel (#4E5C6E) mines, orange-gold blasts (#FF9A3C), jade-cyan (#55E0C8) links,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style,
+crisp pixels, clean readable silhouette, no text, no watermark, no border
+```
+
+#### A7. `skill_inferno_ring.png` —— 焚天剑轮（融合：周天剑环 + 离火法环）
+> 效果：外放的剑环裹上真火，扫过之处留下火域。
+
+```text
+pixel art game skill icon, a spinning wheel of six jade-cyan swords, every blade wrapped in orange-gold
+alchemy flame, a hollow burning center, small flame sparks flung outward,
+color palette: jade-cyan (#55E0C8) blades, orange-gold flame (#FF9A3C), white-hot edges,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style,
+crisp pixels, clean readable silhouette, no text, no watermark, no border
+```
+
+#### A8. `skill_storm_volley.png` —— 惊雷剑引（融合：本命飞剑 + 连环雷符）
+> 效果：放射状剑雨，每一把剑落下时都带一道天雷。
+
+```text
+pixel art game skill icon, a fan of jade-cyan flying swords radiating outward from the lower-left,
+each sword struck by a short white-cyan lightning bolt, thunder glow between the blades,
+color palette: jade-cyan (#55E0C8) blades, gold (#E8B84A) guards, white-cyan lightning (#CFE8E0),
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style,
+crisp pixels, clean readable silhouette, no text, no watermark, no border
+```
+
+### B. 新角色方向表（2 张 · 64×64 · 4×4 网格，每格 16×16）
+
+> 规格与主角表完全一致：**列 = 朝向（下 0 / 上 1 / 左 2 / 右 3），行 0-3 = 行走帧**。
+> ⚠️ **每一列内部都必须帧间自洽**：4 帧里身体水平位置不能跳、脸朝向不能翻。
+> 我会用机器校验（身体质心极差 + 肤色朝向符号，L0 判据 `hero-columns`），不合格直接打回。
+> 没生成之前，多角色用**代码调色变体**顶着，功能是完整的。
+
+#### B1. `char_fu_sheet.png` —— 符修（万宝楼掌柜的弟子）
+> 玩法定位：初始法宝「地火符阵」，灵力上限更高、身板更脆。
+
+```text
+pixel art sprite sheet, exact 4x4 grid of 16 frames, each frame a small 16x16 pixel character:
+a young Chinese talisman cultivator (xianxia) walking. loose saffron-yellow robe with cinnabar-red trim,
+a bamboo tube of yellow talismans on his back, two paper talismans pinched between his fingers,
+black cloth shoes, hair in a small topknot tied with a red cord.
+columns = facing direction: column 1 walking facing down (front), column 2 facing up (back),
+column 3 facing left, column 4 facing right. rows = 4-frame walk cycle with alternating legs.
+STRICT: inside every column the body must stay in exactly the same horizontal position across all four
+frames, and the face must point the same way in all four frames; only legs and arms change.
+chunky pixels, limited palette, consistent size and framing in all 16 frames.
+color palette: saffron yellow (#E8B84A) robe, cinnabar red (#B5352C) trim, paper yellow (#FFD98A) talismans,
+dark ink-blue night (#0E1420) outline,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels, no text, no watermark, no border
+```
+
+#### B2. `char_jian_sheet.png` —— 剑修（青冥山弃徒）
+> 玩法定位：初始法宝「周天剑环」，出手更快、走位更慢。
+
+```text
+pixel art sprite sheet, exact 4x4 grid of 16 frames, each frame a small 16x16 pixel character:
+a lean Chinese sword cultivator (xianxia) walking. moon-white and pale jade robe with black trim,
+a long plain sword strapped across his back, a white headband ribbon trailing behind his head, dark boots,
+hair tied high with a white cord.
+columns = facing direction: column 1 walking facing down (front), column 2 facing up (back),
+column 3 facing left, column 4 facing right. rows = 4-frame walk cycle with alternating legs.
+STRICT: inside every column the body must stay in exactly the same horizontal position across all four
+frames, and the face must point the same way in all four frames; only legs and arms change.
+chunky pixels, limited palette, consistent size and framing in all 16 frames.
+color palette: moon-white (#CFE8E0) robe, jade-cyan (#55E0C8) trim, steel grey (#8FA3B8) sword,
+dark ink-blue night (#0E1420) outline,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels, no text, no watermark, no border
+```
+
+### C. 主角表重画（1 张 · 可选，纯打磨）
+
+#### C1. `ninja_sheet.png` —— 守山人行走表（替换现用表）
+> 现在这张表的**右向列（col3）是坏的**（row0 与其余 3 帧朝向相反、整体右移 2px），
+> 代码靠"镜像左向列"绕开了。重画好之后右向就是原生帧，走路姿态更自然。
+> 请保持**同一个人物造型与配色**（游戏里已有大量截图与存档，换脸会很明显）。
+
+```text
+pixel art sprite sheet, exact 4x4 grid of 16 frames, each frame a small 16x16 pixel character:
+a young Chinese mountain night-watch cultivator walking. dark teal-blue robe with black trim,
+a small red hair ribbon trailing behind his head, a flat sword case on his back, dark shoes.
+columns = facing direction: column 1 walking facing down (front), column 2 facing up (back),
+column 3 facing left, column 4 facing right. rows = 4-frame walk cycle with alternating legs.
+STRICT: inside every column the body must stay in exactly the same horizontal position across all four
+frames, and the face must point the same way in all four frames; only legs and arms change.
+chunky pixels, limited palette, consistent size and framing in all 16 frames.
+color palette: dark teal-blue (#1E4F5C) robe, black trim, cinnabar red (#B5352C) ribbon,
+skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels, no text, no watermark, no border
+```
+
+### D. 本轮**不用**你生成的（说明，免得白做功）
+
+- 两件新法宝的图标（`icon_fa_boomerang.png` / `icon_fa_mine.png`）与它们的神通图标
+  （`skill_boomerang.png` / `skill_mine.png`）——提示词在「P6 补充图标」一节，**还没生成**，
+  有空可以和 A 组一起做；不做也能玩（现在是代码画的）。
+- 设置菜单、乾坤袋、触屏按钮（拾取 / 乾坤袋 / 暂停）的图标全部代码绘制，**不需要生图**。
+- 融合神通的解锁提示、角色选择框也全是代码 UI，**不需要生图**。
