@@ -49,6 +49,12 @@ func _on_body_entered(body):
 	Audio.play("res://sounds/pickup.wav", false, 1.0, 0.35)
 	VFX.explosion(global_position, 150.0, VFX.C_GOLD)
 	VFX.screen_flash(VFX.C_GOLD, 0.20, 0.3)
+	# ⚠️ 奖励分发可能改碰撞状态（免费升阶会给剑环加刃），
+	# 物理回调里直接做会报 "Can't change this state while flushing queries"——推迟到刷新之外
+	call_deferred("_dispatch_reward")
+
+
+func _dispatch_reward() -> void:
 	var roll := randf()
 	if roll < Balance.CHEST_MATERIAL_CHANCE:
 		_give_materials()
