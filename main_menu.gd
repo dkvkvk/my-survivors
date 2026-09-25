@@ -34,7 +34,7 @@ func _ready():
 	_setup_settings_panel()
 
 	var records := SaveGame.load_records()
-	%RecordsLabel.text = "最高纪录　守夜 %d:%02d　斩妖 %d　修为 %d\n灵石 %d（坊市万宝楼可花）" % [
+	%RecordsLabel.text = "最高纪录　守夜 %d:%02d　·　斩妖 %d　·　修为 %d　·　灵石 %d（万宝楼可花）" % [
 		int(records["best_time"]) / 60,
 		int(records["best_time"]) % 60,
 		records["best_kills"],
@@ -133,6 +133,7 @@ const CHAR_CARD_W := 320.0
 const CHAR_CARD_H := 118.0
 const CHAR_GAP := 24.0
 var _char_cards: Array = []
+var _char_caption: Label = null
 
 
 ## 视频背景（P7）：桌面版播放 menu_loop.ogv（用户 AI 生成、CI 转码 OGV）；
@@ -169,16 +170,25 @@ func _setup_character_picker() -> void:
 	var cap := Label.new()
 	cap.set_anchors_preset(Control.PRESET_CENTER)
 	cap.offset_left = -500
-	cap.offset_top = -66
+	cap.offset_top = -96
 	cap.offset_right = 500
-	cap.offset_bottom = -34
+	cap.offset_bottom = -32
 	cap.text = "— 选 择 身 份 —"
 	cap.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	cap.add_theme_font_size_override("font_size", 30)
+	cap.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM   # 文字贴矩形底边，避免最小高度把它顶出去
+	cap.add_theme_font_size_override("font_size", 28)
+	# 上一行「最高纪录/灵石」是两行文字，会略微溢出它自己的矩形——把字号和矩形收紧，
+	# 否则它会压住下面这行「选择身份」（2026-09-24 用户截图反馈的糅杂之一）
+	var rec := get_node_or_null("%RecordsLabel")
+	if rec != null:
+		rec.offset_top = -150
+		rec.offset_bottom = -106
+		rec.add_theme_font_size_override("font_size", 30)
 	cap.add_theme_color_override("font_color", Color(0.75, 0.88, 0.82))
 	cap.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	cap.add_theme_constant_override("outline_size", 8)
 	add_child(cap)
+	_char_caption = cap
 
 	for i in defs.size():
 		var def: Dictionary = defs[i]
@@ -187,9 +197,9 @@ func _setup_character_picker() -> void:
 		var card := Button.new()
 		card.set_anchors_preset(Control.PRESET_CENTER)
 		card.offset_left = x0
-		card.offset_top = -28
+		card.offset_top = -24
 		card.offset_right = x0 + CHAR_CARD_W
-		card.offset_bottom = -28 + CHAR_CARD_H
+		card.offset_bottom = -24 + CHAR_CARD_H
 		card.text = ""
 		card.pressed.connect(_on_character_clicked.bind(id))
 		add_child(card)
@@ -197,36 +207,44 @@ func _setup_character_picker() -> void:
 		var ppath := "res://assets/ui/portrait_%s.png" % id
 		if ResourceLoader.exists(ppath):
 			var pic := TextureRect.new()
-			pic.position = Vector2(10, 10)
-			pic.size = Vector2(52, 52)
+			pic.position = Vector2(10, 16)
+			pic.size = Vector2(50, 50)
 			pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			# ⚠️ 不设 expand_mode 的话，TextureRect 的最小尺寸 = 贴图尺寸（96x96），
+			# 我设的 50x50 会被顶大，头像就压到右边的名字和描述上（2026-09-24 截图发现）
+			pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			pic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 			pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			pic.texture = load(ppath)
 			card.add_child(pic)
 		var nm := Label.new()
 		nm.set_anchors_preset(Control.PRESET_FULL_RECT)
-		nm.offset_left = 68
-		nm.offset_top = 8
-		nm.offset_bottom = -70
+		nm.offset_left = 70
+		nm.offset_top = 10
+		nm.offset_right = -10
+		nm.offset_bottom = -64
 		nm.text = str(def["name"])
 		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		nm.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		nm.add_theme_font_size_override("font_size", 36)
+		nm.clip_text = true
+		nm.add_theme_font_size_override("font_size", 34)
 		nm.add_theme_color_override("font_color", Color(1, 0.92, 0.6))
 		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		card.add_child(nm)
 		var ds := Label.new()
 		ds.set_anchors_preset(Control.PRESET_FULL_RECT)
-		ds.offset_top = -60
-		ds.offset_bottom = -12
-		ds.offset_left = 14
-		ds.offset_right = -14
+		# ⚠️ FULL_RECT 锚点下 offset_top 是"从卡片顶边向下"的位移，
+		# 写成负值 = 把整块文字推到卡片外面（会压住标题和上一行）——这正是糅杂的根因。
+		ds.offset_top = 56
+		ds.offset_bottom = -6
+		ds.offset_left = 66   # 让开左边的头像栏（头像占 10..60），否则文字会压在人物身上
+		ds.offset_right = -10
 		ds.text = str(def["desc"])
 		ds.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		ds.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		ds.vertical_alignment = 1
-		ds.add_theme_font_size_override("font_size", 18)
+		ds.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		ds.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+		ds.clip_text = true
+		ds.add_theme_font_size_override("font_size", 17)
 		ds.add_theme_color_override("font_color", Color(0.78, 0.9, 0.95))
 		ds.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		card.add_child(ds)
@@ -327,16 +345,18 @@ func _setup_settings_panel() -> void:
 	title.add_theme_color_override("font_color", Color(1, 0.92, 0.6))
 	panel.add_child(title)
 
-	_slider(panel, "抖动强度", 460, float(SaveGame.get_setting("shake", 1.0)),
+	# ⚠️ _slider 的 y 是**相对面板中心**的位移，面板只有 520 高（±260）——
+	# 之前传 460/560/660 直接把三个滑杆甩到面板下方 400px 处（截图发现）
+	_slider(panel, "抖动强度", -70, float(SaveGame.get_setting("shake", 1.0)),
 		func(v: float):
 			SaveGame.set_setting("shake", v)
 			VFX.set_shake_scale(v))
-	_slider(panel, "音乐音量", 560, float(SaveGame.get_setting("music", 1.0)),
+	_slider(panel, "音乐音量", 30, float(SaveGame.get_setting("music", 1.0)),
 		func(v: float):
 			SaveGame.set_setting("music", v)
 			Audio.music_volume = v
 			Audio.apply_volumes())
-	_slider(panel, "音效音量", 660, float(SaveGame.get_setting("sfx", 1.0)),
+	_slider(panel, "音效音量", 130, float(SaveGame.get_setting("sfx", 1.0)),
 		func(v: float):
 			SaveGame.set_setting("sfx", v)
 			Audio.sfx_volume = v
@@ -437,9 +457,9 @@ func _open_achievements() -> void:
 	var panel := Panel.new()
 	panel.set_anchors_preset(Control.PRESET_CENTER)
 	panel.offset_left = -520
-	panel.offset_top = -400
+	panel.offset_top = -430
 	panel.offset_right = 520
-	panel.offset_bottom = 400
+	panel.offset_bottom = 430
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.05, 0.08, 0.11, 0.97)
 	sb.border_color = Color(0.35, 0.8, 0.9, 0.85)
@@ -450,21 +470,22 @@ func _open_achievements() -> void:
 
 	var records := SaveGame.load_records()
 	var stats: Dictionary = SaveGame.get_stats()
-	var unlocked: Array = SaveGame.get_unlocked()
+	# 回填：老存档里"早就达标但当时还没这个功能"的成就（例如守夜早就超过 10 分钟）
+	var unlocked: Array = SaveGame.sync_achievements()
 
 	var title := Label.new()
 	title.set_anchors_preset(Control.PRESET_CENTER)
 	title.offset_left = -480
-	title.offset_top = -378
+	title.offset_top = -408
 	title.offset_right = 480
-	title.offset_bottom = -322
+	title.offset_bottom = -352
 	title.text = "成 就    %d / %d" % [unlocked.size(), Achievements.LIST.size()]
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 42)
 	title.add_theme_color_override("font_color", Color(1, 0.92, 0.6))
 	panel.add_child(title)
 
-	var y := -292.0
+	var y := -360.0
 	for a in Achievements.LIST:
 		var done: bool = unlocked.has(str(a["id"]))
 		var cur := Achievements.progress(stats, records, a)
@@ -473,27 +494,27 @@ func _open_achievements() -> void:
 		row.offset_left = -468
 		row.offset_top = y
 		row.offset_right = 468
-		row.offset_bottom = y + 40
+		row.offset_bottom = y + 32
 		row.text = "%s  %s          %d / %d" % ["★" if done else "·", str(a["name"]), mini(cur, int(a["target"])), int(a["target"])]
-		row.add_theme_font_size_override("font_size", 25)
+		row.add_theme_font_size_override("font_size", 22)
 		row.add_theme_color_override("font_color", Color(1, 0.9, 0.5) if done else Color(0.62, 0.7, 0.78))
 		panel.add_child(row)
 		var sub := Label.new()
 		sub.set_anchors_preset(Control.PRESET_CENTER)
 		sub.offset_left = -448
-		sub.offset_top = y + 20
+		sub.offset_top = y + 31
 		sub.offset_right = 468
-		sub.offset_bottom = y + 44
+		sub.offset_bottom = y + 52
 		sub.text = str(a["desc"])
-		sub.add_theme_font_size_override("font_size", 17)
+		sub.add_theme_font_size_override("font_size", 15)
 		sub.add_theme_color_override("font_color", Color(0.5, 0.6, 0.68))
 		panel.add_child(sub)
-		y += 46.0
+		y += 54.0
 
 	var close := Button.new()
 	close.set_anchors_preset(Control.PRESET_CENTER)
 	close.offset_left = -120
-	close.offset_top = 332
+	close.offset_top = 352
 	close.offset_right = 120
 	close.offset_bottom = 392
 	close.text = "关 闭"

@@ -33,7 +33,26 @@ static func load_records() -> Dictionary:
 	records["best_kills"] = int(records["best_kills"])
 	records["best_level"] = int(records["best_level"])
 	records["coins"] = int(records["coins"])
+	_migrate_settings(records)
 	return records
+
+
+## 存档迁移：早期版本把抖动/音量存成**整数百分比**（50 表示 50%），
+## 现在统一 0~1 浮点。不迁移的话老存档读出来是 50 → 滑杆显示「5000%」且被 clamp 到上限。
+## 只在新值可能非法时（> 1.5）才换算并回写一次。
+static func _migrate_settings(records: Dictionary) -> void:
+	var settings = records.get("settings", {})
+	if not settings is Dictionary:
+		return
+	var changed := false
+	for key in ["shake", "music", "sfx"]:
+		var v = settings.get(key, null)
+		if (v is float or v is int) and float(v) > 1.5:
+			settings[key] = clampf(float(v) / 100.0, 0.0, 1.5)
+			changed = true
+	if changed:
+		records["settings"] = settings
+		_write(records)
 
 
 ## 提交一局战绩：刷新最高纪录、把本局灵石存入余额。返回各项是否为新纪录。
@@ -80,6 +99,20 @@ static func submit_run(kills: int, survived: float, level: int, coins: int, extr
 	_write(records)
 	new_flags["unlocked"] = newly
 	return new_flags
+
+
+## 回填：把"已达标但没记进解锁列表"的成就补上（老存档在本功能上线前就达标的情况），
+## 返回补完后的解锁列表。主菜单打开成就页时调用。
+static func sync_achievements() -> Array:
+	var records := load_records()
+	var stats = records.get("stats", {})
+	var unlocked: Array = records.get("unlocked", [])
+	for id in Achievements.satisfied(stats if stats is Dictionary else {}, records):
+		if not unlocked.has(id):
+			unlocked.append(id)
+	records["unlocked"] = unlocked
+	_write(records)
+	return unlocked
 
 
 ## 某强化的当前等级（0 = 未购买）

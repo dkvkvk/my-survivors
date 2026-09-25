@@ -332,7 +332,7 @@ offset_top = 224.0
 offset_right = 424.0
 offset_bottom = 272.0
 theme_override_font_sizes/font_size = 36
-text = "妖王 0/3"
+text = "妖王 0/5"
 [node name="BossWarnLabel" type="Label" parent="HUD" unique_id=971100012]
 unique_name_in_owner = true
 visible = false

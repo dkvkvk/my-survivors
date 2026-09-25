@@ -28,6 +28,8 @@ var _chunk_map: Node2D
 
 func _ready():
 	Audio.play_music("res://sounds/bgm_battle.wav")
+	# 占位文字可能与 balance.gd 脱节（改胜利线时漏改场景）——启动即按常量刷一遍
+	%BossProgressLabel.text = "妖王 0/%d" % Balance.VICTORY_BOSS_KILLS
 	player.leveled_up.connect(_on_player_leveled_up)
 	_chunk_map = preload("res://chunk_map.gd").new()
 	add_child(_chunk_map)

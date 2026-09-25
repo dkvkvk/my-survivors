@@ -69,18 +69,69 @@ func _process(_delta: float) -> bool:
 		if not has_pic:
 			_fail("身份卡 %s 没有头像" % str(c["id"]))
 
+	# 卡片排版（2026-09-24 用户截图反馈"界面糅杂"）：元素不得重叠、不得超出卡片
+	for c in _menu._char_cards:
+		var card: Button = c["card"]
+		var nm: Label = c["nm"]
+		var ds: Label = c["ds"]
+		var card_rect := Rect2(Vector2.ZERO, card.size)
+		var r_nm := Rect2(nm.position, nm.size)
+		var r_ds := Rect2(ds.position, ds.size)
+		if not card_rect.encloses(r_nm):
+			_fail("身份卡 %s 的名字超出卡片 %s" % [str(c["id"]), str(r_nm)])
+		if not card_rect.encloses(r_ds):
+			_fail("身份卡 %s 的描述超出卡片 %s" % [str(c["id"]), str(r_ds)])
+		if r_nm.intersects(r_ds):
+			_fail("身份卡 %s 的名字与描述重叠" % str(c["id"]))
+		if r_ds.position.y < card.size.y * 0.4:
+			_fail("身份卡 %s 的描述位置过高（y=%.0f）" % [str(c["id"]), r_ds.position.y])
+		for ch in card.get_children():
+			if ch is TextureRect and (ch as TextureRect).texture != null:
+				var r_pic := Rect2((ch as TextureRect).position, (ch as TextureRect).size)
+				if r_pic.intersects(r_ds):
+					_fail("身份卡 %s 的描述压在头像上 %s" % [str(c["id"]), str(r_ds)])
+				if r_pic.intersects(r_nm):
+					_fail("身份卡 %s 的名字压在头像上 %s" % [str(c["id"]), str(r_nm)])
+	if _menu._char_caption == null:
+		_fail("找不到身份选择标题")
+	else:
+		var cap_bottom: float = _menu._char_caption.position.y + _menu._char_caption.size.y
+		var first_card: Button = _menu._char_cards[0]["card"]
+		if cap_bottom > first_card.position.y:
+			_fail("「选择身份」标题压住卡片（标题底 %.0f > 卡片顶 %.0f）" % [
+				cap_bottom, first_card.position.y])
+		var rec: Label = _menu.get_node_or_null("%RecordsLabel")
+		if rec != null:
+			var rec_bottom: float = rec.position.y + rec.size.y
+			if rec_bottom > _menu._char_caption.position.y:
+				_fail("「最高纪录」压住「选择身份」（纪录底 %.0f > 标题顶 %.0f）" % [
+					rec_bottom, _menu._char_caption.position.y])
+
+	# 老存档迁移：早期版本把抖动/音量存成整数百分比（50 = 50%），读出来必须换算成 0~1
+	var legacy := SaveGame.load_records()
+	legacy["settings"] = {"shake": 50, "music": 30, "sfx": 25}
+	SaveGame._write(legacy)
+	var migrated: Dictionary = SaveGame.load_records()["settings"]
+	if absf(float(migrated.get("shake", -1.0)) - 0.5) > 0.01:
+		_fail("老存档迁移失败：shake = %s（应为 0.5）" % str(migrated.get("shake")))
+	if absf(float(migrated.get("music", -1.0)) - 0.3) > 0.01:
+		_fail("老存档迁移失败：music = %s（应为 0.3）" % str(migrated.get("music")))
+
 	# 抖动：写存档 + 实时改 VFX.shake_scale
-	sliders[0].value = 0.5
-	if absf(float(SaveGame.get_setting("shake", -1.0)) - 0.5) > 0.01:
+	# ⚠️ 赋一个与当前值相同的值不会触发 value_changed——所以先确保目标值与现值不同
+	var shake_target := 0.7 if absf(sliders[0].value - 0.7) > 0.01 else 0.4
+	sliders[0].value = shake_target
+	if absf(float(SaveGame.get_setting("shake", -1.0)) - shake_target) > 0.01:
 		_fail("抖动设置没有写入存档")
-	if absf(float(root_vfx().shake_scale) - 0.5) > 0.01:
+	if absf(float(root_vfx().shake_scale) - shake_target) > 0.01:
 		_fail("抖动强度没有实时生效（%.2f）" % root_vfx().shake_scale)
 
 	# 音乐：写存档 + 实时生效
-	sliders[1].value = 0.3
-	if absf(float(SaveGame.get_setting("music", -1.0)) - 0.3) > 0.01:
+	var music_target := 0.35 if absf(sliders[1].value - 0.35) > 0.01 else 0.6
+	sliders[1].value = music_target
+	if absf(float(SaveGame.get_setting("music", -1.0)) - music_target) > 0.01:
 		_fail("音乐音量没有写入存档")
-	if absf(float(root_audio().music_volume) - 0.3) > 0.01:
+	if absf(float(root_audio().music_volume) - music_target) > 0.01:
 		_fail("音乐音量没有实时生效")
 
 	# 音效：写存档 + 实时生效
