@@ -139,6 +139,19 @@ MS_AUTOSTART=1 MS_FEEL_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 18
 ⚠️ 后期同屏怪多（10 只以上连杀）时抖动会回升（实测 >4px 占 41% 的帧）——
 那时调 `CAMERA_SHAKE_SWARM_FLOOR`（0.35 → 更小）比调 GAIN 更对症。
 
+### 跑局采集数据（自动机器人 MS_BOT=1）
+```bash
+G="/d/Downloads/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.exe"
+MS_AUTOSTART=1 MS_BOT=1 "$G" --headless --path /e/games/my-survivors --fixed-fps 60 --quit-after 60000 2>&1 | grep -E 'BOTPING|BOTSTAT'
+```
+- `--headless --fixed-fps 60`：**每帧 delta 固定 1/60**，15 分钟游戏时间只要几分钟真实时间就跑完，
+  而且不会往桌面上弹窗口
+- 机器人行为：远离最近的妖（带摆动）· 顺路捡法宝 · 蓝够就放神通 · 材料够就升阶 · 升级三选一随机选
+- 输出：`BOTPING` 每 30 秒一条（时间/等级/斩妖/血量/同屏怪/法宝），结束时 `BOTSTAT` 一条
+- ⚠️ 两个必踩的坑：① 升级三选一与结算都会**暂停游戏树**，机器人节点必须
+  `process_mode = ALWAYS` **并且自己应答弹窗**，否则第一次升级就永久卡住（表现为"只输出一行就没了"）；
+  ② 法宝位满时捡法宝会弹**替换面板**，所以机器人只在有空位时捡
+
 ### 触屏与移动端验证（本机没有触摸屏）
 ```bash
 # 强制开启触屏层（桌面调试/截图）：命令行 --touch，或环境变量 MS_TOUCH=1

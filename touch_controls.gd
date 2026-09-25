@@ -36,6 +36,13 @@ var _base_pos := Vector2.ZERO
 var _buttons: Array = []          # [{index, center, base, icon}]
 var _util: Array = []             # [{key, center, ring, label}]
 var _player: Node
+# 自动跑局机器人（开发用，见 HANDOVER §3）：MS_BOT=1 远离妖、捡法宝、放神通、能升就升，
+# 用来采集生存数据回答"15 分钟到底能不能活到"。配合 --headless --fixed-fps 可把
+# 15 分钟压缩成几分钟跑完（fixed-fps 让每帧 delta 固定，与真实耗时无关）。
+var _bot := false
+var _bot_wobble := 0.0
+var _bot_ping_next := 30.0
+var _bot_done := false
 
 
 func _ready() -> void:
@@ -46,6 +53,10 @@ func _ready() -> void:
 		return
 	add_to_group("touch_input")
 	set_process_input(true)
+	_bot = OS.get_environment("MS_BOT") == "1"
+	if _bot:
+		# 升级三选一 / 结算都会暂停游戏树；机器人必须照常运行才能自己应答弹窗
+		process_mode = Node.PROCESS_MODE_ALWAYS
 	_build()
 
 
@@ -58,6 +69,8 @@ func _should_enable() -> bool:
 			return true
 	if OS.has_feature("mobile") or OS.has_feature("web_android") or OS.has_feature("web_ios"):
 		return true
+	if OS.get_environment("MS_BOT") == "1":
+		return true          # 机器人复用同一条输入注入路径（顺带也测了触屏方向）
 	return DisplayServer.is_touchscreen_available()
 
 
@@ -132,6 +145,8 @@ func _make_ring(radius: float, width: float, col: Color, pos: Vector2) -> Line2D
 
 
 func _process(_delta: float) -> void:
+	if _bot:
+		_bot_step(_delta)
 	if _knob != null:
 		_knob.position = _base_pos + direction * STICK_MAX
 	if _player == null:
@@ -186,6 +201,98 @@ func _process(_delta: float) -> void:
 		var on: bool = String(u["key"]) != "pickup" or _pickup_available()
 		ring.default_color = Color(0.6, 1.0, 1.0, 0.55) if on else Color(0.5, 0.55, 0.65, 0.2)
 		lab.modulate.a = 1.0 if on else 0.45
+
+
+## 机器人一步：躲最近的妖、顺路捡法宝、放神通、材料够就升阶
+func _bot_step(delta: float) -> void:
+	if _player == null:
+		_player = get_node_or_null("/root/Game/Player")
+		if _player == null:
+			return
+	var game := get_node_or_null("/root/Game")
+	if game == null:
+		return
+	# 弹窗应答：headless 下没人点按钮，机器人不自己选就会永远卡在暂停里
+	var lvl = get_node_or_null("/root/Game/LevelUpUI")
+	if lvl != null and lvl.visible:
+		lvl._choose(randi() % 3)
+		return
+	var t: float = float(game.run_time)
+	_bot_wobble += delta * 1.7
+	var nearest := _nearest_mob()
+	if nearest == null:
+		direction = Vector2.ZERO
+	else:
+		var away: Vector2 = (_player.global_position - nearest.global_position).normalized()
+		# 加一点左右摆动，避免被妖逼在直线上越跑越窄
+		direction = away.rotated(sin(_bot_wobble) * 0.85)
+		# 妖贴脸时优先脱身：反向拉满
+		if _player.global_position.distance_to(nearest.global_position) < 90.0:
+			direction = away
+	# 脚下有法宝就过去捡（只在有空位时捡，否则会弹替换面板把局面搞乱）
+	if _player.weapon_count() < Weapons.MAX_SLOTS:
+		for drop in get_tree().get_nodes_in_group("weapon_drops"):
+			if not is_instance_valid(drop):
+				continue
+			if _player.global_position.distance_to(drop.global_position) < 260.0:
+				direction = _player.global_position.direction_to(drop.global_position)
+				if drop.has_method("can_touch_pickup") and drop.can_touch_pickup():
+					drop.touch_pickup()
+				break
+	# 神通：蓝够、不在冷却就放
+	for i in _player.skill_slots.size():
+		var id: String = str(_player.skill_slots[i])
+		if id == "":
+			continue
+		var def: Dictionary = Skills.get_def(id)
+		if _player.get_skill_cooldown(id) <= 0.0 and _player.mana >= float(def.get("mana", 0.0)):
+			_player.cast_skill(i)
+	# 能升就升（模拟玩家会做的事）
+	for w in _player.weapons:
+		var wid: String = str(w["id"])
+		if _player.can_upgrade_weapon(wid):
+			_player.upgrade_weapon(wid)
+	# 汇报
+	if not _bot_done and t >= _bot_ping_next:
+		_bot_ping_next += 30.0
+		print("BOTPING t=%.0fs lv=%d kills=%d hp=%.0f/%.0f mobs=%d fa=%s" % [
+			t, _player.level, int(game.kill_count), _player.health, _player.max_health,
+			get_tree().get_nodes_in_group("mobs").size(), _weapons_text()])
+	if not _bot_done and (_player.health <= 0.0 or bool(game._run_ended)):
+		_bot_finish("win" if bool(game._run_ended) and _player.health > 0.0 else "died", t)
+
+
+func _bot_finish(result: String, t: float) -> void:
+	if _bot_done:
+		return
+	_bot_done = true
+	var game = get_node_or_null("/root/Game")
+	print("BOTSTAT result=%s time=%.0fs level=%d kills=%d boss=%d coins=%d fa=%s" % [
+		result, t, _player.level,
+		int(game.kill_count) if game != null else 0,
+		int(game.boss_kill_count) if game != null else 0,
+		int(game.run_coins) if game != null else 0, _weapons_text()])
+	get_tree().quit()
+
+
+func _nearest_mob() -> Node2D:
+	var best: Node2D = null
+	var best_d := 1e20
+	for mob in get_tree().get_nodes_in_group("mobs"):
+		if not is_instance_valid(mob) or not (mob is Node2D):
+			continue
+		var d: float = _player.global_position.distance_to(mob.global_position)
+		if d < best_d:
+			best_d = d
+			best = mob
+	return best
+
+
+func _weapons_text() -> String:
+	var s := ""
+	for w in _player.weapons:
+		s += "%s:%d " % [str(w["id"]), int(w["level"])]
+	return s.strip_edges()
 
 
 func _input(event: InputEvent) -> void:
