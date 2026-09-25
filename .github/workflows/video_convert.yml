@@ -5,7 +5,8 @@ name: 转码主菜单视频
 
 on:
   push:
-    paths: ['menu_raw/**']
+    branches: [main]        # 只认分支推送：tag 推送时 paths 过滤不生效，
+    paths: ['menu_raw/**']  # 且 tag 检出是 detached HEAD，push 必然失败
   workflow_dispatch:
 
 permissions:
