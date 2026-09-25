@@ -189,6 +189,26 @@ def check_kill_credit():
     }
 
 
+def check_achievements():
+    """功能回归：成就系统（P7）——累计统计、达成解锁、不重复解锁、成就页可列。
+
+    测试会临时改写 user://records.json 并在结束时恢复（玩家真实进度不受影响）。
+    """
+    code, out, secs = run_godot(["--script", "res://tools/qa/check_achievements.gd"])
+    if code == "missing":
+        return {"id": "achievements", "determinism": "assert", "pass": False,
+                "reason": "找不到 Godot 可执行文件", "godot": GODOT}
+    bad = [ln for ln in out.splitlines() if "ACHIEVE FAIL" in ln]
+    return {
+        "id": "achievements",
+        "determinism": "assert",
+        "pass": "ACHIEVE PASS" in out and not bad,
+        "bad_count": len(bad),
+        "bad_lines": bad[:10],
+        "seconds": round(secs, 1),
+    }
+
+
 def check_settings():
     """功能回归：设置菜单（P7）——3 个滑杆写存档并实时生效，身份选择器可选并持久化。"""
     code, out, secs = run_godot(["--script", "res://tools/qa/check_settings.gd"])
@@ -454,7 +474,7 @@ def main():
     args = parser.parse_args()
 
     checks = [check_import(), check_script_parse(), check_kill_credit(), check_weapons(),
-              check_skills(), check_characters(), check_settings(),
+              check_skills(), check_characters(), check_settings(), check_achievements(),
               check_asset_contract(), check_import_hygiene(), check_sprite_refs(),
               check_touch(), check_hero_columns(), check_fx_entry(), check_font_coverage()]
     if not args.fast:
@@ -483,6 +503,8 @@ def main():
         extra = ""
         if c["id"] == "kill-credit":
             extra = " (精确斩妖归属)"
+        if c["id"] == "achievements":
+            extra = " (13 项成就: 统计/解锁/不重复/成就页)"
         if c["id"] == "settings-ui":
             extra = " (设置菜单 3 滑杆 + 身份选择器)"
         if c["id"] == "characters":

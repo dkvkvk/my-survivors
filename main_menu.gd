@@ -30,6 +30,7 @@ func _ready():
 	_setup_talismans()
 	_setup_character_picker()
 	_setup_settings_button()
+	_setup_achievements_button()
 	_setup_settings_panel()
 
 	var records := SaveGame.load_records()
@@ -395,6 +396,112 @@ func _slider(panel: Control, label: String, y: float, value: float, on_change: C
 	row.value_changed.connect(func(v: float):
 		refresh.call(v)
 		on_change.call(v))
+
+
+
+
+## ---------- 成就（P7）：主菜单可查，结算时解锁 ----------
+
+var _ach_panel: Control = null
+
+
+func _setup_achievements_button() -> void:
+	var b := Button.new()
+	b.set_anchors_preset(Control.PRESET_CENTER)
+	b.offset_left = 180
+	b.offset_top = 360
+	b.offset_right = 420
+	b.offset_bottom = 440
+	b.text = "成 就"
+	b.add_theme_font_size_override("font_size", 40)
+	b.pressed.connect(_open_achievements)
+	add_child(b)
+
+
+func _open_achievements() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 44
+	add_child(layer)
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_STOP
+	layer.add_child(root)
+	_ach_panel = root
+
+	var dim := ColorRect.new()
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.color = Color(0, 0, 0, 0.84)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(dim)
+
+	var panel := Panel.new()
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.offset_left = -520
+	panel.offset_top = -400
+	panel.offset_right = 520
+	panel.offset_bottom = 400
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.05, 0.08, 0.11, 0.97)
+	sb.border_color = Color(0.35, 0.8, 0.9, 0.85)
+	sb.set_border_width_all(3)
+	sb.set_corner_radius_all(10)
+	panel.add_theme_stylebox_override("panel", sb)
+	root.add_child(panel)
+
+	var records := SaveGame.load_records()
+	var stats: Dictionary = SaveGame.get_stats()
+	var unlocked: Array = SaveGame.get_unlocked()
+
+	var title := Label.new()
+	title.set_anchors_preset(Control.PRESET_CENTER)
+	title.offset_left = -480
+	title.offset_top = -378
+	title.offset_right = 480
+	title.offset_bottom = -322
+	title.text = "成 就    %d / %d" % [unlocked.size(), Achievements.LIST.size()]
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 42)
+	title.add_theme_color_override("font_color", Color(1, 0.92, 0.6))
+	panel.add_child(title)
+
+	var y := -292.0
+	for a in Achievements.LIST:
+		var done: bool = unlocked.has(str(a["id"]))
+		var cur := Achievements.progress(stats, records, a)
+		var row := Label.new()
+		row.set_anchors_preset(Control.PRESET_CENTER)
+		row.offset_left = -468
+		row.offset_top = y
+		row.offset_right = 468
+		row.offset_bottom = y + 40
+		row.text = "%s  %s          %d / %d" % ["★" if done else "·", str(a["name"]), mini(cur, int(a["target"])), int(a["target"])]
+		row.add_theme_font_size_override("font_size", 25)
+		row.add_theme_color_override("font_color", Color(1, 0.9, 0.5) if done else Color(0.62, 0.7, 0.78))
+		panel.add_child(row)
+		var sub := Label.new()
+		sub.set_anchors_preset(Control.PRESET_CENTER)
+		sub.offset_left = -448
+		sub.offset_top = y + 20
+		sub.offset_right = 468
+		sub.offset_bottom = y + 44
+		sub.text = str(a["desc"])
+		sub.add_theme_font_size_override("font_size", 17)
+		sub.add_theme_color_override("font_color", Color(0.5, 0.6, 0.68))
+		panel.add_child(sub)
+		y += 46.0
+
+	var close := Button.new()
+	close.set_anchors_preset(Control.PRESET_CENTER)
+	close.offset_left = -120
+	close.offset_top = 332
+	close.offset_right = 120
+	close.offset_bottom = 392
+	close.text = "关 闭"
+	close.add_theme_font_size_override("font_size", 34)
+	close.pressed.connect(func():
+		layer.queue_free()
+		_ach_panel = null)
+	panel.add_child(close)
 
 
 func _open_settings() -> void:

@@ -13,7 +13,16 @@ func _unhandled_input(event):
 
 ## 展示本局战绩并把灵石存入余额（P2）。game.gd 在玩家死亡时调用。
 func show_results(kills: int, survived: float, level: int, coins: int) -> void:
-	var new_flags := SaveGame.submit_run(kills, survived, level, coins)
+	var game := get_node_or_null("/root/Game")
+	var player := get_node_or_null("/root/Game/Player")
+	var extra := {
+		"win": false,
+		"boss": int(game.boss_kill_count) if game != null else 0,
+		"weapons": _weapon_ids(player),
+		"max_weapon_level": _max_weapon_level(player),
+		"character": SaveGame.get_character(),
+	}
+	var new_flags := SaveGame.submit_run(kills, survived, level, coins, extra)
 	var records := SaveGame.load_records()
 	%StatsLabel.text = "本夜　守夜 %d:%02d　斩妖 %d　修为 %d\n灵石 +%d（余额 %d）" % [
 		int(survived) / 60, int(survived) % 60, kills, level,
@@ -27,6 +36,11 @@ func show_results(kills: int, survived: float, level: int, coins: int) -> void:
 		records["best_kills"],
 		records["best_level"],
 	]
+	var unlocked: Array = new_flags.get("unlocked", [])
+	if not unlocked.is_empty():
+		var label = %StatsLabel if has_node("%StatsLabel") else %VictoryStatsLabel
+		label.text += "
+★ 解锁成就：" + Achievements.names_of(unlocked) + " ★"
 	show()
 
 
@@ -46,3 +60,22 @@ func _on_restart_button_pressed():
 
 func _on_menu_button_pressed():
 	back_to_menu()
+
+
+
+## 本局携带的法宝 id 列表（成就统计用）
+func _weapon_ids(p) -> Array:
+	var out: Array = []
+	if p != null:
+		for w in p.weapons:
+			out.append(str(w["id"]))
+	return out
+
+
+## 本局最高的法宝品阶（成就统计用）
+func _max_weapon_level(p) -> int:
+	var m := 0
+	if p != null:
+		for w in p.weapons:
+			m = maxi(m, int(w["level"]))
+	return m

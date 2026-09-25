@@ -11,6 +11,7 @@
 | `survivors_game.tscn` + `game.gd` | 战斗场景：刷怪计时器、更次切换、HUD、升级/暂停/结算流程 |
 | `player.tscn` + `player.gd` | 玩家：移动、血量、修为、属性卡应用、法宝/材料/技能槽/灵力（P6）；身份修正与签名法宝（P7 多角色） |
 | `characters.gd` | 身份表（P7 多角色）：3 个身份的签名法宝 / 属性倍率 / 主角配色 |
+| `achievements.gd` | 成就表（P7）：13 项，按**累计统计**解锁（存 `save.gd` 的 stats / unlocked） |
 | 主菜单「设置」 | 抖动强度（0~150%）/ 音乐 / 音效滑杆（P7，`tools/qa/check_settings.gd` 有回归） |
 | `gun.tscn` + `gun.gd` | 本命飞剑（法宝"本命飞剑"的**被动**）：索敌转向、定时开火，弹丸数与伤害随法宝品阶 |
 | `orbit_blades.tscn` + `orbit_blades.gd` | 法宝"环形刀刃"的被动：刀刃绕玩家公转撞击伤害，刀刃数 = 法宝品阶（纯代码绘制） |
