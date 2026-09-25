@@ -60,6 +60,14 @@ func _process(_delta: float) -> bool:
 		return true
 	if _menu._char_cards.size() != 3:
 		print("SETTINGS FAIL: 身份选择卡数量 %d != 3" % _menu._char_cards.size())
+	# 选卡头像（从用户交付的方向表抽出的正面格）
+	for c in _menu._char_cards:
+		var has_pic := false
+		for ch in (c["card"] as Button).get_children():
+			if ch is TextureRect and (ch as TextureRect).texture != null:
+				has_pic = true
+		if not has_pic:
+			_fail("身份卡 %s 没有头像" % str(c["id"]))
 
 	# 抖动：写存档 + 实时改 VFX.shake_scale
 	sliders[0].value = 0.5

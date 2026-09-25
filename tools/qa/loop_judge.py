@@ -41,6 +41,9 @@ ASSET_SPEC = {
     "assets/ui/cover.png": {"size": (1920, 1080), "note": "封面 16:9"},
     "assets/ui/menu_bg.png": {"size": (1920, 1080), "note": "菜单背景 16:9", "optional": True},
     "assets/ui/gameover_bg.png": {"size": (1920, 1080), "note": "结算背景 16:9", "optional": True},
+    "assets/ui/portrait_shou_shan.png": {"size": (96, 96), "note": "角色选卡头像（主角表 col0 row0 正面待机）"},
+    "assets/ui/portrait_fu_xiu.png": {"size": (96, 96), "note": "角色选卡头像（从用户交付的方向表抽正面格）"},
+    "assets/ui/portrait_jian_xiu.png": {"size": (96, 96), "note": "同上"},
 }
 
 

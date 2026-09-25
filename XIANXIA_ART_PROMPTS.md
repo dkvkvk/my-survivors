@@ -767,6 +767,41 @@ dark ink-blue night (#0E1420) outline,
 solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels, no text, no watermark, no border
 ```
 
+
+### B 组补充：**单列 4 帧**才是可靠做法（2026-09-24 实测）
+
+实测：AI 生成器画不出严格的四向表。交付的 3 张表机器分类结果是——
+
+| 表 | 列数 | 问题 |
+|---|---|---|
+| `char_fu_sheet` | 4 | 多列头部肤色都偏高（偏正面/侧面），帧间质心极差最大 15px |
+| `char_jian_sheet` | 8 | 只有 col0 正面、col6 左侧，**4 列重复朝右、没有背面列** |
+| `ninja_sheet` | 11 | col0 正面、col4 左侧、4 列重复朝右、**没有背面列**、还有 5 条空列 |
+
+**结论：不要一次要 4×4 表**（模型会把"方向"画成"多个略微转头的同向姿势"）。
+改成**一次只要一个方向、一列 4 帧**，我来拼表。每个角色最多要 3 列（下 / 上 / 左；**右向由左向镜像**，
+这是代码里已验证过的做法）：
+
+```text
+pixel art sprite strip, one single row of 4 frames side by side, exact 4 equal 16x16 cells,
+no gaps, no grid lines: a small pixel character walking, facing LEFT the whole time
+(profile view, face on the left side of the head in all 4 frames).
+Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
+frame 4 = passing pose. Same body height, same horizontal position, same head position in all 4
+frames — only the legs and arms move.
+character: <在这里替换成角色描述，见 B1/B2>
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
+no text, no watermark, no border
+```
+
+同样的提示词把 `facing LEFT` 换成 `facing DOWN (front view, face toward viewer)` /
+`facing UP (back view, no face visible, seen from behind)` 各出一张。
+交给我时命名如 `fu_left.png` / `fu_down.png` / `fu_up.png`，我来抠底、切帧、拼成 4×4 表并用
+`hero-columns` 判据机器验收。
+
+> 已经交付的三张表**没有浪费**：每张表的"正面那一格"已被抽成角色选卡头像
+> （`assets/ui/portrait_*.png`，96×96，见主菜单「选择身份」）。
+
 ### C. 主角表重画（1 张 · 可选，纯打磨）
 
 #### C1. `ninja_sheet.png` —— 守山人行走表（替换现用表）

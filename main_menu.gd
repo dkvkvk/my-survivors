@@ -192,13 +192,26 @@ func _setup_character_picker() -> void:
 		card.text = ""
 		card.pressed.connect(_on_character_clicked.bind(id))
 		add_child(card)
+		# 头像：从用户交付的方向表里抽出的"正面那一格"（守山人用主角表 col0 row0）
+		var ppath := "res://assets/ui/portrait_%s.png" % id
+		if ResourceLoader.exists(ppath):
+			var pic := TextureRect.new()
+			pic.position = Vector2(10, 10)
+			pic.size = Vector2(52, 52)
+			pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			pic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			pic.texture = load(ppath)
+			card.add_child(pic)
 		var nm := Label.new()
 		nm.set_anchors_preset(Control.PRESET_FULL_RECT)
-		nm.offset_top = 12
-		nm.offset_bottom = -66
+		nm.offset_left = 68
+		nm.offset_top = 8
+		nm.offset_bottom = -70
 		nm.text = str(def["name"])
-		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		nm.add_theme_font_size_override("font_size", 40)
+		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		nm.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		nm.add_theme_font_size_override("font_size", 36)
 		nm.add_theme_color_override("font_color", Color(1, 0.92, 0.6))
 		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		card.add_child(nm)
