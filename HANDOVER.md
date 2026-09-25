@@ -176,7 +176,9 @@ MS_AUTOSTART=1 MS_FEEL_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 18
 - ⚠️ 关键认知：**pck 里放的是导入后的 `.ctex`，不是源 PNG**——改源图大小没有用，
   要改 `.import` 里的 `compress/mode`。想再瘦就先 `ls -la .godot/imported/*.ctex` 看真凶。
 
-预期：pck 8.07MB → ~2.6MB，Web 首载 18.4MB → ~13MB。
+**实测结果（线上部署后复测）**：pck 原始 8.46MB → **1.42MB**（gzip 8.18MB → 1.17MB），
+wasm 未动（gzip 10.2MB）→ **首载 18.4MB → 11.0MB，省 7.2MB**。
+下一步若还要瘦，就只剩 wasm（占首载 89%）——只能自建引擎模板，见下。
 
 ### Web wasm 瘦身配方（需要自建引擎模板，未实施）
 线上 wasm 39.5MB 全是官方 Godot Web 模板。官方模板不带裁剪，想省就得起一份**自建模板**：

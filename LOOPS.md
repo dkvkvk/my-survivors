@@ -232,3 +232,18 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 
 状态：awaiting-human
 
+### 2026-09-24 · 包体优化：Web 首载 18.4MB → 11.0MB（省 7.2MB，线上实测）
+
+- **先量后改**（此前一直没量过）：wasm 原始 39.5MB 但 **gzip 只传 10.2MB**；pck 原始 8.07MB
+  且 gzip 后 8.18MB（几乎不压缩）→ 真实首载 18.4MB，pck 才是可优化的大头
+- pck 里 4 张图占绝大部分（其余资产合计 < 300KB）：
+  - 三张全屏背景默认**无损**导入（.ctex 合计 5.98MB）→ compress/mode=1（lossy WebP）+
+    lossy_quality=0.9 → **541KB**
+  - cover.png 全项目零引用（只是商店封面）→ 导出 exclude_filter 排除 → 省 1.8MB
+- **关键认知**：pck 里是**导入后的 .ctex**，不是源 PNG——想瘦要先 ls -la .godot/imported/*.ctex
+  找真凶，改源图大小没用
+- 线上复测：pck 8.46MB → **1.42MB**，首载 **18.4MB → 11.0MB**（省 7.2MB）
+- 剩余：wasm 占首载 89%，只能自建引擎模板（配方已写，未实施）
+
+状态：awaiting-human
+
