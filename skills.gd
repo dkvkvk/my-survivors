@@ -59,7 +59,106 @@ const LIST := [
 		"desc": "举手画符，九天之雷当空劈落",
 		"from": "chain_lightning",
 	},
+	# ---------- P7：每把法宝的第 2 神通 ----------
+	{
+		"id": "dash_blade",
+		"name": "御剑疾影",
+		"icon": "res://assets/ui/skill_dash_blade.png",
+		"mana": 18.0, "cd": 5.0,
+		"desc": "化身剑光疾奔，途中撞伤贴身的妖",
+		"from": "shuriken",
+	},
+	{
+		"id": "ring_release",
+		"name": "剑环外放",
+		"icon": "res://assets/ui/skill_ring_release.png",
+		"mana": 24.0, "cd": 7.0,
+		"desc": "护身剑环一次性向外飞出，扫平近身",
+		"from": "orbit_blade",
+	},
+	{
+		"id": "fire_field",
+		"name": "焚地火域",
+		"icon": "res://assets/ui/skill_fire_field.png",
+		"mana": 28.0, "cd": 9.0,
+		"desc": "脚下留一片三昧火海，持续灼烧踏入的妖",
+		"from": "aura",
+	},
+	{
+		"id": "charge_storm",
+		"name": "蓄雷引弧",
+		"icon": "res://assets/ui/skill_charge_storm.png",
+		"mana": 26.0, "cd": 14.0,
+		"desc": "蓄雷数秒：电弧跳得更多、触发更密",
+		"from": "chain_lightning",
+	},
+	{
+		"id": "pierce_shuttle",
+		"name": "穿云巨梭",
+		"icon": "res://assets/ui/skill_pierce_shuttle.png",
+		"mana": 22.0, "cd": 6.0,
+		"desc": "掷出巨型飞梭，直线穿透一切敌人",
+		"from": "boomerang",
+	},
+	{
+		"id": "detonate_all",
+		"name": "符阵合围",
+		"icon": "res://assets/ui/skill_detonate_all.png",
+		"mana": 26.0, "cd": 9.0,
+		"desc": "立刻引爆场上所有符雷，连锁成一片雷火",
+		"from": "mine",
+	},
+	# ---------- P7：融合神通（需两把法宝都在场，见 FUSIONS）----------
+	{
+		"id": "inferno_ring",
+		"name": "焚天剑轮",
+		"icon": "res://assets/ui/skill_inferno_ring.png",
+		"mana": 40.0, "cd": 14.0,
+		"desc": "融合：带火的剑环外放，扫过之处留下火域",
+		"from": "fusion",
+	},
+	{
+		"id": "storm_volley",
+		"name": "惊雷剑引",
+		"icon": "res://assets/ui/skill_storm_volley.png",
+		"mana": 45.0, "cd": 16.0,
+		"desc": "融合：放射剑雨，每一把剑落下都带一道天雷",
+		"from": "fusion",
+	},
 ]
+
+
+## 取某个技能所属的法宝 id（融合技能返回空串）
+static func weapon_of_skill(skill_id: String) -> String:
+	for w in Weapons.LIST:
+		if skill_id in w.get("skills", []):
+			return str(w["id"])
+	return ""
+
+
+## 某件法宝**当前可换**的神通：自带技能 + 已满足条件的融合神通。
+## 乾坤袋与 player.set_active_skill 都走它，保证"能不能选"只有一处判定。
+static func available_for(player: Node, weapon_id: String) -> Array:
+	var def: Dictionary = Weapons.get_def(weapon_id)
+	var out: Array = def.get("skills", []).duplicate()
+	for f in FUSIONS:
+		var ok := true
+		for sid in f.get("requires", []):
+			var owner_id: String = weapon_of_skill(str(sid))
+			if owner_id == "" or not player.has_weapon(owner_id):
+				ok = false
+				break
+		if ok and not out.has(str(f["result"])):
+			out.append(f["result"])
+	return out
+
+
+## 是不是融合神通（乾坤袋用来标"融合"字样）
+static func is_fusion(skill_id: String) -> bool:
+	for f in FUSIONS:
+		if str(f["result"]) == skill_id:
+			return true
+	return false
 
 
 ## 按 id 取技能定义（找不到返回空字典）

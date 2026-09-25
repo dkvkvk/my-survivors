@@ -74,7 +74,8 @@ func _throw(count: int, dir: Vector2) -> void:
 		_add_shot(dir.rotated(offset))
 
 
-func _add_shot(dir: Vector2) -> void:
+## pierce=true 是神通「穿云巨梭」：更大更快、走直线穿透、到射程就消失（不折返）
+func _add_shot(dir: Vector2, pierce := false) -> void:
 	var area := Area2D.new()
 	area.collision_layer = 0
 	area.collision_mask = 2      # 只碰敌人层
@@ -90,6 +91,9 @@ func _add_shot(dir: Vector2) -> void:
 		Vector2(20, 0), Vector2(2, 10), Vector2(-14, 0), Vector2(2, -10),
 	])
 	blade.color = Color(1.0, 0.72, 0.3) if evolved else Color(0.62, 0.98, 1.0)
+	if pierce:
+		blade.scale = Vector2(2.0, 2.0)
+		blade.color = Color(1.0, 0.93, 0.66)
 	area.add_child(blade)
 	var glow := Sprite2D.new()
 	glow.texture = load("res://assets/fx/glow_64.png")
@@ -106,6 +110,7 @@ func _add_shot(dir: Vector2) -> void:
 		"dir": dir,
 		"travelled": 0.0,
 		"returning": false,
+		"pierce": pierce,
 		"hit": {},
 	}
 	area.body_entered.connect(_on_shot_body_entered.bind(rec))
@@ -134,10 +139,17 @@ func _update_shots(delta: float) -> void:
 			node.rotation = rdir.angle()
 		else:
 			var dir: Vector2 = rec["dir"]
-			node.global_position += dir * Balance.BOOMERANG_SPEED * speed_mult * delta
+			var pierce: bool = bool(rec.get("pierce", false))
+			var spd: float = (Balance.SKILL_PIERCE_SPEED if pierce else Balance.BOOMERANG_SPEED) * speed_mult
+			node.global_position += dir * spd * delta
 			node.rotation = dir.angle()
-			rec["travelled"] = float(rec["travelled"]) + Balance.BOOMERANG_SPEED * speed_mult * delta
-			if float(rec["travelled"]) >= reach:
+			rec["travelled"] = float(rec["travelled"]) + spd * delta
+			var limit: float = Balance.SKILL_PIERCE_RANGE if pierce else reach
+			if float(rec["travelled"]) >= limit:
+				if pierce:
+					dead.append(rec)
+					node.queue_free()
+					continue
 				rec["returning"] = true
 				var hits: Dictionary = rec["hit"]
 				hits.clear()      # 返程可以再命中一次
@@ -154,6 +166,8 @@ func _on_shot_body_entered(body: Node, rec: Dictionary) -> void:
 		return
 	hits[id] = true
 	var damage: int = Balance.BOOMERANG_DAMAGE + Balance.BOOMERANG_DAMAGE_STEP * (level - 1)
+	if bool(rec.get("pierce", false)):
+		damage = Balance.SKILL_PIERCE_DAMAGE + Balance.BOOMERANG_DAMAGE_STEP * (level - 1)
 	if evolved:
 		damage += Balance.BOOMERANG_EVOLVE_DAMAGE
 	damage += get_parent().bullet_damage - 1   # 与飞剑共享"重装弹药"加成
@@ -164,6 +178,15 @@ func _on_shot_body_entered(body: Node, rec: Dictionary) -> void:
 	if is_instance_valid(node):
 		VFX.impact(node.global_position, dir, VFX.C_CYAN)
 	get_parent().call_deferred("on_weapon_hit", body.global_position, id)
+
+
+## 神通「穿云巨梭」：一枚巨型飞梭走直线穿透全部敌人（进化后两枚）
+func cast_pierce() -> void:
+	if level <= 0:
+		return
+	_add_shot(_aim_dir(), true)
+	if evolved:
+		_add_shot(_aim_dir().rotated(0.16), true)
 
 
 ## 技能：风卷残云——向四周掷出一圈飞梭

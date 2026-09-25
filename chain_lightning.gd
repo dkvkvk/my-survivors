@@ -8,6 +8,7 @@ extends Node2D
 var level := 0
 var evolved := false  # 满级进化形态
 var _cooldown := 0.0
+var _charge_timer := 0.0   # 神通「蓄雷引弧」剩余秒数：期间跳数更多、触发更快
 var _lines: Array = []  # 每段电弧：{"from":Vector2, "to":Vector2, "points":PackedVector2Array, "life":float}
 
 
@@ -29,7 +30,7 @@ func evolve() -> void:
 func on_hit(pos: Vector2, exclude_id := 0) -> void:
 	if level <= 0 or _cooldown > 0.0:
 		return
-	_cooldown = Balance.CHAIN_TRIGGER_CD
+	_cooldown = Balance.CHAIN_TRIGGER_CD * (Balance.SKILL_CHARGE_CD_MULT if is_overcharged() else 1.0)
 	var exclude := {}
 	if exclude_id != 0:
 		exclude[exclude_id] = true
@@ -88,6 +89,8 @@ func _strike(origin: Vector2, extra_jumps := 0, damage_bonus := 0, exclude := {}
 	if evolved:
 		jumps += Balance.CHAIN_EVOLVE_EXTRA_JUMPS
 		falloff = Balance.CHAIN_EVOLVE_FALLOFF
+	if is_overcharged():
+		jumps += Balance.SKILL_CHARGE_EXTRA_JUMPS
 
 	var damage: float = float(_hit_damage(damage_bonus))
 	var hit_ids: Dictionary = exclude.duplicate()
@@ -154,7 +157,21 @@ func _jagged(from: Vector2, to: Vector2) -> PackedVector2Array:
 	return pts
 
 
+## 神通「蓄雷引弧」：一段时间内电弧跳得更多、触发间隔更短
+func overcharge() -> void:
+	_charge_timer = Balance.SKILL_CHARGE_TIME
+	VFX.shockwave(global_position, 170.0, VFX.C_BLUE, 0.35, 8.0)
+
+
+func is_overcharged() -> bool:
+	return _charge_timer > 0.0
+
+
 func _process(delta: float) -> void:
+	if _charge_timer > 0.0:
+		_charge_timer = maxf(0.0, _charge_timer - delta)
+		# 蓄雷期间触发冷却按倍率额外流逝（等效于放得更密）
+		_cooldown = maxf(0.0, _cooldown - delta * (1.0 / Balance.SKILL_CHARGE_CD_MULT - 1.0))
 	_cooldown = maxf(0.0, _cooldown - delta)
 	if _lines.is_empty():
 		return

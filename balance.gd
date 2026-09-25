@@ -179,6 +179,36 @@ const SKILL_BLADE_RADIUS := 260.0     # 刃风暴横扫半径
 const SKILL_BLADE_DAMAGE := 8
 const SKILL_AURA_RADIUS := 420.0      # 烈日爆发范围
 const SKILL_AURA_DAMAGE := 12
+# ---------- 第二神通与融合神通（P7）----------
+# 御剑疾影（本命飞剑）：短时间疾奔，途中撞伤贴身的妖（位移手段，割草游戏里最值钱）
+const SKILL_DASH_TIME := 0.38
+const SKILL_DASH_SPEED_MULT := 4.0
+const SKILL_DASH_DAMAGE := 4
+const SKILL_DASH_HIT_RADIUS := 54.0
+# 剑环外放（周天剑环）：护身剑一次性向外飞出
+const SKILL_RING_DAMAGE := 6
+const SKILL_RING_SPEED := 720.0
+const SKILL_RING_RANGE := 470.0
+# 焚地火域（离火法环）：脚下留一片持续燃烧的火海
+const SKILL_FIRE_RADIUS := 150.0
+const SKILL_FIRE_TIME := 5.0
+const SKILL_FIRE_TICK := 0.5
+const SKILL_FIRE_DAMAGE := 3
+# 蓄雷引弧（连环雷符）：一段时间内电弧跳得更多、触发更快
+const SKILL_CHARGE_TIME := 6.0
+const SKILL_CHARGE_EXTRA_JUMPS := 2
+const SKILL_CHARGE_CD_MULT := 0.4
+# 穿云巨梭（回风梭）：一枚巨型飞梭走直线穿透全部敌人，不折返
+const SKILL_PIERCE_DAMAGE := 8
+const SKILL_PIERCE_SPEED := 900.0
+const SKILL_PIERCE_RANGE := 950.0
+const SKILL_PIERCE_RADIUS := 34.0
+# 符阵合围（地火符阵）：立刻引爆场上所有符雷（逐张错开 0.08 秒，看着是连锁）
+const SKILL_DETONATE_STAGGER := 0.08
+# 融合：焚天剑轮（剑环外放 + 火域）/ 惊雷剑引（剑雨 + 天雷）
+const SKILL_FUSION_INFERNO_DAMAGE := 9
+const SKILL_FUSION_STORM_BOLTS := 6
+
 const SKILL_WHIRLWIND_COUNT := 10      # 风卷残云：向四周掷出的飞梭数量
 const SKILL_THUNDERNET_COUNT := 8      # 十方雷网：一圈符雷数量
 const SKILL_THUNDERNET_RADIUS := 130.0 # 符雷布下的圈半径

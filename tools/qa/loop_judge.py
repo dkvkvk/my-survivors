@@ -186,6 +186,30 @@ def check_kill_credit():
     }
 
 
+def check_skills():
+    """功能回归：14 个神通逐个施放（P7 每把法宝 2 个 + 2 个融合）。
+
+    解析通过不代表放得出来：这里把每件法宝的每个可换神通都设为激活并施放，
+    断言扣了灵力、且新神通真的产生对应状态（疾奔计时 / 外放剑刃 / 火域 / 蓄雷 / 穿透梭 / 引爆），
+    并校验融合神通"两把法宝都在场"的门槛（不满足必须拒绝激活）。
+    """
+    code, out, secs = run_godot(["--script", "res://tools/qa/check_skills.gd"])
+    if code == "missing":
+        return {"id": "skills-cast", "determinism": "assert", "pass": False,
+                "reason": "找不到 Godot 可执行文件", "godot": GODOT}
+    bad = [ln for ln in out.splitlines() if "SKILLS FAIL" in ln]
+    cast = re.search(r"casted=(\d+)", out)
+    return {
+        "id": "skills-cast",
+        "determinism": "assert",
+        "pass": "SKILLS PASS" in out and not bad,
+        "casted": int(cast.group(1)) if cast else None,
+        "bad_count": len(bad),
+        "bad_lines": bad[:10],
+        "seconds": round(secs, 1),
+    }
+
+
 def check_weapons():
     """功能回归：6 把法宝的被动 / 技能 / 进化 / 归属（P6）。
 
@@ -389,6 +413,7 @@ def main():
     args = parser.parse_args()
 
     checks = [check_import(), check_script_parse(), check_kill_credit(), check_weapons(),
+              check_skills(),
               check_asset_contract(), check_import_hygiene(), check_sprite_refs(),
               check_touch(), check_hero_columns(), check_fx_entry(), check_font_coverage()]
     if not args.fast:
@@ -417,6 +442,8 @@ def main():
         extra = ""
         if c["id"] == "kill-credit":
             extra = " (精确斩妖归属)"
+        if c["id"] == "skills-cast":
+            extra = " (14 个神通逐个施放 + 融合门槛)"
         if c["id"] == "weapons-smoke":
             extra = " (6 把法宝被动/技能/进化/归属)"
             for line in c.get("info", [])[:2]:

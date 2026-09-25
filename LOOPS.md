@@ -156,3 +156,22 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 
 状态：awaiting-human
 
+### 2026-09-24 · P7 神通扩容：每把法宝 2 门 + 2 门融合（共 14 门）
+
+- 新增判据 ⑪ `skills-cast`：@@tools/qa/check_skills.gd@@ —— 把 6 件法宝的**每个可换神通**
+  都设为激活并施放（两轮覆盖 6 件法宝，共 28 次施放），断言：扣了灵力 + 新神通真的产生状态
+  （疾奔计时 / 外放剑刃 / 火域节点 / 蓄雷标记 / 穿透飞梭 / 引爆补布），
+  并校验融合门槛：**缺任一法宝时 available_for 不含融合、set_active_skill 必须拒绝**
+- 第 2 神通：御剑疾影（位移+撞伤）/ 剑环外放 / 焚地火域（持续法阵）/ 蓄雷引弧（强化被动）/
+  穿云巨梭（直线穿透）/ 符阵合围（引爆全场）
+- 融合：焚天剑轮（剑环+法环）、惊雷剑引（飞剑+雷符）；
+  "可选范围"收敛到 `Skills.available_for()` 一处，乾坤袋与激活共用
+- 图标：8 张新神通图标仍为代码占位（@@tools/gen_skill_icons_p7.py@@），
+  AI 生图提示词已写在 `XIANXIA_ART_PROMPTS.md` 第八节 A 组
+- 踩坑：`get_node("%唯一名")` 只在**拥有该节点的场景脚本内**有效，跨节点要按路径取
+  （测试里 `_game.get_node("%OrbitBlades")` 拿到 null）
+- 字体：新增中文触发 `--restore` 自愈 → 423 字 / 46KB
+- 全量判定：@@python tools/qa/loop_judge.py@@ → **退出码 0**，**13/13 PASS**
+
+状态：awaiting-human
+

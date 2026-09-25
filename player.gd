@@ -33,6 +33,10 @@ var weapons: Array = []                # [{id, level, active_skill, kills}]
 var materials := {}                    # {材料id: 数量}
 var skill_books := 0                   # 神通残卷数量
 
+# 御剑疾影（P7 神通）：短时间内提速并撞伤贴身的妖
+var _dash_timer := 0.0
+var _dash_hits := {}                   # 本次疾奔已撞过的敌人 id（一只怪只撞一次）
+
 
 func _ready():
 	_apply_shop_upgrades()
@@ -180,8 +184,8 @@ func set_active_skill(weapon_id: String, skill_id: String, use_book := true) -> 
 	var w: Dictionary = get_weapon(weapon_id)
 	if w.is_empty():
 		return false
-	var def: Dictionary = Weapons.get_def(weapon_id)
-	if not (skill_id in def.get("skills", [])):
+	# 可选范围 = 自带技能 + 已满足条件的融合神通（与乾坤袋显示的是同一份判定）
+	if not (skill_id in Skills.available_for(self, weapon_id)):
 		return false
 	if w["active_skill"] == skill_id:
 		return true
@@ -339,6 +343,36 @@ func _run_skill_effect(id: String) -> void:
 			VFX.shockwave(global_position, Balance.SKILL_AURA_RADIUS, VFX.C_BLUE, 0.4, 8.0)
 			VFX.screen_flash(VFX.C_BLUE, 0.30, 0.22)
 			%ChainLightning.cast_ultimate()
+		# ---------- P7：每把法宝的第 2 神通 ----------
+		"dash_blade":
+			_dash_timer = Balance.SKILL_DASH_TIME
+			_dash_hits = {}
+			VFX.shockwave(global_position, 130.0, VFX.C_CYAN, 0.26, 6.0)
+			VFX.trail(self, VFX.C_CYAN, 16.0, 14, 0.22)
+			Audio.play("res://sounds/shoot.wav", false, 0.75, 0.3)
+		"ring_release":
+			%OrbitBlades.release_blades(Balance.SKILL_RING_DAMAGE + bullet_damage - 1)
+			VFX.shockwave(global_position, Balance.ORBIT_BLADE_RADIUS + 60.0, VFX.C_GOLD, 0.3, 7.0)
+		"fire_field":
+			_spawn_fire_field(Balance.SKILL_FIRE_DAMAGE, Balance.SKILL_FIRE_RADIUS, "aura")
+		"charge_storm":
+			%ChainLightning.overcharge()
+		"pierce_shuttle":
+			%Boomerang.cast_pierce()
+			VFX.shockwave(global_position, 120.0, VFX.C_GOLD, 0.24, 6.0)
+		"detonate_all":
+			%Mine.detonate_all()
+			VFX.screen_flash(VFX.C_ORANGE, 0.16, 0.2)
+		# ---------- P7：融合神通（两把法宝的效果叠在一起放）----------
+		"inferno_ring":
+			%OrbitBlades.release_blades(Balance.SKILL_FUSION_INFERNO_DAMAGE + bullet_damage - 1)
+			_spawn_fire_field(Balance.SKILL_FIRE_DAMAGE + 2, Balance.SKILL_FIRE_RADIUS * 1.3, "aura")
+			VFX.shockwave(global_position, Balance.ORBIT_BLADE_RADIUS + 90.0, VFX.C_ORANGE, 0.36, 9.0)
+			VFX.screen_flash(VFX.C_ORANGE, 0.22, 0.24)
+		"storm_volley":
+			_shuriken_burst()
+			%ChainLightning.cast_ultimate()
+			VFX.screen_flash(VFX.C_BLUE, 0.24, 0.22)
 		"whirlwind_volley":
 			VFX.shockwave(global_position, 240.0, VFX.C_CYAN, 0.34, 7.0)
 			VFX.burst(global_position, 14, VFX.C_CYAN, 460.0, 0.6, "star", 1.6, 200.0)
@@ -361,6 +395,34 @@ func _shuriken_burst() -> void:
 		b.rotation = TAU * i / float(n)
 		get_parent().add_child(b)
 		VFX.trail(b, VFX.C_CYAN, 9.0, 10, 0.16)
+
+
+## 放一片持续灼烧的火域（焚地火域 / 焚天剑轮共用）
+func _spawn_fire_field(dmg: int, radius: float, src: String) -> void:
+	var f = preload("res://fire_field.tscn").instantiate()
+	get_parent().add_child(f)
+	f.global_position = global_position
+	f.damage = dmg
+	f.radius = radius
+	f.source = src
+
+
+## 疾奔途中撞伤贴身的妖（一只怪本次只撞一次）
+func _dash_damage() -> void:
+	for mob in get_tree().get_nodes_in_group("mobs"):
+		if not is_instance_valid(mob) or not (mob is Node2D):
+			continue
+		if not mob.has_method("take_damage"):
+			continue
+		var id: int = mob.get_instance_id()
+		if _dash_hits.has(id):
+			continue
+		if global_position.distance_to(mob.global_position) > Balance.SKILL_DASH_HIT_RADIUS:
+			continue
+		_dash_hits[id] = true
+		var kb: Vector2 = (mob.global_position - global_position).normalized() * Balance.KNOCKBACK_BLADE * 1.6
+		mob.call_deferred("take_damage", Balance.SKILL_DASH_DAMAGE + bullet_damage - 1, kb, "shuriken")
+		VFX.impact(mob.global_position, kb, VFX.C_CYAN)
 
 
 ## 对半径内所有敌人造成一次伤害（近身爆发类技能共用）。
@@ -404,6 +466,11 @@ func _physics_process(delta):
 	var direction: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	# 触屏：叠加虚拟摇杆（没有触屏时是零向量，见 touch_controls.gd）
 	direction = (direction + _touch_dir()).limit_length(1.0)
+	# 御剑疾影：疾奔期间提速，并撞伤贴上去的妖
+	if _dash_timer > 0.0:
+		_dash_timer = maxf(0.0, _dash_timer - delta)
+		_dash_damage()
+		direction *= Balance.SKILL_DASH_SPEED_MULT
 	velocity = direction * Balance.PLAYER_SPEED * speed_mult
 
 	move_and_slide()

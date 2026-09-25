@@ -12,6 +12,7 @@ var _blades: Array[Area2D] = []
 # 同一敌人的受击冷却：{ 敌人 instance_id: 剩余秒 }，所有刀刃共用，
 # 避免两把刀扫过同一个怪时一帧内连续结算
 var _hit_cooldowns: Dictionary = {}
+var _flying: Array = []   # 神通「剑环外放」飞出去的剑刃：[{node, dir, travelled, damage}]
 
 
 ## 设置刀刃数量，多退少补，并按数量重新均匀分布角度。
@@ -74,7 +75,68 @@ func _add_blade() -> void:
 	_blades.append(blade)
 
 
+## 神通「剑环外放」：按当前刀刃数沿环绕方向向外飞出一批剑刃（一次性，环绕本体不受影响）
+func release_blades(damage: int) -> void:
+	for blade in _blades:
+		var dir: Vector2 = (blade.position as Vector2).normalized()
+		if dir == Vector2.ZERO:
+			dir = Vector2.RIGHT
+		_add_flying_blade(global_position + dir * _radius, dir, damage)
+
+
+func _add_flying_blade(pos: Vector2, dir: Vector2, damage: int) -> void:
+	var area := Area2D.new()
+	area.collision_layer = 0
+	area.collision_mask = 2
+	area.monitorable = false
+	var shape := CollisionShape2D.new()
+	var circle := CircleShape2D.new()
+	circle.radius = 30.0
+	shape.shape = circle
+	area.add_child(shape)
+	var knife := Polygon2D.new()
+	knife.polygon = PackedVector2Array([
+		Vector2(30, 0), Vector2(-10, 12), Vector2(-20, 0), Vector2(-10, -12),
+	])
+	knife.color = Color(1.0, 0.78, 0.35)
+	area.add_child(knife)
+	area.add_to_group("fx")
+	add_child(area)
+	area.global_position = pos
+	area.rotation = dir.angle()
+	var rec := {"node": area, "dir": dir, "travelled": 0.0, "damage": damage}
+	area.body_entered.connect(_on_flying_blade_hit.bind(rec))
+	_flying.append(rec)
+
+
+func _on_flying_blade_hit(body: Node, rec: Dictionary) -> void:
+	if not body.has_method("take_damage"):
+		return
+	var node: Node2D = rec["node"]
+	if not is_instance_valid(node):
+		return
+	_flying.erase(rec)
+	node.queue_free()
+	body.call_deferred("take_damage", int(rec["damage"]), Vector2.ZERO, "orbit_blade")
+	VFX.impact(body.global_position, rec["dir"], VFX.C_GOLD)
+
+
 func _process(delta):
+	# 外放的剑刃直飞，超出射程自毁
+	var gone: Array = []
+	for rec in _flying:
+		var node: Node2D = rec["node"]
+		if not is_instance_valid(node):
+			gone.append(rec)
+			continue
+		var fdir: Vector2 = rec["dir"]
+		node.global_position += fdir * Balance.SKILL_RING_SPEED * delta
+		rec["travelled"] = float(rec["travelled"]) + Balance.SKILL_RING_SPEED * delta
+		if float(rec["travelled"]) > Balance.SKILL_RING_RANGE:
+			node.queue_free()
+			gone.append(rec)
+	for rec in gone:
+		_flying.erase(rec)
 	var speed := Balance.ORBIT_BLADE_ROT_SPEED
 	if evolved:
 		speed *= Balance.BLADE_EVOLVE_ROT_MULT

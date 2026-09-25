@@ -201,6 +201,22 @@ func cast_ultimate() -> void:
 		_place(pos, Balance.SKILL_THUNDERNET_FUSE)
 
 
+## 神通「符阵合围」：立刻引爆场上所有符雷（逐张错开，看着是连锁引爆）
+## 一张都没布下时不空转：先在身周撒一圈再齐爆
+func detonate_all() -> void:
+	if level <= 0:
+		return
+	if _mines.is_empty():
+		var n: int = Balance.SKILL_THUNDERNET_COUNT
+		for i in n:
+			var ang: float = TAU * float(i) / float(n)
+			_place(_owner_pos() + Vector2(Balance.SKILL_THUNDERNET_RADIUS, 0).rotated(ang), 0.05)
+	var idx := 0
+	for rec in _mines.duplicate():
+		rec["fuse"] = 0.05 + float(idx) * Balance.SKILL_DETONATE_STAGGER
+		idx += 1
+
+
 func _clear_mines() -> void:
 	for rec in _mines:
 		var node: Node2D = rec["node"]

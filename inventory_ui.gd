@@ -196,15 +196,17 @@ func _refresh() -> void:
 	# 选中法宝的技能
 	var w2: Dictionary = _player.get_weapon(_selected)
 	var def2: Dictionary = Weapons.get_def(_selected)
-	var skills: Array = def2.get("skills", [])
+	# 可换范围 = 自带技能 + 已满足条件的融合神通（与 player.set_active_skill 同一份判定）
+	var skills: Array = Skills.available_for(_player, _selected)
 	for i in _skill_rows.size():
 		var row: Button = _skill_rows[i]
 		if i < skills.size():
 			var sid: String = skills[i]
 			var sdef: Dictionary = Skills.get_def(sid)
 			var mark := "●" if w2.get("active_skill", "") == sid else "○"
+			var tag := "〔融合〕" if Skills.is_fusion(sid) else ""
 			var need := "" if mark == "●" else "  （改换需神通残卷 x1，现有 %d）" % _player.skill_books
-			row.text = "%s %s%s" % [mark, sdef.get("name", sid), need]
+			row.text = "%s %s%s%s" % [mark, tag, sdef.get("name", sid), need]
 			row.disabled = false
 		else:
 			row.text = "—"
@@ -252,8 +254,7 @@ func _on_weapon_clicked(i: int) -> void:
 func _on_skill_clicked(i: int) -> void:
 	if _player == null or _selected == "":
 		return
-	var def: Dictionary = Weapons.get_def(_selected)
-	var skills: Array = def.get("skills", [])
+	var skills: Array = Skills.available_for(_player, _selected)
 	if i >= skills.size():
 		return
 	var w: Dictionary = _player.get_weapon(_selected)
