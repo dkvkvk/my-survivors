@@ -27,6 +27,7 @@ func _ready():
 	Audio.play_music("res://sounds/bgm_menu.wav")
 	_setup_background_motion()
 	_setup_talismans()
+	_setup_character_picker()
 
 	var records := SaveGame.load_records()
 	%RecordsLabel.text = "最高纪录　守夜 %d:%02d　斩妖 %d　修为 %d\n灵石 %d（坊市万宝楼可花）" % [
@@ -118,3 +119,104 @@ func _on_shop_button_pressed():
 
 func _on_quit_button_pressed():
 	get_tree().quit()
+
+
+## ---------- 身份选择（P7 多角色）----------
+## 主菜单直接选身份（3 张卡），选择写入存档；进战斗后由 player._apply_character() 生效。
+## 配色是代码调色；想要各自独立的行走表，见 XIANXIA_ART_PROMPTS.md 第八节 B 组提示词。
+
+const CHAR_CARD_W := 320.0
+const CHAR_CARD_H := 118.0
+const CHAR_GAP := 24.0
+var _char_cards: Array = []
+
+
+func _setup_character_picker() -> void:
+	var cur: String = SaveGame.get_character()
+	var defs: Array = Characters.LIST
+	var total: float = defs.size() * CHAR_CARD_W + (defs.size() - 1) * CHAR_GAP
+
+	var cap := Label.new()
+	cap.set_anchors_preset(Control.PRESET_CENTER)
+	cap.offset_left = -500
+	cap.offset_top = -66
+	cap.offset_right = 500
+	cap.offset_bottom = -34
+	cap.text = "— 选 择 身 份 —"
+	cap.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	cap.add_theme_font_size_override("font_size", 30)
+	cap.add_theme_color_override("font_color", Color(0.75, 0.88, 0.82))
+	cap.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	cap.add_theme_constant_override("outline_size", 8)
+	add_child(cap)
+
+	for i in defs.size():
+		var def: Dictionary = defs[i]
+		var id: String = str(def["id"])
+		var x0: float = -total / 2.0 + float(i) * (CHAR_CARD_W + CHAR_GAP)
+		var card := Button.new()
+		card.set_anchors_preset(Control.PRESET_CENTER)
+		card.offset_left = x0
+		card.offset_top = -28
+		card.offset_right = x0 + CHAR_CARD_W
+		card.offset_bottom = -28 + CHAR_CARD_H
+		card.text = ""
+		card.pressed.connect(_on_character_clicked.bind(id))
+		add_child(card)
+		var nm := Label.new()
+		nm.set_anchors_preset(Control.PRESET_FULL_RECT)
+		nm.offset_top = 12
+		nm.offset_bottom = -66
+		nm.text = str(def["name"])
+		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		nm.add_theme_font_size_override("font_size", 40)
+		nm.add_theme_color_override("font_color", Color(1, 0.92, 0.6))
+		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card.add_child(nm)
+		var ds := Label.new()
+		ds.set_anchors_preset(Control.PRESET_FULL_RECT)
+		ds.offset_top = -60
+		ds.offset_bottom = -12
+		ds.offset_left = 14
+		ds.offset_right = -14
+		ds.text = str(def["desc"])
+		ds.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		ds.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		ds.vertical_alignment = 1
+		ds.add_theme_font_size_override("font_size", 18)
+		ds.add_theme_color_override("font_color", Color(0.78, 0.9, 0.95))
+		ds.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card.add_child(ds)
+		_char_cards.append({"id": id, "card": card, "nm": nm, "ds": ds})
+	_refresh_character_picker()
+
+
+func _on_character_clicked(id: String) -> void:
+	SaveGame.set_character(id)
+	Audio.play("res://sounds/pickup.wav", false, 1.4, 0.3)
+	_refresh_character_picker()
+
+
+func _refresh_character_picker() -> void:
+	var cur: String = SaveGame.get_character()
+	for c in _char_cards:
+		var sel: bool = str(c["id"]) == cur
+		var card: Button = c["card"]
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.07, 0.11, 0.15, 0.9) if sel else Color(0.05, 0.07, 0.1, 0.55)
+		sb.border_color = Color(0.45, 0.95, 1.0, 0.95) if sel else Color(0.3, 0.45, 0.55, 0.5)
+		sb.set_border_width_all(4 if sel else 2)
+		sb.set_corner_radius_all(10)
+		card.add_theme_stylebox_override("normal", sb)
+		var sbh := StyleBoxFlat.new()
+		sbh.bg_color = Color(0.09, 0.14, 0.19, 0.92) if sel else Color(0.07, 0.11, 0.15, 0.7)
+		sbh.border_color = Color(0.45, 0.95, 1.0, 1.0) if sel else Color(0.3, 0.45, 0.55, 0.6)
+		sbh.set_border_width_all(4 if sel else 2)
+		sbh.set_corner_radius_all(10)
+		card.add_theme_stylebox_override("hover", sbh)
+		card.add_theme_stylebox_override("pressed", sbh)
+		card.add_theme_stylebox_override("focus", sb)
+		(c["nm"] as Label).add_theme_color_override("font_color",
+			Color(1, 0.92, 0.6) if sel else Color(0.75, 0.82, 0.9))
+		(c["ds"] as Label).modulate.a = 1.0 if sel else 0.55
+

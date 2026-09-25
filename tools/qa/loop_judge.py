@@ -186,6 +186,27 @@ def check_kill_credit():
     }
 
 
+def check_characters():
+    """功能回归：多角色（P7）——签名法宝 / 属性倍率 / 配色 / 存档回读 / 非法 id 回退。
+
+    测法：复用战斗场景里现成的玩家，把面板重置到商店升级后的基准再重放身份，
+    避免（a）商店升级干扰绝对值断言（b）独立实例化 player.tscn 时 %唯一名 解析不到。
+    """
+    code, out, secs = run_godot(["--script", "res://tools/qa/check_characters.gd"])
+    if code == "missing":
+        return {"id": "characters", "determinism": "assert", "pass": False,
+                "reason": "找不到 Godot 可执行文件", "godot": GODOT}
+    bad = [ln for ln in out.splitlines() if "CHARS FAIL" in ln]
+    return {
+        "id": "characters",
+        "determinism": "assert",
+        "pass": "CHARS PASS" in out and not bad,
+        "bad_count": len(bad),
+        "bad_lines": bad[:10],
+        "seconds": round(secs, 1),
+    }
+
+
 def check_skills():
     """功能回归：14 个神通逐个施放（P7 每把法宝 2 个 + 2 个融合）。
 
@@ -413,7 +434,7 @@ def main():
     args = parser.parse_args()
 
     checks = [check_import(), check_script_parse(), check_kill_credit(), check_weapons(),
-              check_skills(),
+              check_skills(), check_characters(),
               check_asset_contract(), check_import_hygiene(), check_sprite_refs(),
               check_touch(), check_hero_columns(), check_fx_entry(), check_font_coverage()]
     if not args.fast:
@@ -442,6 +463,8 @@ def main():
         extra = ""
         if c["id"] == "kill-credit":
             extra = " (精确斩妖归属)"
+        if c["id"] == "characters":
+            extra = " (3 身份: 签名法宝/属性/配色/回退)"
         if c["id"] == "skills-cast":
             extra = " (14 个神通逐个施放 + 融合门槛)"
         if c["id"] == "weapons-smoke":
