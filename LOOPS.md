@@ -259,3 +259,15 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 
 状态：awaiting-human
 
+### 2026-09-24 · 发版修复：v0.6.2（Releases 页曾停在 v0.6.0）
+
+- 现象：一轮里反复「删 tag + 重打到新提交」，弱网下删成功了但重推失败 →
+  远端 v0.6.1 停在旧提交、Release 也没建起来，**Releases 页最新还是 v0.6.0**
+  （用户下载到的构建缺了整个会话的内容）
+- 修法：**新内容开新版本号** → v0.6.2 一次推成，Release 自动创建并成为 Latest
+- 额外收获：包体优化对 Windows exe 同样有效，**exe 113MB → 107MB**
+  （4 张背景改 lossy WebP + 排除 cover.png）
+- 约定写进 HANDOVER §4：新内容 = 新 patch 号，别再删旧 tag 重打
+
+状态：awaiting-human
+

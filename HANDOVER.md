@@ -276,6 +276,11 @@ git tag v0.6.0 && git push origin v0.6.0     # 打 tag 即自动构建 + 建 Rel
 - Release 附件走**仓库存储**，不占 Actions 配额、不受保留期限制
 - 同一 tag 重跑：已存在 Release 时只更新说明与附件（`--clobber`）
 - 版本号只是 tag 名（`project.godot` 没有版本字段），随便改；重发就删 tag 重打
+- ⚠️ **版本号约定（2026-09-24 踩过）**：**新内容就开新 patch 号**（v0.6.2），
+  不要删旧 tag 重打到新提交——一轮里反复复用同一个 tag，会出现
+  「远端 tag 停在旧提交、Release 却没建起来」，结果 Releases 页还挂着很老的版本。
+  删 tag / 重推在弱网下很容易只成功一半（远端删了、重推失败 → 该版本彻底消失）。
+  正确流程：`git tag -a vX.Y.Z -m "..." && git push origin vX.Y.Z`，一次到位。
 
 ### ⚠️ Actions 产物存储只有 0.5GB（免费额度）——2026-09-24 踩过
 
