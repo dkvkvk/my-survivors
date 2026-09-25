@@ -25,6 +25,7 @@ var _t := 0.0
 
 func _ready():
 	Audio.play_music("res://sounds/bgm_menu.wav")
+	_setup_video_background()
 	_setup_background_motion()
 	_setup_talismans()
 	_setup_character_picker()
@@ -131,6 +132,32 @@ const CHAR_CARD_W := 320.0
 const CHAR_CARD_H := 118.0
 const CHAR_GAP := 24.0
 var _char_cards: Array = []
+
+
+## 视频背景（P7）：桌面版播放 menu_loop.ogv（用户 AI 生成、CI 转码 OGV）；
+## Web 版跳过（视频不进 Web 包，保留代码动效，省 1.7MB 首载）。
+var _video_bg: VideoStreamPlayer = null
+
+
+func _setup_video_background() -> void:
+	if OS.has_feature("web"):
+		return
+	var path := "res://menu_loop.ogv"
+	if not ResourceLoader.exists(path):
+		return
+	var stream: VideoStreamTheora = load(path)
+	if stream == null:
+		return
+	_video_bg = VideoStreamPlayer.new()
+	_video_bg.stream = stream
+	_video_bg.loop = true
+	_video_bg.autoplay = true
+	_video_bg.expand = true
+	_video_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_video_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_video_bg.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(_video_bg)
+	move_child(_video_bg, 1)   # Background 之后、Dim 之前（Dim 压暗保证文字可读）
 
 
 func _setup_character_picker() -> void:

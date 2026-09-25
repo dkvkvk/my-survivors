@@ -218,3 +218,17 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 
 状态：awaiting-human
 
+### 2026-09-24 · 主菜单视频背景（用户 AI 生成 → CI 转码 → 接入）
+
+- 用户按提示词生成 3 版视频，帧级分析对比后选定 **gemini 版**
+  （1280×720/10s；pavo 有水印弃选；青冥山循环跳变最明显、偏亮）
+- 新增 `video_convert.yml`：push menu_raw/** 或手动触发 → CI 装 ffmpeg → MP4 转 OGV → 自动提交回仓库
+  （本机没有 ffmpeg；runner 也已不预装——首版工作流就栽在 ffmpeg command not found）
+- 接入：`main_menu.gd::_setup_video_background()`——桌面版播 menu_loop.ogv（循环、
+  NEAREST 像素过滤、插在 Background 与 Dim 之间）；**Web 版跳过**（导出排除 *.ogv，省 1.7MB 首载）
+- 真机验证：菜单跑 400 帧无报错；探针确认 expand/loop/autoplay 属性齐备、OGV 加载正常
+- 提醒：gemini 版循环差 16.3（循环点有可见跳变），介意的话用「首尾帧=menu_bg.png」
+  重新生成一版更无缝的
+
+状态：awaiting-human
+
