@@ -60,7 +60,7 @@ def strip_gd_comments(text):
 
 
 def collect_chars():
-    """扫源码收集所有字符（含注释——多留几个字比漏字便宜得多）。"""
+    """扫源码收集所有会被渲染的字符（.gd 先剥注释，注释里的字不进字体）。"""
     chars = set(BASE)
     for root, dirs, files in os.walk(ROOT):
         # tools/ 是开发脚本，里面的中文只打到控制台、不进游戏界面，所以不进字体
@@ -91,13 +91,47 @@ def font_codepoints(path):
     return codes
 
 
+def restore_source():
+    """从 git 历史取回**全量**字体（本仓库第一次提交该文件的那版）。
+
+    为什么需要：字体是就地子集化的，裁过之后再往里加新字就无从可取
+    （比如界面上新用了字体里没有的"也"字）。历史里那份才是完整字库。
+    """
+    rel = os.path.relpath(FONT, ROOT).replace(os.sep, "/")
+    log = subprocess.run(["git", "log", "--reverse", "--format=%H", "--", rel],
+                         capture_output=True, cwd=ROOT)
+    commits = log.stdout.decode().split()
+    if not commits:
+        print("SUBSET FAIL: git history has no %s, cannot restore full font" % rel)
+        return False
+    blob = subprocess.run(["git", "show", "%s:%s" % (commits[0], rel)], capture_output=True, cwd=ROOT)
+    if blob.returncode != 0 or len(blob.stdout) < 500000:
+        print("SUBSET FAIL: git show %s:%s is not the full font (%d bytes)" % (
+            commits[0][:7], rel, len(blob.stdout)))
+        return False
+    with open(FONT, "wb") as fh:
+        fh.write(blob.stdout)
+    print("restored full font from git %s (%.1fMB)" % (commits[0][:7], len(blob.stdout) / 1048576.0))
+    return True
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="只校验子集覆盖率，不重新裁剪")
+    ap.add_argument("--restore", action="store_true", help="只从 git 取回全量字体，不裁剪")
     args = ap.parse_args()
+
+    if args.restore:
+        return 0 if restore_source() else 1
 
     chars = collect_chars()
     if not args.check:
+        # 就地子集化过的字体可能缺新字：先自愈回全量再裁（否则新字永远补不进来）
+        have = font_codepoints(FONT)
+        if any(ord(c) not in have for c in chars):
+            print("note: current font misses new chars (it is a previous subset), restoring full font")
+            if not restore_source():
+                return 1
         os.makedirs(os.path.dirname(CHARS_TXT), exist_ok=True)
         with open(CHARS_TXT, "w", encoding="utf-8", newline="") as fh:
             fh.write("".join(sorted(chars)))

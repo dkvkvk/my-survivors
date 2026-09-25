@@ -140,6 +140,18 @@ func _float_text(msg: String) -> void:
 	Juice.damage_number(game, global_position + Vector2(0, -50), msg, {"color": Color(0.7, 1.0, 1.0), "scale": 1.2})
 
 
+## 触屏拾取（P2b）：等价于按 F——只有玩家已经走进提示范围才算数。
+func can_touch_pickup() -> bool:
+	return _hint.visible and weapon_id != "" and _player != null
+
+
+func touch_pickup() -> bool:
+	if not can_touch_pickup():
+		return false
+	_try_pickup()
+	return true
+
+
 ## 替换面板取消时调用：把提示重新显示出来
 func cancel_replace() -> void:
 	if _player != null and global_position.distance_to(_player.global_position) < 90.0:

@@ -86,7 +86,9 @@ func _build() -> void:
 	_root.add_child(panel)
 
 	_title(panel, "乾 坤 袋", Vector2(28, 14))
-	_hint(panel, "B / Esc 关闭", Vector2(W - 220, 26))
+	# 触屏没有 Esc：必须有可点的关闭按钮（否则手机上打开乾坤袋就卡死在暂停里）
+	_hint(panel, "B / Esc 也可关闭", Vector2(W - 350, 34))
+	_button(panel, "关闭", Vector2(W - 132, 18), Vector2(108, 48), toggle)
 
 	# ---- 左：法宝 4 格 ----
 	_label(panel, "法宝", Vector2(28, 70), 30)

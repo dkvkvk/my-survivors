@@ -49,6 +49,7 @@ func _process(_delta: float) -> bool:
 			if _f >= 8:
 				_check_release()
 				_check_button()
+				_check_utils()
 				_report()
 				return true
 	return false
@@ -117,6 +118,57 @@ func _check_button() -> void:
 		_fail("找不到 HUD/SkillBar")
 	elif bar._slots[0]["key"].visible:
 		_fail("触屏时按键提示（1/2/3/4）应该隐藏")
+
+
+## 触屏三个功能入口：拾取 / 乾坤袋 / 暂停（手机上没有 F / B / Esc，这三个必须可点）
+func _check_utils() -> void:
+	var ui = _game.get_node_or_null("InventoryUI")
+	if ui == null:
+		_fail("找不到 InventoryUI")
+	else:
+		_touch._press(9, _touch._util[1]["center"])
+		if not ui.visible:
+			_fail("点触屏「乾坤袋」按钮没有打开面板")
+		if not _has_close_button(ui):
+			_fail("乾坤袋面板没有「关闭」按钮：手机上打开就永远关不掉（没有 Esc）")
+		ui.toggle()
+		if ui.visible:
+			_fail("toggle() 没能收起乾坤袋")
+
+	var pu = _game.get_node_or_null("PauseUI")
+	if pu == null:
+		_fail("找不到 PauseUI")
+	else:
+		_touch._press(9, _touch._util[2]["center"])
+		if not pu.visible:
+			_fail("点触屏「暂停」按钮没有暂停")
+		if not _game.get_tree().paused:
+			_fail("触屏暂停按钮没有真的暂停游戏树")
+		pu.resume()
+
+	# 拾取：造一个玩家没持有的法宝，强制进入"提示可见"状态，再点拾取按钮
+	if _player.has_weapon("aura"):
+		_fail("测试前置不成立：玩家已持有 aura")
+	var drop = load("res://weapon_drop.tscn").instantiate()
+	_game.add_child(drop)
+	drop.setup("aura")
+	drop.global_position = _player.global_position
+	drop._hint.visible = true
+	if not drop.can_touch_pickup():
+		_fail("走进提示范围后 can_touch_pickup 仍为 false")
+	_touch._press(9, _touch._util[0]["center"])
+	if not _player.has_weapon("aura"):
+		_fail("点触屏「拾取」按钮没有捡到法宝")
+
+
+## 在面板里找有没有一个写着「关闭」的按钮（递归子节点）
+func _has_close_button(node: Node) -> bool:
+	for c in node.get_children():
+		if c is Button and String((c as Button).text).find("关闭") >= 0:
+			return true
+		if _has_close_button(c):
+			return true
+	return false
 
 
 func _report() -> void:
