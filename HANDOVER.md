@@ -119,10 +119,13 @@ python tools/subset_font.py --check  # 只校验（L0 判据 font-coverage 用�
 
 ### 调手感（抖动 / 定帧）——别靠感觉，看数
 ```bash
-# 自动开局（本机调试用，免得手点菜单）+ 手感探针：每 120 帧汇报一次
+# 测试钩子（见本节末）：
+#   MS_AUTOSTART=1  跳过菜单与开局选法宝，直接进战斗（省得手点）
+#   MS_FEEL_PROBE=1 每 120 帧汇报手感 + 性能：抖动强度分布、定帧冻结比例、同屏怪数与特效数、帧率
 G="/d/Downloads/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.exe"
-MS_FEEL_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 1800 2>&1 | grep FEELSTAT
-# 输出：mean/max 相机偏移像素、>4px 与 >10px 的帧占比、time_scale 被冻结的帧占比
+MS_AUTOSTART=1 MS_FEEL_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 1800 2>&1 | grep FEELSTAT
+# 例：frames=120 mean=0.27 max=3.18 over4=0% over10=0% frozen=3% mobs=10 fps=119(min 118) fx=48
+# 实测（后期波次 14 只怪 + 48 个特效）：fps 117~119（min 116）—— 性能不是瓶颈
 ```
 实测基线（2026-09-24 修复前）→ 修复后：
 | 指标 | 修复前 | 修复后（日常战斗 / 妖王期） |
@@ -131,6 +134,8 @@ MS_FEEL_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 1800 2>&1 | grep 
 | >4px 帧占比 | 0~84% | 0~3% / 21~38% |
 | 定帧冻结占比 | 6~22% | 3~7% |
 调参入口只有一个：`balance.gd` 的 `CAMERA_SHAKE_GAIN`（整体强度）。
+⚠️ 后期同屏怪多（10 只以上连杀）时抖动会回升（实测 >4px 占 41% 的帧）——
+那时调 `CAMERA_SHAKE_SWARM_FLOOR`（0.35 → 更小）比调 GAIN 更对症。
 
 ### 触屏与移动端验证（本机没有触摸屏）
 ```bash

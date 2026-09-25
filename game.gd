@@ -16,6 +16,8 @@ var _probe_max := 0.0
 var _probe_over4 := 0
 var _probe_over10 := 0
 var _probe_frozen := 0
+var _probe_fps_sum := 0.0
+var _probe_fps_min := 0.0
 
 @onready var player = $Player
 
@@ -84,6 +86,9 @@ func _feel_probe() -> void:
 	var off: float = cam.offset.length()
 	_probe_sum += off
 	_probe_max = maxf(_probe_max, off)
+	if _probe_fps_min <= 0.0 or Engine.get_frames_per_second() < _probe_fps_min:
+		_probe_fps_min = Engine.get_frames_per_second()
+	_probe_fps_sum += Engine.get_frames_per_second()
 	if off > 4.0:
 		_probe_over4 += 1
 	if off > 10.0:
@@ -91,17 +96,22 @@ func _feel_probe() -> void:
 	if Engine.time_scale < 1.0:
 		_probe_frozen += 1
 	if _probe_n % 120 == 0:
-		print("FEELSTAT frames=%d mean=%.2f max=%.2f over4=%.0f%% over10=%.0f%% frozen=%.0f%%" % [
+		print("FEELSTAT frames=%d mean=%.2f max=%.2f over4=%.0f%% over10=%.0f%% frozen=%.0f%% mobs=%d fps=%.0f(min %.0f) fx=%d" % [
 			_probe_n, _probe_sum / float(_probe_n), _probe_max,
 			100.0 * float(_probe_over4) / float(_probe_n),
 			100.0 * float(_probe_over10) / float(_probe_n),
-			100.0 * float(_probe_frozen) / float(_probe_n)])
+			100.0 * float(_probe_frozen) / float(_probe_n),
+			get_tree().get_nodes_in_group("mobs").size(),
+			_probe_fps_sum / float(_probe_n), _probe_fps_min,
+			get_tree().get_nodes_in_group("fx").size()])
 		_probe_n = 0
 		_probe_sum = 0.0
 		_probe_max = 0.0
 		_probe_over4 = 0
 		_probe_over10 = 0
 		_probe_frozen = 0
+		_probe_fps_sum = 0.0
+		_probe_fps_min = 0.0
 
 
 ## 开局保底判定：前 WEAPON_PITY_TIME 秒内，每攒够 WEAPON_PITY_KILLS 次斩妖还没掉够法宝就返回 true

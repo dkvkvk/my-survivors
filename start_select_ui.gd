@@ -28,6 +28,10 @@ func _ready() -> void:
 ## 打开界面并暂停游戏（game.gd 在 _ready 里 call_deferred 调用）
 func open(p_player: Node) -> void:
 	_player = p_player
+	# 测试钩子：MS_AUTOSTART=1 时自动选本命飞剑，不弹界面
+	if OS.get_environment("MS_AUTOSTART") == "1":
+		_choose("shuriken")
+		return
 	if not _built:
 		_build()
 		_built = true

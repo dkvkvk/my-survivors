@@ -39,6 +39,9 @@ func _ready():
 	# Web 版跑在浏览器里没有窗口可关，隐藏退出按钮
 	if OS.has_feature("web"):
 		%QuitButton.hide()
+	# 测试钩子（HANDOVER §3）：MS_AUTOSTART=1 直接进战斗，省去手点菜单（探针/压测用）
+	if OS.get_environment("MS_AUTOSTART") == "1":
+		_on_start_button_pressed()
 
 
 ## 背景：放大一点并以中心为轴，之后做正弦漂移就不会露出边缘
