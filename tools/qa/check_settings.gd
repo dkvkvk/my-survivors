@@ -40,9 +40,39 @@ func _find_sliders(node: Node, out: Array) -> void:
 		_find_sliders(c, out)
 
 
+## 真实鼠标点击（走输入管线）——用于验证没有控件吞掉点击。
+## 注意：parse_input_event 要到下一帧才被派发，所以点击和断言必须分帧做。
+var _clicked_id := ""
+
+
+func _click_card(index: int) -> void:
+	var card: Button = _menu._char_cards[index]["card"]
+	var center: Vector2 = card.global_position + card.size / 2.0
+	for pressed in [true, false]:
+		var ev := InputEventMouseButton.new()
+		ev.button_index = MOUSE_BUTTON_LEFT
+		ev.pressed = pressed
+		ev.position = center
+		ev.global_position = center
+		Input.parse_input_event(ev)
+
+
 func _process(_delta: float) -> bool:
 	_f += 1
-	if _f < 5:
+	if _f == 4:
+		# 先真实点一张"当前没选中"的卡（用户反馈"人物无法切换"的回归）
+		var menu0 = root.get_node_or_null("MainMenu")
+		if menu0 != null:
+			var cur: String = SaveGame.get_character()
+			var idx := 0
+			for i in menu0._char_cards.size():
+				if str(menu0._char_cards[i]["id"]) != cur:
+					idx = i
+					break
+			_clicked_id = str(menu0._char_cards[idx]["id"])
+			_menu = menu0
+			_click_card(idx)
+	if _f < 8:
 		return false
 	_menu = root.get_node_or_null("MainMenu")
 	if _menu == null:
@@ -139,7 +169,15 @@ func _process(_delta: float) -> bool:
 	if absf(float(root_audio().sfx_volume) - 0.25) > 0.01:
 		_fail("音效音量没有实时生效")
 
-	# 身份选择：点第 2 张卡（符修）应写入存档
+	# 真实鼠标点击是否切换了角色（分帧：点击在第 4 帧派发，这里已是第 8 帧）
+	# ⚠️ headless 模式**不派发**模拟鼠标事件（Input.parse_input_event 被丢弃），
+	#    所以这条断言只能在带窗口跑时生效；判据是 headless 跑的，这里会自动跳过。
+	if _clicked_id != "" and not DisplayServer.get_name() == "headless":
+		if SaveGame.get_character() != _clicked_id:
+			_fail("真实点击身份卡没有切换（点的是 %s，存档是 %s）" % [
+				_clicked_id, SaveGame.get_character()])
+
+	# 身份选择：直接调用处理函数也应写入存档
 	_menu._on_character_clicked("fu_xiu")
 	if SaveGame.get_character() != "fu_xiu":
 		_fail("点击身份卡没有写入存档")

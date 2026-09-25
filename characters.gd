@@ -22,7 +22,9 @@ const LIST := [
 		"id": "fu_xiu",
 		"name": "符修",
 		"desc": "万宝楼掌柜的弟子。随身带符阵，灵力深厚，但身板脆。",
-		"tint": Color(1.0, 0.8, 0.55),
+		# 三个身份共用主角表，只能靠配色区分——调太淡玩家会说"人物没法切换"，
+		# 所以这里用**明显的换色**（2026-09-24 用户反馈后加强）
+		"tint": Color(1.0, 0.58, 0.22),
 		"start_extra_weapon": "mine",
 		"health_mult": 0.75, "speed_mult": 1.0, "fire_rate_mult": 1.0, "mana_max_mult": 1.4,
 	},
@@ -30,7 +32,7 @@ const LIST := [
 		"id": "jian_xiu",
 		"name": "剑修",
 		"desc": "青冥山弃徒。剑环护身、出手极快，脚下却慢半拍。",
-		"tint": Color(0.75, 0.92, 1.0),
+		"tint": Color(0.52, 0.86, 1.0),
 		"start_extra_weapon": "orbit_blade",
 		"health_mult": 1.0, "speed_mult": 0.9, "fire_rate_mult": 1.25, "mana_max_mult": 1.0,
 	},

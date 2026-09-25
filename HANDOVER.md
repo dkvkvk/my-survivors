@@ -182,6 +182,23 @@ MS_AUTOSTART=1 MS_FEEL_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 18
 wasm 未动（gzip 10.2MB）→ **首载 18.4MB → 11.0MB，省 7.2MB**。
 下一步若还要瘦，就只剩 wasm（占首载 89%）——只能自建引擎模板，见下。
 
+### 坑 #20：headless 不派发模拟鼠标事件（点击类断言会假阴性）
+`Input.parse_input_event()` 造出来的鼠标事件在 **headless 下被直接丢弃**——
+带窗口跑能正常点击、headless 跑永远「没切换」。实测对照（同一份脚本）：
+```
+带窗口：点击前=jian_xiu 目标=shou_shan -> 点击后=shou_shan OK
+headless：点击前=shou_shan 目标=fu_xiu -> 点击后=shou_shan 没切换！
+```
+所以：**涉及点击/命中检测的断言必须带窗口跑**（判据是 headless，会跳过这类断言，
+见 `check_settings.gd` 里的 `DisplayServer.get_name() == "headless"` 判断）。
+
+### 坑 #21：三个身份「看起来一样」= 玩家以为切不了
+三个身份共用同一张主角表、只靠 `modulate` 换色，早期配色太淡
+（符修 1.0/0.8/0.55、剑修 0.75/0.92/1.0）→ 玩家反馈「人物无法切换」。
+实测点击与存档都正常，**问题在观感**。修法：换色拉开到一眼可辨
+（符修 1.0/0.58/0.22 橙黄、剑修 0.52/0.86/1.0 冰蓝），并与选卡头像配色一致。
+**教训**：靠换色区分的角色，色差必须大到「一眼可辨」才算数。
+
 ### 坑 #17：主菜单三处「界面糅杂」（2026-09-24 用户截图反馈，已修）
 1. **卡片描述文字压住标题行**：Label 用 `set_anchors_preset(PRESET_FULL_RECT)` 后，
    `offset_top` 是「从父节点顶边向下」的位移——写成**负值 = 整块文字被推到卡片外面**。
