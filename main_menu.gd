@@ -28,6 +28,8 @@ func _ready():
 	_setup_background_motion()
 	_setup_talismans()
 	_setup_character_picker()
+	_setup_settings_button()
+	_setup_settings_panel()
 
 	var records := SaveGame.load_records()
 	%RecordsLabel.text = "最高纪录　守夜 %d:%02d　斩妖 %d　修为 %d\n灵石 %d（坊市万宝楼可花）" % [
@@ -219,4 +221,145 @@ func _refresh_character_picker() -> void:
 		(c["nm"] as Label).add_theme_color_override("font_color",
 			Color(1, 0.92, 0.6) if sel else Color(0.75, 0.82, 0.9))
 		(c["ds"] as Label).modulate.a = 1.0 if sel else 0.55
+
+
+
+## ---------- 设置（P7）：抖动强度 / 音乐 / 音效，写入存档 ----------
+
+var _settings_panel: Control = null
+
+
+func _setup_settings_button() -> void:
+	var b := Button.new()
+	b.set_anchors_preset(Control.PRESET_CENTER)
+	b.offset_left = -420
+	b.offset_top = 360
+	b.offset_right = -180
+	b.offset_bottom = 440
+	b.text = "设 置"
+	b.add_theme_font_size_override("font_size", 40)
+	b.pressed.connect(_open_settings)
+	add_child(b)
+
+
+func _setup_settings_panel() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 45
+	layer.name = "SettingsUI"
+	add_child(layer)
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_STOP
+	root.visible = false
+	layer.add_child(root)
+	_settings_panel = root
+
+	var dim := ColorRect.new()
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.color = Color(0, 0, 0, 0.78)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(dim)
+
+	var panel := Panel.new()
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.offset_left = -420
+	panel.offset_top = -260
+	panel.offset_right = 420
+	panel.offset_bottom = 260
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.05, 0.08, 0.11, 0.97)
+	sb.border_color = Color(0.35, 0.8, 0.9, 0.85)
+	sb.set_border_width_all(3)
+	sb.set_corner_radius_all(10)
+	panel.add_theme_stylebox_override("panel", sb)
+	root.add_child(panel)
+
+	var title := Label.new()
+	title.set_anchors_preset(Control.PRESET_CENTER)
+	title.offset_left = -380
+	title.offset_top = -230
+	title.offset_right = 380
+	title.offset_bottom = -180
+	title.text = "设  置"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 46)
+	title.add_theme_color_override("font_color", Color(1, 0.92, 0.6))
+	panel.add_child(title)
+
+	_slider(panel, "抖动强度", 460, float(SaveGame.get_setting("shake", 1.0)),
+		func(v: float):
+			SaveGame.set_setting("shake", v)
+			VFX.set_shake_scale(v))
+	_slider(panel, "音乐音量", 560, float(SaveGame.get_setting("music", 1.0)),
+		func(v: float):
+			SaveGame.set_setting("music", v)
+			Audio.music_volume = v
+			Audio.apply_volumes())
+	_slider(panel, "音效音量", 660, float(SaveGame.get_setting("sfx", 1.0)),
+		func(v: float):
+			SaveGame.set_setting("sfx", v)
+			Audio.sfx_volume = v
+			Audio.apply_volumes())
+
+	var close := Button.new()
+	close.set_anchors_preset(Control.PRESET_CENTER)
+	close.offset_left = -120
+	close.offset_top = 170
+	close.offset_right = 120
+	close.offset_bottom = 236
+	close.text = "关 闭"
+	close.add_theme_font_size_override("font_size", 34)
+	close.pressed.connect(func():
+		root.visible = false
+		_settings_panel = null
+		queue_free()   # 关闭即销毁整层，下次点「设置」重建（读回最新存档值）
+	)
+	panel.add_child(close)
+
+
+func _slider(panel: Control, label: String, y: float, value: float, on_change: Callable) -> void:
+	var cap := Label.new()
+	cap.set_anchors_preset(Control.PRESET_CENTER)
+	cap.offset_left = -360
+	cap.offset_top = y - 46
+	cap.offset_right = 360
+	cap.offset_bottom = y - 10
+	cap.text = label
+	cap.add_theme_font_size_override("font_size", 30)
+	panel.add_child(cap)
+
+	var row := HSlider.new()
+	row.set_anchors_preset(Control.PRESET_CENTER)
+	row.offset_left = -360
+	row.offset_top = y
+	row.offset_right = 240
+	row.offset_bottom = y + 34
+	row.min_value = 0.0
+	row.max_value = 1.5 if label == "抖动强度" else 1.0
+	row.step = 0.05
+	row.value = value
+	panel.add_child(row)
+
+	var val := Label.new()
+	val.set_anchors_preset(Control.PRESET_CENTER)
+	val.offset_left = 260
+	val.offset_top = y
+	val.offset_right = 360
+	val.offset_bottom = y + 34
+	val.add_theme_font_size_override("font_size", 26)
+	panel.add_child(val)
+
+	var refresh := func(v: float) -> void:
+		val.text = "%d%%" % int(round(v * 100.0))
+	refresh.call(value)
+	row.value_changed.connect(func(v: float):
+		refresh.call(v)
+		on_change.call(v))
+
+
+func _open_settings() -> void:
+	# 重建一层新的面板，保证读到最新存档值
+	_setup_settings_panel()
+	_settings_panel.visible = true
+	Audio.play("res://sounds/pickup.wav", false, 1.2, 0.3)
 

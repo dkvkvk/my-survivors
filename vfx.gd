@@ -35,6 +35,7 @@ var _flash_rect: ColorRect = null
 var _flash_tween: Tween = null
 # 抖动"热度"（0~1）：连杀时升高，小抖随之变弱，避免画面被一直顶在最大抖动
 var _shake_heat := 0.0
+var shake_scale := 1.0   # 设置菜单的抖动强度（0~1.5），与 CAMERA_SHAKE_GAIN 相乘
 var _hitstop_last_ms := 0
 
 
@@ -55,6 +56,11 @@ func _process(delta: float) -> void:
 ##   amount：0~1，>= Balance.CAMERA_SHAKE_BIG 视为"大抖"（妖王死亡那种），不吃连杀衰减
 ## 连杀（斩妖/符雷）会累积"热度"，小抖随之衰减到 SWARM_FLOOR——画面保持稳定，
 ## 但打击反馈不会完全消失；妖王/受击这类大事件照常震。
+## 设置菜单的抖动强度（0~1.5，1.0 = 默认）
+func set_shake_scale(v: float) -> void:
+	shake_scale = clampf(v, 0.0, 1.5)
+
+
 func shake(camera: Node, amount: float) -> void:
 	if camera == null:
 		return
@@ -63,6 +69,7 @@ func shake(camera: Node, amount: float) -> void:
 	if not big:
 		scaled *= lerpf(1.0, Balance.CAMERA_SHAKE_SWARM_FLOOR, _shake_heat)
 		_shake_heat = minf(1.0, _shake_heat + Balance.CAMERA_SHAKE_HEAT_STEP)
+	scaled *= shake_scale
 	Juice.shake(camera, scaled, Balance.CAMERA_SHAKE_DECAY,
 		Balance.CAMERA_SHAKE_OFFSET, Balance.CAMERA_SHAKE_ROLL)
 

@@ -144,6 +144,29 @@ MS_AUTOSTART=1 MS_FEEL_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 18
 ⚠️ 后期同屏怪多（10 只以上连杀）时抖动会回升（实测 >4px 占 41% 的帧）——
 那时调 `CAMERA_SHAKE_SWARM_FLOOR`（0.35 → 更小）比调 GAIN 更对症。
 
+### 设置菜单（P7）
+主菜单左下「设 置」：抖动强度（0~150%）、音乐音量、音效音量，写入存档并**实时生效**。
+实现：`main_menu.gd::_setup_settings_panel()`（代码构建，滑杆值存进 settings 字典）
++ `VFX.set_shake_scale()`（与 CAMERA_SHAKE_GAIN 相乘）+ `audio.gd::apply_volumes()`。
+回归：`tools/qa/check_settings.gd`（判据 `settings-ui`）。
+⚠️ 设置值的**存取单位要一致**：滑杆存 0~1 浮点，读取侧也按 0~1——一度存成整数百分比，
+读取侧 clamp 后直接变成 1.0，测试当场抓出来。
+
+### Web wasm 瘦身配方（需要自建引擎模板，未实施）
+线上 wasm 39.5MB 全是官方 Godot Web 模板。官方模板不带裁剪，想省就得起一份**自建模板**：
+```bash
+# 在 Linux（或 WSL）上：
+git clone -b 4.7.2-stable --depth 1 https://github.com/godotengine/godot.git
+cd godot
+scons platform=web target=template_release dlink_enabled=yes module_raycast_enabled=no \
+      module_xr_enabled=no module_webxr_enabled=no disable_3d=yes -j$(nproc)
+# 产物：bin/web_*.zip -> 解压到导出预设的 custom_template/release
+```
+- 预期收益：disable_3d + 砍掉 raycast/xr 等模块，wasm 可降到 ~20MB（brotli 后更小）
+- 做法：加一个 `workflow_dispatch` 的 CI job 用 scons 编译模板并缓存成 artifact，
+  导出预设指向它（首次约 30~60 分钟，之后缓存命中很快）
+- 没做的原因：需要一条 Linux 工具链与一次较长编译，属于独立工程，价值高但本次不动
+
 ### 跑局采集数据（自动机器人 MS_BOT=1）
 ```bash
 G="/d/Downloads/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.exe"
@@ -330,7 +353,7 @@ gh api "repos/dkvkvk/my-survivors/actions/artifacts?per_page=100" \
 6. 妖王目前一只形象，可加多种（模板机制已支持，见 chunk_map 的做法）。
 7. ~~手机触屏~~：**2026-09-24 完整可用**——摇杆 + 神通按钮 + 拾取/乾坤袋/暂停三个功能入口，
    乾坤袋补了可点的关闭按钮（`check_touch.gd` 有断言，去掉关闭按钮会 FAIL）。
-   **仍待办**：竖屏/横屏布局适配（现在只有横屏布局，手机竖屏会很小）。
+   竖屏时会盖一层「请横屏游玩」提示（横屏设计，竖屏压成一条没法玩）。
 7b. ~~**第 5/6 种法宝 + 每把补第 2 门神通**~~：**全部完成**（回风梭 / 地火符阵 + 14 门神通
     + 2 门融合，2026-09-24）。判据 `skills-cast` 会把 14 门逐个施放并断言状态。
 7c. ~~**精确斩妖归属**~~：**2026-09-22 已完成**——`take_damage(amount, knockback, source)` + `died(source)`，

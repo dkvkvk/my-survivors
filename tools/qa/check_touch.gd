@@ -146,6 +146,10 @@ func _check_utils() -> void:
 			_fail("触屏暂停按钮没有真的暂停游戏树")
 		pu.resume()
 
+	# 竖屏提示层必须存在（结构断言；实际翻转窗口宽高比无法在 headless 下模拟）
+	if _touch._portrait == null:
+		_fail("没有竖屏提示层")
+
 	# 拾取：造一个玩家没持有的法宝，强制进入"提示可见"状态，再点拾取按钮
 	if _player.has_weapon("aura"):
 		_fail("测试前置不成立：玩家已持有 aura")

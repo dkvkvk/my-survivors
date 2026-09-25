@@ -14,7 +14,19 @@ var active_sounds = {}
 var _music_player: AudioStreamPlayer
 var _music_path := ""
 
+# 音量（P7 设置菜单）：0~1，由设置面板写入存档后调用 apply_volumes() 生效
+var music_volume := 1.0
+var sfx_volume := 1.0
+
+func apply_volumes() -> void:
+	music_volume = clampf(float(SaveGame.get_setting("music", 1.0)), 0.0, 1.0)
+	sfx_volume = clampf(float(SaveGame.get_setting("sfx", 1.0)), 0.0, 1.0)
+	if _music_player != null:
+		# -16dB 是曲子本身的基准音量，滑块在其上按比例缩放
+		_music_player.volume_db = linear_to_db(maxf(music_volume, 0.001)) - 16.0
+
 func _ready():
+	apply_volumes()
 	for i in num_players:
 		var p = AudioStreamPlayer.new()
 		add_child(p)
@@ -37,7 +49,7 @@ func play_music(sound_path: String) -> void:
 	if _music_player == null:
 		_music_player = AudioStreamPlayer.new()
 		add_child(_music_player)
-		_music_player.volume_db = -16
+		_music_player.volume_db = linear_to_db(maxf(music_volume, 0.001)) - 16.0
 		_music_player.bus = bus
 		# WAV 播完自动重播实现循环
 		_music_player.finished.connect(func(): _music_player.play())
@@ -82,7 +94,7 @@ func _process(_delta):
 		player.stream = load(sound_path)
 		player.pitch_scale = data["pitch"]
 		
-		player.volume_db = linear_to_db(data["volume"])
+		player.volume_db = linear_to_db(maxf(float(data["volume"]) * sfx_volume, 0.001))
 		
 		player.play()
 

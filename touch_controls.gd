@@ -35,6 +35,7 @@ var _knob: Line2D
 var _base_pos := Vector2.ZERO
 var _buttons: Array = []          # [{index, center, base, icon}]
 var _util: Array = []             # [{key, center, ring, label}]
+var _portrait: ColorRect = null   # 竖屏提示层（横屏设计的游戏在竖屏下没法玩）
 var _player: Node
 # 自动跑局机器人（开发用，见 HANDOVER §3）：MS_BOT=1 远离妖、捡法宝、放神通、能升就升，
 # 用来采集生存数据回答"15 分钟到底能不能活到"。配合 --headless --fixed-fps 可把
@@ -116,6 +117,25 @@ func _build() -> void:
 		lab.add_theme_constant_override("outline_size", 6)
 		add_child(lab)
 		_util.append({"key": String(util_defs[i]["key"]), "center": ucenter, "ring": ring, "label": lab})
+	# 竖屏提示：本作是横屏设计，竖屏下画面会被压成一条
+	_portrait = ColorRect.new()
+	_portrait.color = Color(0, 0, 0, 0.92)
+	_portrait.size = Vector2(6000, 6000)
+	_portrait.position = Vector2(-1500, -1500)
+	_portrait.visible = false
+	var pl := Label.new()
+	pl.text = "请横屏游玩"
+	pl.position = Vector2(1720, 980)
+	pl.add_theme_font_size_override("font_size", 110)
+	pl.add_theme_color_override("font_color", Color(1, 0.92, 0.6))
+	_portrait.add_child(pl)
+	var pl2 := Label.new()
+	pl2.text = "（旋转设备后开始）"
+	pl2.position = Vector2(1790, 1130)
+	pl2.add_theme_font_size_override("font_size", 48)
+	pl2.add_theme_color_override("font_color", Color(0.8, 0.9, 0.95))
+	_portrait.add_child(pl2)
+	add_child(_portrait)
 
 
 func _make_glow(s: float, col: Color, pos: Vector2) -> Sprite2D:
@@ -149,6 +169,12 @@ func _process(_delta: float) -> void:
 		_bot_step(_delta)
 	if _knob != null:
 		_knob.position = _base_pos + direction * STICK_MAX
+	# 竖屏检测：竖屏时盖一层提示（横屏设计，竖屏没法玩）
+	var wsize: Vector2i = DisplayServer.window_get_size()
+	if _portrait != null:
+		var is_portrait: bool = wsize.y > wsize.x
+		if _portrait.visible != is_portrait:
+			_portrait.visible = is_portrait
 	if _player == null:
 		_player = get_node_or_null("/root/Game/Player")
 		if _player == null:
