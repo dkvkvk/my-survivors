@@ -1,0 +1,36 @@
+name: 转码主菜单视频
+
+# 把 menu_raw/ 里的 MP4 转成 Godot 能播的 OGV（Theora）并提交回仓库。
+# 本机没有 ffmpeg，GitHub 的 ubuntu runner 自带。
+
+on:
+  push:
+    paths: ['menu_raw/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 转 OGV（去音轨，主菜单有自己的 BGM）
+        run: |
+          mkdir -p .tmpout
+          for f in menu_raw/*.mp4; do
+            base=$(basename "$f" .mp4)
+            ffmpeg -y -i "$f" -codec:v libtheora -q:v 6 -an ".tmpout/$base.ogv"
+          done
+          ls -la .tmpout
+
+      - name: 提交回仓库
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cp .tmpout/*.ogv .
+          git add *.ogv
+          git commit -m "CI：主菜单视频转码 OGV" || echo "没有变化"
+          git push
