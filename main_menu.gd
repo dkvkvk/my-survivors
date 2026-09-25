@@ -29,6 +29,7 @@ func _ready():
 	_setup_background_motion()
 	_setup_talismans()
 	_setup_character_picker()
+	_setup_difficulty_picker()
 	_setup_settings_button()
 	_setup_achievements_button()
 	_setup_settings_panel()
@@ -187,6 +188,7 @@ func _setup_character_picker() -> void:
 	cap.add_theme_color_override("font_color", Color(0.75, 0.88, 0.82))
 	cap.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	cap.add_theme_constant_override("outline_size", 8)
+	cap.mouse_filter = Control.MOUSE_FILTER_IGNORE   # 别吞掉旁边难度按钮的点击
 	add_child(cap)
 	_char_caption = cap
 
@@ -280,6 +282,71 @@ func _refresh_character_picker() -> void:
 		(c["nm"] as Label).add_theme_color_override("font_color",
 			Color(1, 0.92, 0.6) if sel else Color(0.75, 0.82, 0.9))
 		(c["ds"] as Label).modulate.a = 1.0 if sel else 0.55
+
+
+
+## ---------- 难度（P7）：寻常 / 凶险 / 修罗，写入存档的 settings ----------
+
+var _diff_buttons: Array = []
+
+
+func _setup_difficulty_picker() -> void:
+	var cap := Label.new()
+	cap.set_anchors_preset(Control.PRESET_CENTER)
+	cap.offset_left = -620
+	cap.offset_top = -76
+	cap.offset_right = -530
+	cap.offset_bottom = -36
+	cap.text = "难度"
+	cap.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	cap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cap.add_theme_font_size_override("font_size", 24)
+	cap.add_theme_color_override("font_color", Color(0.8, 0.86, 0.92))
+	add_child(cap)
+
+	var x := -520.0
+	for d in Balance.DIFFICULTIES:
+		var b := Button.new()
+		b.set_anchors_preset(Control.PRESET_CENTER)
+		b.offset_left = x
+		b.offset_top = -78
+		b.offset_right = x + 100
+		b.offset_bottom = -34
+		b.text = str(d["name"])
+		b.tooltip_text = str(d["desc"])
+		b.add_theme_font_size_override("font_size", 22)
+		b.pressed.connect(_on_difficulty_clicked.bind(str(d["id"])))
+		add_child(b)
+		_diff_buttons.append({"id": str(d["id"]), "btn": b})
+		x += 108.0
+
+	# 说明只走 tooltip（鼠标悬浮）：另起一行会压在身份卡上（试过，截图发现）
+	_refresh_difficulty()
+
+
+func _on_difficulty_clicked(id: String) -> void:
+	SaveGame.set_setting("difficulty", id)
+	Audio.play("res://sounds/pickup.wav", false, 1.5, 0.3)
+	_refresh_difficulty()
+
+
+func _refresh_difficulty() -> void:
+	var cur: String = Balance.difficulty_id()
+	for e in _diff_buttons:
+		var sel: bool = str(e["id"]) == cur   # 当前难度：亮色描边高亮
+		var b: Button = e["btn"]
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.1, 0.16, 0.2, 0.92) if sel else Color(0.05, 0.07, 0.1, 0.55)
+		sb.border_color = Color(1.0, 0.78, 0.42, 0.95) if sel else Color(0.3, 0.45, 0.55, 0.5)
+		sb.set_border_width_all(3 if sel else 2)
+		sb.set_corner_radius_all(8)
+		b.add_theme_stylebox_override("normal", sb)
+		var sbh := sb.duplicate()
+		sbh.bg_color = Color(0.13, 0.2, 0.25, 0.95)
+		b.add_theme_stylebox_override("hover", sbh)
+		b.add_theme_stylebox_override("pressed", sbh)
+		b.add_theme_color_override("font_color",
+			Color(1, 0.9, 0.55) if sel else Color(0.72, 0.8, 0.86))
 
 
 

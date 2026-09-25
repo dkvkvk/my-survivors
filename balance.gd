@@ -63,6 +63,43 @@ const WAVES := [
 ]
 
 
+# ---------------------------------------------------------------- 难度（P7）
+# 影响四件事：怪物血量 / 接触伤害 / 刷怪间隔 / 经验与灵石收益。
+# 低难度不惩罚收益、高难度给正反馈——否则没人愿意往上调。
+const DIFFICULTIES := [
+	{"id": "normal", "name": "寻常", "desc": "标准难度",
+		"mob_hp": 1.0, "mob_damage": 1.0, "spawn": 1.0, "reward": 1.0},
+	{"id": "hard", "name": "凶险", "desc": "妖潮更密更硬，收益 ×1.3",
+		"mob_hp": 1.35, "mob_damage": 1.25, "spawn": 0.88, "reward": 1.3},
+	{"id": "nightmare", "name": "修罗", "desc": "给老手的挑战，收益 ×1.7",
+		"mob_hp": 1.8, "mob_damage": 1.5, "spawn": 0.76, "reward": 1.7},
+]
+const DEFAULT_DIFFICULTY := "normal"
+
+
+## 当前难度 id（存档里没有或写了个不存在的值 → 退回默认）
+static func difficulty_id() -> String:
+	var id: String = str(SaveGame.get_setting("difficulty", DEFAULT_DIFFICULTY))
+	for d in DIFFICULTIES:
+		if str(d["id"]) == id:
+			return id
+	return DEFAULT_DIFFICULTY
+
+
+## 难度定义（可传 id 取指定项）
+static func difficulty_def(id := "") -> Dictionary:
+	var want: String = id if id != "" else difficulty_id()
+	for d in DIFFICULTIES:
+		if str(d["id"]) == want:
+			return d
+	return DIFFICULTIES[0]
+
+
+## 取当前难度的某项倍率：mob_hp / mob_damage / spawn / reward
+static func diff(key: String) -> float:
+	return float(difficulty_def().get(key, 1.0))
+
+
 ## 取守夜时间对应的当前更次配置
 static func current_wave(run_time: float) -> Dictionary:
 	var wave: Dictionary = WAVES[0]

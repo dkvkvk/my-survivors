@@ -111,6 +111,16 @@ func setup(variant_name: String) -> void:
 	_ground_sprite()
 
 
+## 难度加成（P7）：刷怪方按当前难度给血量/接触伤害倍率。
+## 必须在 setup()/setup_boss() 之后调用（那时 health/contact_damage 才是最终值）。
+func apply_difficulty(hp_mult: float, damage_mult: float) -> void:
+	health = maxi(1, int(round(float(health) * hp_mult)))
+	contact_damage *= damage_mult
+	if is_boss and has_node("%BossBar"):
+		%BossBar.max_value = health
+		%BossBar.value = health
+
+
 ## 升格为妖王（P4）：属性覆盖 + 头顶血条。hp_bonus 为按斩妖数递增的血量。
 func setup_boss(hp_bonus: int) -> void:
 	is_boss = true

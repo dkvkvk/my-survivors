@@ -147,6 +147,32 @@ func _process(_delta: float) -> bool:
 	if absf(float(migrated.get("music", -1.0)) - 0.3) > 0.01:
 		_fail("老存档迁移失败：music = %s（应为 0.3）" % str(migrated.get("music")))
 
+	# 难度（P7）：按钮数量 / 写存档 / 倍率生效 / 怪物属性真被放大 / 非法值回退
+	if _menu._diff_buttons.size() != Balance.DIFFICULTIES.size():
+		_fail("难度按钮数量 %d != %d" % [_menu._diff_buttons.size(), Balance.DIFFICULTIES.size()])
+	_menu._on_difficulty_clicked("nightmare")
+	if str(SaveGame.get_setting("difficulty", "")) != "nightmare":
+		_fail("难度没有写入存档")
+	if absf(Balance.diff("mob_hp") - 1.8) > 0.01:
+		_fail("难度倍率没有生效：mob_hp=%.2f" % Balance.diff("mob_hp"))
+	var mob = load("res://mob.tscn").instantiate()
+	root.add_child(mob)
+	mob.setup("slime")
+	var base_hp: int = mob.health
+	var base_dmg: float = mob.contact_damage
+	mob.apply_difficulty(2.0, 3.0)
+	if mob.health != base_hp * 2:
+		_fail("apply_difficulty 血量不对：%d != %d" % [mob.health, base_hp * 2])
+	if absf(mob.contact_damage - base_dmg * 3.0) > 0.01:
+		_fail("apply_difficulty 伤害不对：%.2f" % mob.contact_damage)
+	mob.queue_free()
+	SaveGame.set_setting("difficulty", "不存在的难度")
+	if Balance.difficulty_id() != Balance.DEFAULT_DIFFICULTY:
+		_fail("非法难度没有回退默认")
+	_menu._on_difficulty_clicked("normal")
+	if Balance.difficulty_id() != "normal":
+		_fail("切回寻常失败")
+
 	# 抖动：写存档 + 实时改 VFX.shake_scale
 	# ⚠️ 赋一个与当前值相同的值不会触发 value_changed——所以先确保目标值与现值不同
 	var shake_target := 0.7 if absf(sliders[0].value - 0.7) > 0.01 else 0.4

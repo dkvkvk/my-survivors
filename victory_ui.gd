@@ -32,7 +32,7 @@ func show_victory(kills: int, survived: float, level: int, coins: int, reason: S
 	var records := SaveGame.load_records()
 	%ResultLabel.text = "胜 利"
 	if reason == "boss":
-		%ReasonLabel.text = "★ 斩三妖王，妖潮无锚自溃 ★"
+		%ReasonLabel.text = "★ 斩%d妖王，妖潮无锚自溃 ★" % Balance.VICTORY_BOSS_KILLS
 	else:
 		%ReasonLabel.text = "★ 坚守至黎明，妖潮退散 ★"
 	%VictoryStatsLabel.text = "本夜　守夜 %d:%02d　斩妖 %d　修为 %d\n灵石 +%d（余额 %d）" % [
@@ -41,6 +41,8 @@ func show_victory(kills: int, survived: float, level: int, coins: int, reason: S
 	]
 	if new_flags["time"] or new_flags["kills"] or new_flags["level"]:
 		%VictoryStatsLabel.text += "\n★ 新纪录！ ★"
+	%VictoryStatsLabel.text += "\n身份 %s　·　难度 %s" % [
+		Characters.current_def().get("name", "?"), Balance.difficulty_def().get("name", "?")]
 	%VictoryStatsLabel.text += "\n最高　守夜 %d:%02d　斩妖 %d　修为 %d" % [
 		int(records["best_time"]) / 60,
 		int(records["best_time"]) % 60,

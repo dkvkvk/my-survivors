@@ -182,6 +182,28 @@ MS_AUTOSTART=1 MS_FEEL_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 18
 wasm 未动（gzip 10.2MB）→ **首载 18.4MB → 11.0MB，省 7.2MB**。
 下一步若还要瘦，就只剩 wasm（占首载 89%）——只能自建引擎模板，见下。
 
+### P7 · 难度系统（寻常 / 凶险 / 修罗）
+`balance.gd::DIFFICULTIES` 一处定义，影响四件事：**怪物血量 / 接触伤害 / 刷怪间隔 / 收益**
+（经验与灵石都乘 `reward`）。低难度不惩罚收益、高难度给正反馈，否则没人愿意往上调。
+
+- 应用点（共 4 处，都在刷怪/结算路径上）：`game.gd::spawn_mob()` 与 `_spawn_boss()` 调
+  `mob.apply_difficulty(hp, dmg)`；`_on_timer_timeout()` 的 `wait_time` 乘 `spawn`；
+  `player.add_xp()` 与 `game.add_run_coins()` 乘 `reward`
+- 存档：复用 `settings["difficulty"]`（不需要改存档结构）；非法 id 自动回退寻常
+- 菜单：`main_menu.gd::_setup_difficulty_picker()`（难度按钮在身份标题左侧，琥珀色高亮当前项）
+- 可见性：HUD 左下与结算界面都写「身份 · 难度」（三个身份只靠配色区分，必须写出来）
+- 判据：`check_settings.gd` 断言按钮数量、写存档、倍率生效、
+  `apply_difficulty` 真的把血量/伤害放大、非法值回退
+- 调参入口：想整体加难就改 `DIFFICULTIES` 的倍率，或把 `DEFAULT_DIFFICULTY` 改成 hard
+
+### 坑 #22：CanvasLayer 没开唯一名 → `%HUD` 找不到；HUD 加标签要避开已有控件
+给 HUD 加「身份 · 难度」标签时踩了两下：
+1. `%HUD` 报 `Node not found`——HUD 是 CanvasLayer 且场景里**没勾 unique_name_in_owner**，
+   要用 `$HUD`（HUD 里的 Label 则都勾了，`%KillLabel` 之类可用）
+2. 第一次把标签放在 y=336 处，正好压在**灵力条**（ManaBar 336..360）上；改到 372 才对
+
+两条都是**截图才发现的**（运行时只在错误日志里露出第一条）。
+
 ### 坑 #20：headless 不派发模拟鼠标事件（点击类断言会假阴性）
 `Input.parse_input_event()` 造出来的鼠标事件在 **headless 下被直接丢弃**——
 带窗口跑能正常点击、headless 跑永远「没切换」。实测对照（同一份脚本）：

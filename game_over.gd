@@ -30,6 +30,8 @@ func show_results(kills: int, survived: float, level: int, coins: int) -> void:
 	]
 	if new_flags["time"] or new_flags["kills"] or new_flags["level"]:
 		%StatsLabel.text += "\n★ 新纪录！ ★"
+	%StatsLabel.text += "\n身份 %s　·　难度 %s" % [
+		Characters.current_def().get("name", "?"), Balance.difficulty_def().get("name", "?")]
 	%StatsLabel.text += "\n最高　守夜 %d:%02d　斩妖 %d　修为 %d" % [
 		int(records["best_time"]) / 60,
 		int(records["best_time"]) % 60,

@@ -36,6 +36,21 @@ func _ready():
 	# 触屏操作（P2b）：只有真有触摸时才存在，桌面键鼠下自毁（不抢输入）
 	add_child(preload("res://touch_controls.gd").new())
 	_boss_timer = Balance.BOSS_FIRST_DELAY  # 妖王倒计时（P4）
+	# 首个刷怪间隔按难度（之后每次超时都会刷新）
+	$Timer.wait_time = float(Balance.WAVES[0]["spawn"]) * Balance.diff("spawn")
+	# 身份与难度：三个身份只靠配色区分（见 HANDOVER 坑 #21），HUD 里明确写出来。
+	# ⚠️ HUD 是 CanvasLayer 且**没开唯一名**，用 $HUD；y 要避开灵力条（336..360）
+	var id_label := Label.new()
+	id_label.name = "IdentityLabel"
+	id_label.offset_left = 24.0
+	id_label.offset_top = 372.0
+	id_label.offset_right = 700.0
+	id_label.offset_bottom = 414.0
+	id_label.add_theme_font_size_override("font_size", 30)
+	id_label.add_theme_color_override("font_color", Color(0.72, 0.92, 0.86))
+	id_label.text = "%s · %s" % [Characters.current_def().get("name", "?"),
+		Balance.difficulty_def().get("name", "?")]
+	$HUD.add_child(id_label)
 	# 开局选法宝（P6）：弹 4 张卡并暂停游戏，选完才正式开打
 	%StartSelectUI.call_deferred("open", player)
 
@@ -131,6 +146,7 @@ func spawn_mob():
 	new_mob.global_position = %PathFollow2D.global_position
 	add_child(new_mob)
 	new_mob.setup(Balance.pick_variant(current_wave))
+	new_mob.apply_difficulty(Balance.diff("mob_hp"), Balance.diff("mob_damage"))
 	new_mob.died.connect(_on_mob_died)
 
 
@@ -138,7 +154,7 @@ func _on_timer_timeout():
 	spawn_mob()
 	# 每次刷怪后按守夜时间刷新更次（难度与怪物组合）
 	current_wave = Balance.current_wave(run_time)
-	$Timer.wait_time = current_wave["spawn"]
+	$Timer.wait_time = float(current_wave["spawn"]) * Balance.diff("spawn")
 
 
 func _on_mob_died(source: String) -> void:
@@ -150,7 +166,8 @@ func _on_mob_died(source: String) -> void:
 
 ## 灵石拾取入口（coin.gd 延迟调用）
 func add_run_coins(amount: int) -> void:
-	run_coins += amount
+	# 难度收益倍率（P7）：高难度给更多灵石，不然没人愿意往上调
+	run_coins += int(round(float(amount) * Balance.diff("reward")))
 	%CoinLabel.text = "灵石 %d" % run_coins
 
 
@@ -161,6 +178,7 @@ func _spawn_boss() -> void:
 	boss.global_position = %PathFollow2D.global_position
 	add_child(boss)
 	boss.setup_boss(boss_kill_count * Balance.BOSS_HP_PER_KILL)
+	boss.apply_difficulty(Balance.diff("mob_hp"), Balance.diff("mob_damage"))
 	boss.died.connect(_on_boss_died)
 	_show_boss_warn()
 

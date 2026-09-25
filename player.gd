@@ -517,7 +517,8 @@ func _physics_process(delta):
 ## 收取经验。够一级就升级并发出信号，游戏主逻辑收到后弹出三选一。
 ## 连升多级时一次结算经验，只弹一次卡（略有优惠，简化处理）。
 func add_xp(amount: int) -> void:
-	xp += amount
+	# 难度收益倍率（P7）：高难度给更多修为
+	xp += int(round(float(amount) * Balance.diff("reward")))
 	if xp < xp_to_next:
 		return
 	while xp >= xp_to_next:
