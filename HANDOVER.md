@@ -152,6 +152,16 @@ MS_AUTOSTART=1 MS_FEEL_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 18
 ⚠️ 设置值的**存取单位要一致**：滑杆存 0~1 浮点，读取侧也按 0~1——一度存成整数百分比，
 读取侧 clamp 后直接变成 1.0，测试当场抓出来。
 
+### 坑 #16：替换面板收起后游戏永远暂停（法宝位满 + 第 5 把才可达）
+
+`inventory_ui.gd` 的 `ask_replace()` 会 `paused = true`，但 `_close_replace()` 只销毁了面板节点，
+**没有解除暂停、也没隐藏层**——而「替换 → X」和「放弃」两个按钮最后都调它。
+玩家法宝满 4 格时捡第 5 把，点完按钮游戏就永远停在暂停里。
+（P6 时代 4 法宝=4 上限，这面板根本打不开，所以一直没暴露；
+  2026-09-24 加到 6 种法宝后可达，MS_BOT 跑局 4 格满 + 600px 内出现第 5 个掉落时 100% 触发。）
+已修：`_close_replace()` 补 `paused = false; visible = false`，
+并有判据断言（`check_touch.gd`：ask_replace 后 _close_replace 必须解除暂停且隐藏面板）。
+
 ### Web wasm 瘦身配方（需要自建引擎模板，未实施）
 线上 wasm 39.5MB 全是官方 Godot Web 模板。官方模板不带裁剪，想省就得起一份**自建模板**：
 ```bash
@@ -228,6 +238,9 @@ MS_TOUCH=1 MS_TOUCH_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 900 2
 - **真正的死亡窗口是开局 0~60 秒**（17 局里 41% 的死亡都在这段，共同点是只有一把法宝）；
   t>90s 后 0 死亡。人类会回身捡掉落，比机器人好——调难度别只看机器人。
 - 改难度后**必须重跑机器人**对比：\`MS_AUTOSTART=1 MS_BOT=1\`（见 §3），别靠感觉。
+- 随之放宽了开局法宝保底（PITY_KILLS 12→8、PITY_MAX 2→3、PITY_TIME 90→150）：
+  机器人实测开局 30 秒可拿到 3 把、60 秒满 4 把（旧值下 41%~50% 的局死在开局 90 秒内、
+  死时只有一把法宝）。
 
 ### 发正式版（长期可下载）——`release.yml`
 

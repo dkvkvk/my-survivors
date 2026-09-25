@@ -324,6 +324,18 @@ func _close_replace() -> void:
 	if _replace_root != null and is_instance_valid(_replace_root):
 		_replace_root.queue_free()
 	_replace_root = null
+	_pending_id = ""
+	_pending_drop = null
+	# ⚠️ ask_replace 开过暂停，这里必须解除——否则玩家点完「替换/放弃」
+	# 游戏就永远停在暂停里（法宝位满 + 第 5 把才可达，2026-09-24 机器人跑局才发现）
+	get_tree().paused = false
+	visible = false
+	_pending_id = ""
+	_pending_drop = null
+	# ⚠️ ask_replace 开过暂停，这里必须解除——否则玩家点完「替换/放弃」
+	# 游戏就永远停在暂停里（法宝位满 + 第 5 把才可达，2026-09-24 机器人跑局才发现）
+	get_tree().paused = false
+	visible = false
 
 
 func _on_replace_pick(index: int) -> void:

@@ -150,6 +150,25 @@ func _check_utils() -> void:
 	if _touch._portrait == null:
 		_fail("没有竖屏提示层")
 
+	# 替换面板死锁回归：法宝位满时捡第 5 把会弹面板，收起时必须解除暂停
+	# 凑满 4 格（不能用 while：已持有的法宝 add_weapon 会返回 true 但不增格，会死循环）
+	_player.add_weapon("chain_lightning")
+	_player.add_weapon("boomerang")
+	var drop5 = load("res://weapon_drop.tscn").instantiate()
+	_game.add_child(drop5)
+	drop5.setup("mine")
+	drop5.global_position = _player.global_position
+	var inv2 = _game.get_node_or_null("InventoryUI")
+	inv2.ask_replace("mine", drop5)
+	if not _game.get_tree().paused:
+		_fail("替换面板没有暂停游戏")
+	inv2._close_replace()
+	if _game.get_tree().paused:
+		_fail("关闭替换面板后游戏仍在暂停（死锁）")
+	if inv2.visible:
+		_fail("关闭替换面板后面板仍然可见")
+	_player.drop_weapon("chain_lightning")
+
 	# 拾取：造一个玩家没持有的法宝，强制进入"提示可见"状态，再点拾取按钮
 	if _player.has_weapon("aura"):
 		_fail("测试前置不成立：玩家已持有 aura")

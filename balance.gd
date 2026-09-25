@@ -223,9 +223,9 @@ const SKILL_BOOK_DROP_CHANCE := 0.02 # 神通残卷
 
 # 法宝获取（P6 调整）：原来 4% 太稀，开局两分钟一把都掉不出来（实测站桩 3 分钟 66 斩妖 = 0 把）。
 # 现在提高基础概率 + 开局保底，并且限制地上同时存在的把数，避免满地掉落物堆积。
-const WEAPON_PITY_TIME := 90.0   # 开局这段时间内启用保底
-const WEAPON_PITY_KILLS := 12    # 每积累这么多次斩妖还没掉够法宝就必掉一把
-const WEAPON_PITY_MAX := 2       # 保底最多给几把
+const WEAPON_PITY_TIME := 150.0  # 开局这段时间内启用保底（机器人实测 41%~50% 死亡都在开局 90 秒内、死时只有一把法宝）
+const WEAPON_PITY_KILLS := 8     # 每积累这么多次斩妖还没掉够法宝就必掉一把（原 12：开局根本等不起）
+const WEAPON_PITY_MAX := 3       # 保底最多给几把（原 2）
 const WEAPON_DROP_MAX_GROUND := 8 # 地上同时最多留几把（超了回收最早的一把）
 # 开局选法宝：本命飞剑是固定基础法宝，选它 = 起手直接给到这个等级
 const START_WEAPON_LEVEL := 3
@@ -348,4 +348,4 @@ static func xp_for_level(level: int) -> int:
 	# ⚠️ 旧版是 min(3+2L, 25)：25 封顶意味着后期每 25 点经验就升一级，
 	# 机器人实测 8 分钟升到 300 级（≈每秒弹一次三选一，属性也跟着爆炸）。
 	# 新曲线下 480 秒约 55 级、900 秒约 75 级（MS_BOT 实测）。
-	return int(3.0 + level * 2.0 + pow(float(level), 1.7) * 0.18)
+	return int(3.0 + level * 2.0 + pow(float(level), 1.7) * 0.12)
