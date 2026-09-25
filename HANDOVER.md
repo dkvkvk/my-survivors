@@ -162,6 +162,22 @@ MS_AUTOSTART=1 MS_FEEL_PROBE=1 "$G" --path /e/games/my-survivors --quit-after 18
 已修：`_close_replace()` 补 `paused = false; visible = false`，
 并有判据断言（`check_touch.gd`：ask_replace 后 _close_replace 必须解除暂停且隐藏面板）。
 
+### 包体优化记录（2026-09-24）：先量再改，别猜
+
+**实测拆解线上首载**（这一步最关键，之前一直没做）：
+- `index.wasm` 原始 39.5MB → **gzip 传输 10.2MB**（引擎代码压缩率 0.26）
+- `index.pck` 原始 8.07MB → gzip 传输 8.18MB（**几乎不压缩**：里面全是已压缩的贴图/视频）
+- 结论：**真实首载 ≈ 18.4MB**（不是 47MB），且 pck 值得动手、wasm 只能自建模板
+
+**pck 里的大头只有 4 张图**（其余全部资产合计 < 300KB）：
+- 三张全屏背景默认是**无损**导入 → `.ctex` 合计 5.98MB；改成 `compress/mode=1`（lossy WebP）
+  + `compress/lossy_quality=0.9` 后 → **541KB**（menu 2200→128KB / gameover 1821→182KB / victory 1956→231KB）
+- `cover.png`（商店封面）**全项目零引用** → 加进两个导出预设的 `exclude_filter`，省 ~1.8MB
+- ⚠️ 关键认知：**pck 里放的是导入后的 `.ctex`，不是源 PNG**——改源图大小没有用，
+  要改 `.import` 里的 `compress/mode`。想再瘦就先 `ls -la .godot/imported/*.ctex` 看真凶。
+
+预期：pck 8.07MB → ~2.6MB，Web 首载 18.4MB → ~13MB。
+
 ### Web wasm 瘦身配方（需要自建引擎模板，未实施）
 线上 wasm 39.5MB 全是官方 Godot Web 模板。官方模板不带裁剪，想省就得起一份**自建模板**：
 ```bash
