@@ -61,6 +61,15 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 | **L0 判定** | **verdict=pass，11 项全 PASS**（@@characters/settings-ui/achievements/asset-contract/import-hygiene/sprite-refs/touch-controls/hero-columns/fx-entry/font-coverage@@）——本项目首次全绿 | awaiting-human |
 | 剑修观感 | 提亮 1.12x + 提饱和 1.06x + 1px 暗描边（复用 @@tools/postprocess_mobs.py@@，新增 @@--files@@ 支持任意精灵表） | awaiting-human |
 | 神通特效补齐 9 处 | 蓄雷引弧（原来无特效）/十方雷网四方落雷/惊雷剑引双雷/剑环外放旋斩/符阵合围连环炸/焚地火域起手爆环/穿云巨梭拖尾/万剑归宗星芒/御剑疾影用上一直没人用的 @@slash_arc@@ | awaiting-human |
+### 2026-10-01 · 选卡界面打磨 + 签名法宝起手强度 → awaiting-human
+
+| 项 | 结果 | 状态 |
+|---|---|---|
+| 选卡头像一致性 | 96×96 契约不变，但按内容紧裁 + 整数倍放大到约 88px 高：框内人物高度 47~54px（占框 56~75%），四个一致；宽度差异来自角色体型本身（丹修敦实 / 剑修细长） | awaiting-human |
+| 选卡配色一致性 | 每卡用角色主题色描边（`characters.gd` 新增 `accent`：青碧 / 赭黄 / 月白 / 玉绿），选中＝亮版、名字同色；右上角加签名法宝徽章（守山人用本命飞剑当招牌） | awaiting-human |
+| 签名法宝起手强度 | `balance.gd` 新增 `BASE_WEAPON_LEVEL` 与 `SIGNATURE_LEVEL`：签名法宝 1 级 → 2 级；守山人本命飞剑 3 → 4 阶补偿 | awaiting-human |
+| 实测发牌 | 守山人［本命飞剑 Lv4］/ 剑修［本命飞剑 Lv3 + 周天剑环 Lv2］/ 丹修［本命飞剑 Lv3 + 离火法环 Lv2］ | awaiting-human |
+| L0 判定 | **verdict=pass 全绿**。过程中先被 `asset-contract` 抓到「头像必须 96×96」、被 `settings-ui` 抓到「名字压住徽章」，两处都是按判据修正，没有放宽判据 | awaiting-human |
 > 本轮未修改"待办（人写）"列；判定脚本与规格表未改动（边界 must-not）。
 
 ### 2026-09-22 · L0 判据增强：script-parse
