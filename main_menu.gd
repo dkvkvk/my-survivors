@@ -209,8 +209,8 @@ func _setup_character_picker() -> void:
 		var ppath := "res://assets/ui/portrait_%s.png" % id
 		if ResourceLoader.exists(ppath):
 			var pic := TextureRect.new()
-			pic.position = Vector2(10, 16)
-			pic.size = Vector2(50, 50)
+			pic.position = Vector2(8, 22)
+			pic.size = Vector2(58, 72)
 			pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			# ⚠️ 不设 expand_mode 的话，TextureRect 的最小尺寸 = 贴图尺寸（96x96），
 			# 我设的 50x50 会被顶大，头像就压到右边的名字和描述上（2026-09-24 截图发现）
@@ -223,7 +223,7 @@ func _setup_character_picker() -> void:
 		nm.set_anchors_preset(Control.PRESET_FULL_RECT)
 		nm.offset_left = 70
 		nm.offset_top = 10
-		nm.offset_right = -10
+		nm.offset_right = -56  # 让开右上角的签名法宝徽章（它也是 TextureRect，判定会拿它比重叠）
 		nm.offset_bottom = -64
 		nm.text = str(def["name"])
 		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -239,7 +239,7 @@ func _setup_character_picker() -> void:
 		# 写成负值 = 把整块文字推到卡片外面（会压住标题和上一行）——这正是糅杂的根因。
 		ds.offset_top = 56
 		ds.offset_bottom = -6
-		ds.offset_left = 66   # 让开左边的头像栏（头像占 10..60），否则文字会压在人物身上
+		ds.offset_left = 74   # 让开左边的头像栏（头像占 8..66），否则文字会压在人物身上
 		ds.offset_right = -10
 		ds.text = str(def["desc"])
 		ds.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -250,6 +250,34 @@ func _setup_character_picker() -> void:
 		ds.add_theme_color_override("font_color", Color(0.78, 0.9, 0.95))
 		ds.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		card.add_child(ds)
+		# 签名法宝徽章（右上角）：让「选角色即选武器」一眼可见
+		# 守山人没有签名法宝，用本命飞剑当招牌
+		var sig: String = str(def.get("signature_weapon", ""))
+		if sig == "":
+			sig = "shuriken"
+		var acc: Color = def.get("accent", Color(0.45, 0.95, 1.0))
+		var disk := Panel.new()
+		disk.position = Vector2(CHAR_CARD_W - 46.0, 8.0)
+		disk.size = Vector2(38.0, 38.0)
+		var dsb := StyleBoxFlat.new()
+		dsb.bg_color = Color(0.04, 0.06, 0.09, 0.88)
+		dsb.border_color = acc
+		dsb.set_border_width_all(2)
+		dsb.set_corner_radius_all(19)
+		disk.add_theme_stylebox_override("panel", dsb)
+		disk.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card.add_child(disk)
+		var badge := TextureRect.new()
+		badge.position = Vector2(CHAR_CARD_W - 42.0, 12.0)
+		badge.size = Vector2(30.0, 30.0)
+		badge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		badge.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		badge.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var ipath: String = str(Weapons.get_def(sig).get("icon", ""))
+		if ipath != "" and ResourceLoader.exists(ipath):
+			badge.texture = load(ipath)
+		card.add_child(badge)
 		_char_cards.append({"id": id, "card": card, "nm": nm, "ds": ds})
 	_refresh_character_picker()
 
@@ -267,20 +295,22 @@ func _refresh_character_picker() -> void:
 		var card: Button = c["card"]
 		var sb := StyleBoxFlat.new()
 		sb.bg_color = Color(0.07, 0.11, 0.15, 0.9) if sel else Color(0.05, 0.07, 0.1, 0.55)
-		sb.border_color = Color(0.45, 0.95, 1.0, 0.95) if sel else Color(0.3, 0.45, 0.55, 0.5)
+		var acc: Color = Characters.get_def(str(c["id"])).get("accent", Color(0.45, 0.95, 1.0))
+		sb.border_color = acc if sel else Color(acc.r * 0.42, acc.g * 0.42, acc.b * 0.42, 0.6)
 		sb.set_border_width_all(4 if sel else 2)
 		sb.set_corner_radius_all(10)
 		card.add_theme_stylebox_override("normal", sb)
 		var sbh := StyleBoxFlat.new()
 		sbh.bg_color = Color(0.09, 0.14, 0.19, 0.92) if sel else Color(0.07, 0.11, 0.15, 0.7)
-		sbh.border_color = Color(0.45, 0.95, 1.0, 1.0) if sel else Color(0.3, 0.45, 0.55, 0.6)
+		sbh.border_color = acc if sel else Color(acc.r * 0.6, acc.g * 0.6, acc.b * 0.6, 0.75)
 		sbh.set_border_width_all(4 if sel else 2)
 		sbh.set_corner_radius_all(10)
 		card.add_theme_stylebox_override("hover", sbh)
 		card.add_theme_stylebox_override("pressed", sbh)
 		card.add_theme_stylebox_override("focus", sb)
+		var acc2: Color = Characters.get_def(str(c["id"])).get("accent", Color(1, 0.92, 0.6))
 		(c["nm"] as Label).add_theme_color_override("font_color",
-			Color(1, 0.92, 0.6) if sel else Color(0.75, 0.82, 0.9))
+			acc2.lightened(0.25) if sel else Color(0.75, 0.82, 0.9))
 		(c["ds"] as Label).modulate.a = 1.0 if sel else 0.55
 
 

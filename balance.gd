@@ -264,8 +264,12 @@ const WEAPON_PITY_TIME := 150.0  # 开局这段时间内启用保底（机器人
 const WEAPON_PITY_KILLS := 8     # 每积累这么多次斩妖还没掉够法宝就必掉一把（原 12：开局根本等不起）
 const WEAPON_PITY_MAX := 3       # 保底最多给几把（原 2）
 const WEAPON_DROP_MAX_GROUND := 8 # 地上同时最多留几把（超了回收最早的一把）
-# 开局选法宝：本命飞剑是固定基础法宝，选它 = 起手直接给到这个等级
+# 起手等级（P8 武器随角色）：
+#   BASE_WEAPON_LEVEL  本命飞剑默认起手等级（守山人 4、其余 3，逐角色可覆盖）
+#   SIGNATURE_LEVEL    签名法宝起手等级——1 级的剑环只有 1 把剑、法环几乎贴脸，手感像没给
 const START_WEAPON_LEVEL := 3
+const BASE_WEAPON_LEVEL := 3
+const SIGNATURE_LEVEL := 2
 
 # 法宝被动（P6 模型 B）：法宝 = 被动效果 + 提供技能，**被动等级 = 法宝等级**。
 # 本命飞剑（被动=自动投掷）：每 WEAPON_SHURIKEN_LEVEL_STEP 级多 1 发弹丸、+1 伤害；射速线性提升

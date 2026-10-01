@@ -122,6 +122,12 @@ func apply_start_weapon(id: String) -> void:
 ## 签名法宝由 _apply_character() 按身份自带，这里只补一句提示。
 func apply_character_signature() -> void:
 	apply_start_weapon("shuriken")
+	# 本命飞剑的起手等级逐角色可覆盖（守山人 4 阶，补它没有签名法宝的亏）
+	var blv: int = int(_char.get("base_weapon_level", Balance.BASE_WEAPON_LEVEL))
+	var bw: Dictionary = get_weapon("shuriken")
+	if not bw.is_empty() and blv > 0:
+		bw["level"] = blv
+		_apply_weapon_passive("shuriken")
 	var sig := String(_char.get("signature_weapon", ""))
 	if sig != "":
 		Juice.damage_number(get_parent(), global_position + Vector2(0, -156),
@@ -484,6 +490,11 @@ func _apply_character() -> void:
 	var sig: String = str(_char.get("signature_weapon", ""))
 	if sig != "":
 		add_weapon(sig)
+		var slv: int = int(_char.get("signature_level", Balance.SIGNATURE_LEVEL))
+		var sw: Dictionary = get_weapon(sig)
+		if not sw.is_empty() and slv > 0:
+			sw["level"] = slv
+			_apply_weapon_passive(sig)
 
 
 func character_name() -> String:

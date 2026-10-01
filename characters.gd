@@ -19,16 +19,20 @@ const LIST := [
 	{
 		"id": "shou_shan",
 		"name": "守山人",
-		"desc": "三代守夜，剑案传家。身板与出手都均衡。",
+		"desc": "三代守夜，剑案传家。本命飞剑起手 4 阶，身板与出手都均衡，法宝位也更空。",
 		"tint": Color(1, 1, 1),
+		"accent": Color(0.33, 0.88, 0.78),
 		"sheet": "res://assets/hero/ninja_sheet.png",
 		"signature_weapon": "",
+		"base_weapon_level": 4,
+		"signature_level": 0,
 		"health_mult": 1.0, "speed_mult": 1.0, "fire_rate_mult": 1.0, "mana_max_mult": 1.0,
 	},
 	{
 		"id": "fu_xiu",
 		"name": "符修",
 		"desc": "万宝楼掌柜的弟子。随身带符阵，灵力深厚，但身板脆。",
+		"accent": Color(0.91, 0.72, 0.29),
 		# 三个身份共用主角表时只能靠配色区分——调太淡玩家会说"人物没法切换"，
 		# 所以这里用**明显的换色**（2026-09-24 用户反馈后加强）；有专属表后 tint 自动失效
 		"tint": Color(1.0, 0.58, 0.22),
@@ -40,6 +44,7 @@ const LIST := [
 		"id": "jian_xiu",
 		"name": "剑修",
 		"desc": "青冥山弃徒。剑环护身、出手极快，脚下却慢半拍。",
+		"accent": Color(0.81, 0.91, 0.88),
 		"tint": Color(0.52, 0.86, 1.0),
 		"sheet": "res://assets/hero/char_jian_sheet.png",
 		"signature_weapon": "orbit_blade",
@@ -49,6 +54,7 @@ const LIST := [
 		"id": "dan_xiu",
 		"name": "丹修",
 		"desc": "青冥观丹房看火的道人。三昧真火缠身，最耐打，出手偏慢。",
+		"accent": Color(0.45, 0.78, 0.55),
 		"tint": Color(0.62, 1.0, 0.72),
 		"sheet": "res://assets/hero/char_dan_sheet.png",
 		"signature_weapon": "aura",
