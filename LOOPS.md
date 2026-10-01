@@ -52,7 +52,15 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 | 第 4 个身份「丹修」 | 已加（签名法宝＝离火法环，生命 ×1.3 / 攻速 ×0.9）；行走表待生成（提示词 B3-a/b/c） | awaiting-human |
 | 角色专属行走表 | `hero.gd` 已接：有专属表就用它且不调色，没有则退回共用表 + tint；丹修头像已补（暂用共用表正面格 + 绿调） | awaiting-human |
 | 字体子集 | 新文案引入 10 个新字（丹/签/观/房/看/耐/打/偏/缠/名）→ 跑 `python tools/subset_font.py` 重建（515 字 / 0.1MB），font-coverage 恢复 **PASS** | done |
-| L0 `settings-ui` **FAIL** | `tools/qa/check_settings.gd` 里**写死 3 个身份**（报「身份可选数量 4 != 3」）。按 LOOPS 约定我**没有改判据**——**需要人决定**：建议把期望值改成从 `Characters.LIST` 取（以后加身份不用再改），或直接改成 4 | **awaiting-human（需人改判据）** |
+| L0 `settings-ui` | ✅ 用户 2026-10-01 授权后改：判据不再写死 3，改为与 `Characters.LIST.size()` 比对（**接上唯一事实来源，不是放宽**）。判定 **verdict=pass 全绿** | done |
+### 2026-10-01 · 判据接事实来源 + 剑修观感 + 神通特效 → awaiting-human
+
+| 项 | 结果 | 状态 |
+|---|---|---|
+| L0 @@settings-ui@@ | 原来写死「身份卡 = 3」，加第 4 个身份后必然误报。改为与 @@Characters.LIST.size()@@ 比对 | done（人已授权） |
+| **L0 判定** | **verdict=pass，11 项全 PASS**（@@characters/settings-ui/achievements/asset-contract/import-hygiene/sprite-refs/touch-controls/hero-columns/fx-entry/font-coverage@@）——本项目首次全绿 | awaiting-human |
+| 剑修观感 | 提亮 1.12x + 提饱和 1.06x + 1px 暗描边（复用 @@tools/postprocess_mobs.py@@，新增 @@--files@@ 支持任意精灵表） | awaiting-human |
+| 神通特效补齐 9 处 | 蓄雷引弧（原来无特效）/十方雷网四方落雷/惊雷剑引双雷/剑环外放旋斩/符阵合围连环炸/焚地火域起手爆环/穿云巨梭拖尾/万剑归宗星芒/御剑疾影用上一直没人用的 @@slash_arc@@ | awaiting-human |
 > 本轮未修改"待办（人写）"列；判定脚本与规格表未改动（边界 must-not）。
 
 ### 2026-09-22 · L0 判据增强：script-parse

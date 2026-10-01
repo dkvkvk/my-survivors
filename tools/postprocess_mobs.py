@@ -54,9 +54,14 @@ def main():
     ap.add_argument("--sat", type=float, default=1.08)
     ap.add_argument("--outline", action="store_true", default=True)
     ap.add_argument("--no-outline", dest="outline", action="store_false")
+    # 默认处理 assets/mobs 下全部；也可显式指定文件（角色行走表等同样适用）
+    ap.add_argument("--files", nargs="*", default=None)
     a = ap.parse_args()
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    files = sorted(glob.glob(os.path.join(root, "assets/mobs/*.png")))
+    if ap.parse_args().files:
+        files = [f if os.path.isabs(f) else os.path.join(root, f) for f in a.files]
+    else:
+        files = sorted(glob.glob(os.path.join(root, "assets/mobs/*.png")))
     for f in files:
         polish(f, a.bright, a.sat, a.outline)
         print("  polish %-34s bright=%.2f sat=%.2f outline=%s" % (

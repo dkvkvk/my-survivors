@@ -3,7 +3,7 @@ extends SceneTree
 ## 设置菜单（P7）+ 身份选择器 的结构/持久化回归：
 ##   1) 主菜单里有 SettingsUI 层，含 3 个滑杆（抖动/音乐/音效）
 ##   2) 拖动滑杆会写入存档并实时生效（Audio.music_volume / VFX.shake_scale）
-##   3) 身份选择器有 3 张卡，点击会写入存档
+##   3) 身份选择器张数 = Characters.LIST.size()，点击会写入存档
 ## 结束时还原测试前的设置值。
 ## 用法：--headless --script res://tools/qa/check_settings.gd，末行 SETTINGS PASS / FAIL
 ## ⚠️ --script 模式下编译期看不到自动加载名（Audio/VFX），所以测试里用节点路径取。
@@ -88,8 +88,10 @@ func _process(_delta: float) -> bool:
 	if sliders.size() != 3:
 		print("SETTINGS FAIL: 滑杆数量 %d != 3" % sliders.size())
 		return true
-	if _menu._char_cards.size() != 3:
-		print("SETTINGS FAIL: 身份选择卡数量 %d != 3" % _menu._char_cards.size())
+	# 身份张数从唯一事实来源取（原来写死 3，加第 4 个身份「丹修」后必然误报）
+	var want_chars: int = Characters.LIST.size()
+	if _menu._char_cards.size() != want_chars:
+		print("SETTINGS FAIL: 身份选择卡数量 %d != %d" % [_menu._char_cards.size(), want_chars])
 	# 选卡头像（从用户交付的方向表抽出的正面格）
 	for c in _menu._char_cards:
 		var has_pic := false

@@ -341,6 +341,7 @@ func _run_skill_effect(id: String) -> void:
 	match id:
 		"shuriken_burst":
 			VFX.shockwave(global_position, 210.0, VFX.C_CYAN, 0.3, 6.0)
+			VFX.burst(global_position, 10, VFX.C_CYAN, 380.0, 0.5, "star", 1.8, 160.0)
 			VFX.screen_flash(VFX.C_CYAN, 0.10, 0.14)
 			_shuriken_burst()
 		"blade_storm":
@@ -362,20 +363,31 @@ func _run_skill_effect(id: String) -> void:
 			_dash_timer = Balance.SKILL_DASH_TIME
 			_dash_hits = {}
 			VFX.shockwave(global_position, 130.0, VFX.C_CYAN, 0.26, 6.0)
+			VFX.slash_arc(global_position, velocity.angle(), 78.0, VFX.C_CYAN, 0.22, 1.9)
 			VFX.trail(self, VFX.C_CYAN, 16.0, 14, 0.22)
 			Audio.play("res://sounds/shoot.wav", false, 0.75, 0.3)
 		"ring_release":
 			%OrbitBlades.release_blades(Balance.SKILL_RING_DAMAGE + bullet_damage - 1)
+			VFX.spin_slash(global_position, Balance.ORBIT_BLADE_RADIUS + 40.0, VFX.C_GOLD, 5, 0.4)
 			VFX.shockwave(global_position, Balance.ORBIT_BLADE_RADIUS + 60.0, VFX.C_GOLD, 0.3, 7.0)
+			VFX.burst(global_position, 8, VFX.C_GOLD, 320.0, 0.45, "spark", 1.8, 420.0)
 		"fire_field":
+			VFX.shockwave(global_position, Balance.SKILL_FIRE_RADIUS * 0.8, VFX.C_ORANGE, 0.3, 6.0)
 			_spawn_fire_field(Balance.SKILL_FIRE_DAMAGE, Balance.SKILL_FIRE_RADIUS, "aura")
 		"charge_storm":
+			VFX.shockwave(global_position, 150.0, VFX.C_BLUE, 0.35, 6.0, true)
+			VFX.shockwave(global_position, 90.0, VFX.C_CYAN, 0.25, 4.0)
+			VFX.burst(global_position, 10, VFX.C_BLUE, 300.0, 0.5, "spark", 1.8, -60.0)
+			VFX.screen_flash(VFX.C_BLUE, 0.14, 0.16)
 			%ChainLightning.overcharge()
 		"pierce_shuttle":
 			%Boomerang.cast_pierce()
+			VFX.trail(%Boomerang, VFX.C_GOLD, 14.0, 12, 0.2)
 			VFX.shockwave(global_position, 120.0, VFX.C_GOLD, 0.24, 6.0)
 		"detonate_all":
 			%Mine.detonate_all()
+			VFX.shockwave(global_position, 200.0, VFX.C_ORANGE, 0.35, 8.0, true)
+			VFX.burst(global_position, 12, VFX.C_GOLD, 400.0, 0.55, "star", 1.8, 300.0)
 			VFX.screen_flash(VFX.C_ORANGE, 0.16, 0.2)
 		# ---------- P7：融合神通（两把法宝的效果叠在一起放）----------
 		"inferno_ring":
@@ -386,6 +398,8 @@ func _run_skill_effect(id: String) -> void:
 		"storm_volley":
 			_shuriken_burst()
 			%ChainLightning.cast_ultimate()
+			VFX.thunder_strike(global_position + Vector2(-60, -10), VFX.C_BLUE)
+			VFX.thunder_strike(global_position + Vector2(60, 10), VFX.C_BLUE)
 			VFX.screen_flash(VFX.C_BLUE, 0.24, 0.22)
 		"whirlwind_volley":
 			VFX.shockwave(global_position, 240.0, VFX.C_CYAN, 0.34, 7.0)
@@ -394,6 +408,9 @@ func _run_skill_effect(id: String) -> void:
 			%Boomerang.cast_ultimate()
 		"thunder_net":
 			VFX.shockwave(global_position, Balance.SKILL_THUNDERNET_RADIUS + 60.0, VFX.C_GOLD, 0.4, 9.0, true)
+			for _i in 4:
+				var _a: float = TAU * float(_i) / 4.0 + PI * 0.25
+				VFX.thunder_strike(global_position + Vector2.RIGHT.rotated(_a) * Balance.SKILL_THUNDERNET_RADIUS * 0.55, VFX.C_GOLD)
 			VFX.screen_flash(VFX.C_GOLD, 0.18, 0.2)
 			%Mine.cast_ultimate()
 
