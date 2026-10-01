@@ -96,6 +96,9 @@ P6 法宝/技能系统（进行中，权威设计见 `WEAPON_SYSTEM.md`）：
 
 ## 3. 验证流程（重要，别跳过）
 
+> ⚠️ **注入 driver 到 tscn 后，还原要用备份，别用 @@git checkout@@**：@@git checkout survivors_game.tscn@@ 会把该文件里**所有未提交的改动**一起回滚（2026-09-22 与 2026-10-01 各踩一次，地面压暗 modulate 就被吞过）。正确姿势：注入前 @@cp@@ 备份，还原时 @@cp@@ 回来；或者先提交再做截图验证。
+
+
 ### headless 快检
 ```bash
 G="/d/Downloads/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.exe"
