@@ -33,7 +33,9 @@ func _ready():
 	_sheet = _pick_sheet()
 	_sprite = AnimatedSprite2D.new()
 	_sprite.sprite_frames = _build_frames()
-	_sprite.scale = Vector2.ONE * SPRITE_SCALE * (float(FRAME) / float(_cell))
+	# 归一缩放：格子尺寸归一 + 每个身份自己的 sprite_mul（把四人的体格拉到一致，见 characters.gd）
+	var mul: Vector2 = Characters.current_def().get("sprite_mul", Vector2.ONE)
+	_sprite.scale = Vector2.ONE * SPRITE_SCALE * (float(FRAME) / float(_cell)) * mul
 	_sprite.position = Vector2(0, -22)
 	# 身份外观（P8）：有专属行走表就用它（不调色）；素材没到位时退回共用表 + 配色 tint 顶着
 	var own := _sheet != SHEET

@@ -27,6 +27,7 @@ const LIST := [
 		"base_weapon_level": 4,
 		"signature_level": 0,
 		"health_mult": 1.0, "speed_mult": 1.0, "fire_rate_mult": 1.0, "mana_max_mult": 1.0,
+		"sprite_mul": Vector2(1.20, 1.17),  # 归一人物大小（见 LOOPS: 四人一致性）
 	},
 	{
 		"id": "fu_xiu",
@@ -39,6 +40,7 @@ const LIST := [
 		"sheet": "res://assets/hero/char_fu_sheet.png",
 		"signature_weapon": "mine",
 		"health_mult": 0.75, "speed_mult": 1.0, "fire_rate_mult": 1.0, "mana_max_mult": 1.4,
+		"sprite_mul": Vector2(1.30, 1.12),  # 归一人物大小（见 LOOPS: 四人一致性）
 	},
 	{
 		"id": "jian_xiu",
@@ -49,6 +51,7 @@ const LIST := [
 		"sheet": "res://assets/hero/char_jian_sheet.png",
 		"signature_weapon": "orbit_blade",
 		"health_mult": 1.0, "speed_mult": 0.9, "fire_rate_mult": 1.25, "mana_max_mult": 1.0,
+		"sprite_mul": Vector2(0.93, 0.90),  # 归一人物大小（见 LOOPS: 四人一致性）
 	},
 	{
 		"id": "dan_xiu",
@@ -59,6 +62,7 @@ const LIST := [
 		"sheet": "res://assets/hero/char_dan_sheet.png",
 		"signature_weapon": "aura",
 		"health_mult": 1.3, "speed_mult": 0.95, "fire_rate_mult": 0.9, "mana_max_mult": 1.0,
+		"sprite_mul": Vector2(0.84, 1.00),  # 归一人物大小（见 LOOPS: 四人一致性）
 	},
 ]
 
