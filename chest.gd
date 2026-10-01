@@ -12,6 +12,7 @@ var _t := 0.0
 
 
 func _ready():
+	add_to_group("chests")  # 掉落指示用
 	collision_layer = 0
 	collision_mask = 1
 	monitorable = false
