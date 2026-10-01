@@ -521,7 +521,12 @@ func drop_weapon() -> void:
 		ids.append(w["id"])
 	var drop = preload("res://weapon_drop.tscn").instantiate()
 	get_parent().add_child(drop)
-	drop.global_position = global_position + Vector2(randf_range(-16, 16), randf_range(-16, 16))
+	var drop_pos := global_position + Vector2(randf_range(-16, 16), randf_range(-16, 16))
+	# 开局把法宝掉在玩家附近：本命飞剑是远程武器，妖常死在 400~1300px 外，
+	# 首把法宝掉那么远等于没掉（机器人会笔直穿过妖群去捡 -> 1/3 的开局就这么死）。
+	if player != null and game != null and "run_time" in game and float(game.run_time) < Balance.WEAPON_DROP_NEAR_TIME:
+		drop_pos = player.global_position + Vector2.from_angle(randf() * TAU) * randf_range(90.0, Balance.WEAPON_DROP_NEAR_RADIUS)
+	drop.global_position = drop_pos
 	drop.setup(ids[randi() % ids.size()])
 	if game != null and "weapon_drops" in game:
 		game.weapon_drops += 1

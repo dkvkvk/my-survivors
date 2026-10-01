@@ -139,6 +139,10 @@ func weapon_pity_ready() -> bool:
 		return false
 	if weapon_drops >= Balance.WEAPON_PITY_MAX:
 		return false
+	# 时间兜底（2026-10-01）：开局这么久还没掉出第一把，就必掉——不看杀了几只。
+	# 起因：机器人实测有 1/3 的开局在 18~25 秒死亡，死时只有本命飞剑。
+	if weapon_drops == 0 and run_time >= Balance.WEAPON_PITY_FIRST_TIME:
+		return true
 	return kill_count >= (weapon_drops + 1) * Balance.WEAPON_PITY_KILLS
 
 

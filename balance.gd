@@ -261,8 +261,12 @@ const SKILL_BOOK_DROP_CHANCE := 0.02 # 神通残卷
 # 法宝获取（P6 调整）：原来 4% 太稀，开局两分钟一把都掉不出来（实测站桩 3 分钟 66 斩妖 = 0 把）。
 # 现在提高基础概率 + 开局保底，并且限制地上同时存在的把数，避免满地掉落物堆积。
 const WEAPON_PITY_TIME := 150.0  # 开局这段时间内启用保底（机器人实测 41%~50% 死亡都在开局 90 秒内、死时只有一把法宝）
-const WEAPON_PITY_KILLS := 8     # 每积累这么多次斩妖还没掉够法宝就必掉一把（原 12：开局根本等不起）
-const WEAPON_PITY_MAX := 3       # 保底最多给几把（原 2）
+const WEAPON_PITY_KILLS := 6     # 每积累这么多次斩妖还没掉够法宝就必掉一把（8 -> 6，2026-10-01）
+const WEAPON_PITY_MAX := 3       # 保底最多给几把（原 2）。注意别再降 KILLS：MAX=3 时降到 4 会在 12 斩妖内
+                                 # 把 3 把保底全发完，中期就没 loot 期待感了（实测机器人 20 斩妖就该有 2~3 把）
+const WEAPON_PITY_FIRST_TIME := 20.0  # 时间兜底：开局这么久还没掉出第一把就必掉（不看杀几只）
+const WEAPON_DROP_NEAR_TIME := 60.0   # 开局这段时间内，法宝掉在玩家附近（而不是怪死的地方）
+const WEAPON_DROP_NEAR_RADIUS := 190.0  # 上式用的半径上限（px）
 const WEAPON_DROP_MAX_GROUND := 8 # 地上同时最多留几把（超了回收最早的一把）
 # 起手等级（P8 武器随角色）：
 #   BASE_WEAPON_LEVEL  本命飞剑默认起手等级（守山人 4、其余 3，逐角色可覆盖）
