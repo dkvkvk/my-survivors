@@ -136,6 +136,31 @@ func apply_character_signature() -> void:
 
 
 ## 丢弃法宝（替换面板用）：同时卸下它的被动效果
+## 在指定槽位替换法宝（2026-10-01 修）：新法宝**顶到原来的位置**，而不是追加到末尾。
+## 起因：乾坤袋里替换法宝原本是 drop + add，add 把新法宝追加到末尾 -> 法宝顺序变了
+## -> _sync_skill_slots() 按顺序重映射 -> 玩家按键 1 不再是它、原来的技能也"没了"（用户实测报告）。
+func replace_weapon_at(index: int, new_id: String) -> bool:
+	if index < 0 or index >= weapons.size():
+		return false
+	var def: Dictionary = Weapons.get_def(new_id)
+	if def.is_empty():
+		return false
+	if has_weapon(new_id):
+		return false
+	var old_id: String = str(weapons[index]["id"])
+	_clear_weapon_passive(old_id)
+	var skills: Array = def.get("skills", [])
+	weapons[index] = {
+		"id": new_id,
+		"level": 1,
+		"active_skill": skills[0] if skills.size() > 0 else "",
+		"kills": 0,
+	}
+	_apply_weapon_passive(new_id)
+	_sync_skill_slots()
+	return true
+
+
 func drop_weapon(id: String) -> void:
 	for i in weapons.size():
 		if weapons[i]["id"] == id:

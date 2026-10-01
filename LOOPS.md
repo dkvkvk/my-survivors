@@ -121,6 +121,17 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 | **P3 真问题** | `audio.gd` 的 `queue` **原来无上限** ✗：12 个 player 全忙时音效会一直堆积，之后「迟到地」一次性播出（听感像卡带）。现加 `MAX_QUEUE=24`，超了丢最旧的 | done |
 | 验证 | 机器人 3/3 局活过 60 秒；实测 `BOTDROP t=30s 累计掉落=5 已拾取=3 地上=0`（改前同时刻只有 1 把） | done |
 | L0 判定 | **verdict=pass**。过程中 `font-coverage` 抓到我新加的中文（迟到音/卡带/机器人作死等）不在字体子集 → 跑 `subset_font.py` 重建（516 字）后转绿 | done |
+### 2026-10-01 · 修 bug：替换法宝导致技能键位整体错位（用户实测）→ awaiting-human
+
+| 项 | 结果 | 状态 |
+|---|---|---|
+| 用户报告 | 「替换技能，结果技能不仅没换，之前的还丢掉了」 | done |
+| 复现 | 脚本实测：替换 0 号位法宝后 `法宝宝=[mine, orbit_blade, chain_lightning, boomerang]`，`技能槽=[thunder_net, blade_storm, thunder, whirlwind_volley]` —— 键位整体左移、新法宝跑到末尾 | done |
+| 根因 | `inventory_ui._on_replace_pick` 走的是 `drop_weapon` + `add_weapon`，而 `add_weapon` 把新法宝**追加到末尾** -> 法宝顺序变化 -> `_sync_skill_slots()` 按顺序重映射 -> 按键 1 不再是它、原技能像「丢了」 | done |
+| 修法 | `player.replace_weapon_at(index, new_id)`：新法宝**原位顶替**（含被动解绑/绑定 + 同步技能槽）；乾坤袋改走它 | done |
+| 验证 | 真实 UI 路径复测：`法宝=[boomerang, mine, orbit_blade, chain_lightning]`、`技能槽=[whirlwind_volley, thunder_net, blade_storm, thunder]` —— 0 号位正确、其它三格技能不变 | done |
+| 回归判据 | 新增 `tools/qa/check_skill_slots.gd`（切技能只动该槽 / 换法宝原位且不错位 / 越界与已拥有等边界），并注册进 L0 判定为 `skill-slots` 一项。判定现 **16 项全绿** | done |
+| 附带确认 | 「点击技能行切技能」这条路径本身是好的（实测 active_skill 与技能槽都正确更新、消耗 1 本残卷）——坏的只有法宝替换那条 | done |
 > 本轮未修改"待办（人写）"列；判定脚本与规格表未改动（边界 must-not）。
 
 ### 2026-09-22 · L0 判据增强：script-parse

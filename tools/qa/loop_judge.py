@@ -230,6 +230,26 @@ def check_settings():
     }
 
 
+def check_skill_slots():
+    """功能回归：法宝替换 / 技能切换（2026-10-01 用户实测报过「换技能反而把技能丢了」）。
+
+    判据脚本 tools/qa/check_skill_slots.gd：切技能只动该槽；换法宝必须原位替换、
+    其它格的技能不许错位（原来的 drop+add 会追加到末尾导致键位整体错位）。
+    """
+    code, out, secs = run_godot(["--script", "res://tools/qa/check_skill_slots.gd"])
+    if code == "missing":
+        return {"id": "skill-slots", "determinism": "assert", "pass": False,
+                "reason": "找不到 Godot 可执行文件", "godot": GODOT}
+    bad = [ln for ln in out.splitlines() if "SKILLSLOT FAIL" in ln]
+    return {
+        "id": "skill-slots",
+        "determinism": "assert",
+        "pass": "SKILLSLOT PASS" in out and not bad,
+        "bad_count": len(bad),
+        "bad_lines": bad[:10],
+        "seconds": round(secs, 1),
+    }
+
 def check_characters():
     """功能回归：多角色（P7）——签名法宝 / 属性倍率 / 配色 / 存档回读 / 非法 id 回退。
 
@@ -478,7 +498,7 @@ def main():
     args = parser.parse_args()
 
     checks = [check_import(), check_script_parse(), check_kill_credit(), check_weapons(),
-              check_skills(), check_characters(), check_settings(), check_achievements(),
+              check_skills(), check_skill_slots(), check_characters(), check_settings(), check_achievements(),
               check_asset_contract(), check_import_hygiene(), check_sprite_refs(),
               check_touch(), check_hero_columns(), check_fx_entry(), check_font_coverage()]
     if not args.fast:
@@ -511,6 +531,8 @@ def main():
             extra = " (13 项成就: 统计/解锁/不重复/成就页)"
         if c["id"] == "settings-ui":
             extra = " (设置菜单 3 滑杆 + 身份选择器)"
+        if c["id"] == "skill-slots":
+            extra = " (法宝替换原位 / 技能槽不错位)"
         if c["id"] == "characters":
             extra = " (3 身份: 签名法宝/属性/配色/回退)"
         if c["id"] == "skills-cast":

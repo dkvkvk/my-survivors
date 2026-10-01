@@ -342,8 +342,8 @@ func _on_replace_pick(index: int) -> void:
 	if _player == null or index >= _player.weapons.size():
 		return
 	var old_id: String = _player.weapons[index]["id"]
-	_player.drop_weapon(old_id)
-	var ok: bool = _player.add_weapon(_pending_id)
+	# 原位替换（2026-10-01）：不能 drop + add——add 会追加到末尾，导致技能槽整体错位
+	var ok: bool = _player.replace_weapon_at(index, _pending_id)
 	Audio.play("res://sounds/pickup.wav", false, 1.4, 0.4)
 	if ok and _pending_drop != null and is_instance_valid(_pending_drop):
 		# 把换下来的法宝掉在原地，形成循环
