@@ -10,10 +10,10 @@
 
 | 文件 | 尺寸 | 引用处 | 说明 |
 |---|---|---|---|
-| `assets/hero/ninja_sheet.png` | 64×64 | `hero.gd` | **共用兜底表**（守山人行走表）：4×4、16px/格，列=下0 上1 左2 右3，行 0-3=行走帧。⚠️ 代码里**右向 = 镜像左向列（col2）**；col3 帧间不自洽，不用 |
-| `assets/hero/char_fu_sheet.png` | 64×64 | `hero.gd` | 符修专属表（2026-10-01 由 `tools/assemble_char_strips.py` 拼接：赭黄道袍 + 随身符纸筒） |
-| `assets/hero/char_jian_sheet.png` | 64×64 | `hero.gd` | 剑修专属表（月白/玉色道袍 + 背剑 + 白束带；figure 偏瘦，夜色里对比略弱） |
-| `assets/hero/char_dan_sheet.png` | 64×64 | `hero.gd` | 丹修专属表（玉绿道袍 + 朱砂腰带 + 腰间铜丹炉，身板敦实） |
+| `assets/hero/char_shou_shan_sheet.png` | 128×128 | `hero.gd` / `characters.gd` | **守山人现行表**（2026-10-01 重画，32px 格；三条单列条拼成，每方向独立归一到同高） |
+| `assets/hero/ninja_sheet.png` | 64×64 | `hero.gd` | **共用兜底表**（旧 16px 格版）：身份没有专属表时退回它 + 配色 tint；L0 判据 `hero-columns` 也校验它 || `assets/hero/char_fu_sheet.png` | 128×128 | `hero.gd` | 符修专属表（2026-10-01 由 `tools/assemble_char_strips.py` 拼接：赭黄道袍 + 随身符纸筒） |
+| `assets/hero/char_jian_sheet.png` | 128×128 | `hero.gd` | 剑修专属表（月白/玉色道袍 + 背剑 + 白束带；figure 偏瘦，夜色里对比略弱） |
+| `assets/hero/char_dan_sheet.png` | 128×128 | `hero.gd` | 丹修专属表（玉绿道袍 + 朱砂腰带 + 腰间铜丹炉，身板敦实） |
 | `assets/hero/shadow.png` | 12×8 | `hero.gd` | 脚下阴影 |
 
 ### 敌人（每只两帧，代码按 `balance.gd` 的 sprites 路径加载）

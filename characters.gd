@@ -22,12 +22,12 @@ const LIST := [
 		"desc": "三代守夜，剑案传家。本命飞剑起手 4 阶，身板与出手都均衡，法宝位也更空。",
 		"tint": Color(1, 1, 1),
 		"accent": Color(0.33, 0.88, 0.78),
-		"sheet": "res://assets/hero/ninja_sheet.png",
+		"sheet": "res://assets/hero/char_shou_shan_sheet.png",   # 32px 格重画版（旧 16px 表留作 hero.gd 的兜底 SHEET）
 		"signature_weapon": "",
 		"base_weapon_level": 4,
 		"signature_level": 0,
 		"health_mult": 1.0, "speed_mult": 1.0, "fire_rate_mult": 1.0, "mana_max_mult": 1.0,
-		"sprite_mul": Vector2(1.20, 1.17),  # 归一人物大小（见 LOOPS: 四人一致性）
+		"sprite_mul": Vector2(1.29, 1.02),  # 归一人物大小（见 LOOPS: 四人一致性）
 	},
 	{
 		"id": "fu_xiu",

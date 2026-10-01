@@ -38,6 +38,10 @@ RUNTIME_BAD = re.compile(r"SCRIPT ERROR|SHADER ERROR|no animation")
 # 素材契约规格表：改素材只改这里
 ASSET_SPEC = {
     "assets/hero/ninja_sheet.png": {"size": (64, 64), "note": "4x4 方向行走表，禁止换成图标九宫格（坑 #10）"},
+    "assets/hero/char_shou_shan_sheet.png": {"size": (128, 128), "note": "守山人 32px 格重画表（每方向独立归一）"},
+    "assets/hero/char_fu_sheet.png": {"size": (128, 128), "note": "符修 32px 格行走表"},
+    "assets/hero/char_jian_sheet.png": {"size": (128, 128), "note": "剑修 32px 格行走表"},
+    "assets/hero/char_dan_sheet.png": {"size": (128, 128), "note": "丹修 32px 格行走表"},
     "assets/ui/cover.png": {"size": (1920, 1080), "note": "封面 16:9"},
     "assets/ui/menu_bg.png": {"size": (1920, 1080), "note": "菜单背景 16:9", "optional": True},
     "assets/ui/gameover_bg.png": {"size": (1920, 1080), "note": "结算背景 16:9", "optional": True},
