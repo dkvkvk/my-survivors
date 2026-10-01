@@ -226,4 +226,4 @@ var materials: Dictionary = {} # {"scrap":12, "crystal":3}
 | 8 | `icon_skill_book.png` | 32×32 | 神通残卷 | ✅ 已接入 |
 
 > 规格：洋红底 `#FF00FF`、单图标、`crisp pixels`、修仙+修仙（青霓虹 + 红木/和纸）
-> 下一批美术需求（特效贴图等）见 `ART_PROMPTS.md`。
+> 下一批美术需求见 `XIANXIA_ART_PROMPTS.md`。

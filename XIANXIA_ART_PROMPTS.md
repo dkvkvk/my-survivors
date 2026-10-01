@@ -618,6 +618,10 @@ pixel art, 16-bit retro game style, crisp pixels, no text, no watermark, no bord
 
 ---
 
+> **注**：和风时期的旧提示词文件 `ART_PROMPTS.md` 已退役（风格基准与「樱花 / 和纸烟团」那批都过期了）。
+> 其中「特效贴图升级」（fx_ring / fx_slash / fx_burst / fx_thunder）当时没做，现在按本文「〇、总规范」的调色板重写即可——
+> 不做也没关系：`vfx.gd` 现在全部用代码画 + 4 张程序化贴图，观感已经成立。
+
 ## 八、本轮新增（P7 扩展包）· 共 11 张
 
 > **优先级**：A 神通图标 8 张（游戏里已有代码占位图，随时可替换，不挡我推进）

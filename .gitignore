@@ -14,3 +14,11 @@ Thumbs.db
 # 本地产物（判定报告 / 临时验收截图）
 tools/qa/judge-report.json
 /_shots/
+
+# Python 缓存 / 校验脚本的临时产物
+__pycache__/
+*.pyc
+
+# 截图验证用的临时 driver 与临时图（用完即删，防误提交）
+/_drv_*
+/_*.png

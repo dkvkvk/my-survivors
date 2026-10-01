@@ -26,7 +26,6 @@
 | `addons/saltmire_juice/` 打击感套件 | [Saltmire Juice](https://github.com/saltmire/saltmire-juice) | MIT |
 | `sounds/*.wav` 6 个音效 | [Juhani Junkala 8-bit 音效包](https://opengameart.org/content/512-sound-effects-8-bit-style) | CC0 |
 | `sounds/bgm_*.wav` 两首循环 BGM | 本项目脚本合成（`synth_bgm.py` 思路，见提交历史） | CC0（自制） |
-| `backgrounds/grass-ground-soft.png` 草地地面 | [Seamless Grass II](https://opengameart.org/content/seamless-grass-texture-ii) | CC0 |
 | `fonts/` 中文像素字体 + OFL.txt | [Fusion Pixel（缝合像素）by TakWolf](https://github.com/TakWolf/fusion-pixel-font) | SIL OFL 1.1 |
 | 代码绘制的视觉（灵珠/飞刀/光环/本命飞剑/伤害数字） | 本项目 | 随项目 MIT |
 | `assets/fx/` 特效贴图（光晕/星芒/火花/烟雾） | 本项目用 Python 脚本程序化生成（见 ASSETS.md 说明） | CC0（自制） |
