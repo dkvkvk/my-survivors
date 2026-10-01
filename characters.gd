@@ -51,7 +51,7 @@ const LIST := [
 		"sheet": "res://assets/hero/char_jian_sheet.png",
 		"signature_weapon": "orbit_blade",
 		"health_mult": 1.0, "speed_mult": 0.9, "fire_rate_mult": 1.25, "mana_max_mult": 1.0,
-		"sprite_mul": Vector2(0.93, 0.90),  # 归一人物大小（见 LOOPS: 四人一致性）
+		"sprite_mul": Vector2(1.12, 1.04),  # 归一人物大小（见 LOOPS: 四人一致性）
 	},
 	{
 		"id": "dan_xiu",

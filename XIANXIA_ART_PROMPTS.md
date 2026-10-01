@@ -38,6 +38,74 @@ gold accents (#E8B84A), cinnabar red (#B5352C), moon-white highlights (#CFE8E0)
 > `assets/hero/char_shou_shan_sheet.png`（128×128，每方向独立归一到同高）。
 > 按本文件规矩接入后即删提示词；现状查 `ASSETS.md`，经验查 `HANDOVER.md` 坑 #23。
 
+### 1. 剑修行走表重画（3 张 · 修「走路一大一小」）
+
+> **为什么**：你现在看到的"剑修走路一大一小"，根因是**交付的原条里同一方向的 4 帧被画成了不同大小**
+> （实测 up 列帧间躯干高度差 40%、left 26%）。拼表时按内容 bbox 归一，举剑的帧 bbox 被拉高
+> → 那些帧的身体被缩得特别小 ✗。已用 `tools/normalize_sheet_frames.py` 按躯干高度对齐做了补救
+> （left/right/up 现为 9~11%），但**源条重画才是彻底的办法**（补救会让部分帧略软）。
+>
+> **这次的关键约束已写进提示词**：4 帧必须一样大、剑别举过头顶。
+> 命名 `jian_down.png` / `jian_up.png` / `jian_left.png`（**朝左**；不对我会镜像）。
+> 另外 `符修 up`(25%)、`丹修 left/right`(33%) 也有轻微同类问题，可选一起重画。
+
+#### 1-a `jian_down.png` —— 朝下（正面）
+
+```text
+pixel art sprite strip, one single row of 4 frames side by side, four equal cells, no gaps,
+no grid lines: a lean Chinese sword cultivator (xianxia) walking, facing DOWN the whole time (front view: face and both eyes visible, arms hanging at the sides).
+Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
+frame 4 = passing pose. Same body height, same horizontal position, same head position in all
+4 frames - only the legs and arms move.
+IMPORTANT: the character must be EXACTLY THE SAME SIZE in all 4 frames (same head size, same
+torso height). Do not draw one frame bigger than another. Keep the sword close to the body
+(not raised high above the head) so every frame has the same silhouette height.
+character: moon-white and pale jade robe with black trim, a long plain sword, a white headband
+ribbon trailing behind his head, dark boots, hair tied high with a white cord.
+color palette: moon-white (#CFE8E0) robe, jade-cyan (#55E0C8) trim, steel grey (#8FA3B8) sword,
+skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
+clean readable silhouette, no text, no watermark, no border
+```
+
+#### 1-b `jian_up.png` —— 朝上（背面）
+
+```text
+pixel art sprite strip, one single row of 4 frames side by side, four equal cells, no gaps,
+no grid lines: a lean Chinese sword cultivator (xianxia) walking, facing UP the whole time (back view: no face visible, you see the back of the head and the sword).
+Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
+frame 4 = passing pose. Same body height, same horizontal position, same head position in all
+4 frames - only the legs and arms move.
+IMPORTANT: the character must be EXACTLY THE SAME SIZE in all 4 frames (same head size, same
+torso height). Do not draw one frame bigger than another. Keep the sword close to the body
+(not raised high above the head) so every frame has the same silhouette height.
+character: moon-white and pale jade robe with black trim, a long plain sword, a white headband
+ribbon trailing behind his head, dark boots, hair tied high with a white cord.
+color palette: moon-white (#CFE8E0) robe, jade-cyan (#55E0C8) trim, steel grey (#8FA3B8) sword,
+skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
+clean readable silhouette, no text, no watermark, no border
+```
+
+#### 1-c `jian_left.png` —— 朝左（侧面）
+
+```text
+pixel art sprite strip, one single row of 4 frames side by side, four equal cells, no gaps,
+no grid lines: a lean Chinese sword cultivator (xianxia) walking, facing LEFT the whole time (profile view: face on the LEFT side of the head in all 4 frames).
+Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
+frame 4 = passing pose. Same body height, same horizontal position, same head position in all
+4 frames - only the legs and arms move.
+IMPORTANT: the character must be EXACTLY THE SAME SIZE in all 4 frames (same head size, same
+torso height). Do not draw one frame bigger than another. Keep the sword close to the body
+(not raised high above the head) so every frame has the same silhouette height.
+character: moon-white and pale jade robe with black trim, a long plain sword, a white headband
+ribbon trailing behind his head, dark boots, hair tied high with a white cord.
+color palette: moon-white (#CFE8E0) robe, jade-cyan (#55E0C8) trim, steel grey (#8FA3B8) sword,
+skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
+clean readable silhouette, no text, no watermark, no border
+```
+
 ## 二、可选（未排期，想升级时再来找我写完整提示词）
 
 - **P6 两件法宝的图标**：`icon_fa_boomerang.png` / `icon_fa_mine.png` 与它们的神通图标
