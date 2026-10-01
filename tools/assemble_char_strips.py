@@ -18,8 +18,8 @@ from PIL import Image
 
 SRC = "E:/games/"
 OUT = "assets/hero/"
-CELL = 16
-CONTENT_H = 14          # 与共用表一致
+CELL = 32           # 16px 格放不下 AI 立绘的细节（实测糊成色块）
+CONTENT_H = 28          # 与共用表一致
 BOTTOM_PAD = 0          # 与共用表一致：脚踩格子底边（实测共用表底边余量 0）
 CELLS = 4               # 每个方向 4 帧
 

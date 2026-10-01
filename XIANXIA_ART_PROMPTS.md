@@ -737,6 +737,16 @@ crisp pixels, clean readable silhouette, no text, no watermark, no border
 > 产物：`assets/hero/char_fu_sheet.png` / `char_jian_sheet.png` / `char_dan_sheet.png`；
 > 选卡头像 `assets/ui/portrait_*.png` 由各表 col0 row0 裁出（96×96）。
 
+> **朝向约定（2026-10-01 踩坑）**：代码里 `hero.gd` 的 **col2 必须是「朝左」的画**
+> （共用表与三张身份表都如此；走路右由 col2 水平翻转得到，走路左用原画）。
+> 实测本次交付的 `*_left.jpg` 全都是**朝右**的（提示词写了 facing LEFT，模型没听），
+> 直接拼进 col2 会导致「左右走反」。所以拼表时做了镜像，并在 `tools/assemble_char_strips.py` 里留了
+> `MIRROR_LEFT_INTO_COL2` 开关；**下次交付后我会先量一次朝向再拼**。
+
+> **格子尺寸**：身份表用 **32px 格**（128×128），共用表是 16px 格（64×64）。
+> `hero.gd` 已按贴图宽度自动算格子并归一缩放，两种尺寸都能用。
+> 原因：AI 立绘缩到 16px 会糊成色块（实测符修/剑修只剩大像素块）。
+
 #### 这条经验值得留着：不要一次要「整张 4×4 表」（2026-09-24 实测）
 
 | 表 | 机器分类结果 | 问题 |

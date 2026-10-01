@@ -25,6 +25,7 @@ const SPRITE_SCALE := 6.6
 
 var _sprite: AnimatedSprite2D
 var _last_dir := "down"
+var _cell := FRAME        # 实际格子尺寸：身份专属表可能是 32px 格（细节更多）
 var _sheet: Texture2D
 
 
@@ -32,7 +33,7 @@ func _ready():
 	_sheet = _pick_sheet()
 	_sprite = AnimatedSprite2D.new()
 	_sprite.sprite_frames = _build_frames()
-	_sprite.scale = Vector2.ONE * SPRITE_SCALE
+	_sprite.scale = Vector2.ONE * SPRITE_SCALE * (float(FRAME) / float(_cell))
 	_sprite.position = Vector2(0, -22)
 	# 身份外观（P8）：有专属行走表就用它（不调色）；素材没到位时退回共用表 + 配色 tint 顶着
 	var own := _sheet != SHEET
@@ -55,7 +56,8 @@ func _build_frames() -> SpriteFrames:
 	# 有独立素材的朝向
 	for dir in DIR_COL:
 		_add_dir_anims(frames, dir, DIR_COL[dir])
-	# 镜像朝向（左向复用右向的列，播放时由 _sprite.flip_h 翻转）
+	# 镜像朝向：col2 存的是**朝左**的画（列名 left，共用表与三张身份表都如此），
+	# 所以「左」直接用原画、「右」由 _sprite.flip_h 水平翻转得到。
 	for dir in MIRROR_OF:
 		_add_dir_anims(frames, dir, DIR_COL[MIRROR_OF[dir]])
 	return frames
@@ -77,15 +79,18 @@ func _add_dir_anims(frames: SpriteFrames, dir: String, col: int) -> void:
 ## 身份专属行走表：文件不存在就退回共用表（加表是纯增量，不阻塞）
 func _pick_sheet() -> Texture2D:
 	var path := String(Characters.current_def().get("sheet", ""))
+	var tex: Texture2D = SHEET
 	if path != "" and ResourceLoader.exists(path):
-		return load(path)
-	return SHEET
+		tex = load(path)
+	# 4 列，格子尺寸 = 宽 / 4：允许身份表用 32px 格（AI 立绘缩到 16px 会糊成色块）
+	_cell = maxi(8, tex.get_width() / 4)
+	return tex
 
 
 func _frame(col: int, row: int) -> AtlasTexture:
 	var tex := AtlasTexture.new()
 	tex.atlas = _sheet
-	tex.region = Rect2(col * FRAME, row * FRAME, FRAME, FRAME)
+	tex.region = Rect2(col * _cell, row * _cell, _cell, _cell)
 	return tex
 
 
