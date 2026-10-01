@@ -4,7 +4,7 @@ extends Node2D
 ## 自动读取父节点（Player）的速度，按主轴方向播放四向走路/待机动画。
 ## 物理与碰撞仍在 player.tscn 上，这里只负责外观。
 
-const SHEET := preload("res://assets/hero/ninja_sheet.png")
+const SHEET := preload("res://assets/hero/ninja_sheet.png")   # 共用兜底表
 const SHADOW := preload("res://assets/hero/shadow.png")
 const FRAME := 16
 # 精灵表列 = 朝向（下0 上1 左2 右3；行 0=待机帧，行 0-3=走路循环）
@@ -25,16 +25,18 @@ const SPRITE_SCALE := 6.6
 
 var _sprite: AnimatedSprite2D
 var _last_dir := "down"
+var _sheet: Texture2D
 
 
 func _ready():
+	_sheet = _pick_sheet()
 	_sprite = AnimatedSprite2D.new()
 	_sprite.sprite_frames = _build_frames()
 	_sprite.scale = Vector2.ONE * SPRITE_SCALE
 	_sprite.position = Vector2(0, -22)
-	# 身份配色（P7 多角色）：代码调色，不需要额外美术（独立行走表见 XIANXIA_ART_PROMPTS 第八节 B 组）
-	var tint: Color = Characters.current_def().get("tint", Color(1, 1, 1))
-	_sprite.modulate = tint
+	# 身份外观（P8）：有专属行走表就用它（不调色）；素材没到位时退回共用表 + 配色 tint 顶着
+	var own := _sheet != SHEET
+	_sprite.modulate = Color(1, 1, 1) if own else Characters.current_def().get("tint", Color(1, 1, 1))
 	add_child(_sprite)
 	_sprite.play("idle_down")
 
@@ -72,9 +74,17 @@ func _add_dir_anims(frames: SpriteFrames, dir: String, col: int) -> void:
 		frames.add_frame(walk, _frame(col, row))
 
 
+## 身份专属行走表：文件不存在就退回共用表（加表是纯增量，不阻塞）
+func _pick_sheet() -> Texture2D:
+	var path := String(Characters.current_def().get("sheet", ""))
+	if path != "" and ResourceLoader.exists(path):
+		return load(path)
+	return SHEET
+
+
 func _frame(col: int, row: int) -> AtlasTexture:
 	var tex := AtlasTexture.new()
-	tex.atlas = SHEET
+	tex.atlas = _sheet
 	tex.region = Rect2(col * FRAME, row * FRAME, FRAME, FRAME)
 	return tex
 

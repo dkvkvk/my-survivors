@@ -118,6 +118,17 @@ func apply_start_weapon(id: String) -> void:
 	VFX.levelup_burst(global_position, VFX.C_CYAN)
 
 
+## 开局发牌（P8 武器随角色）：不再弹"选法宝"面板——本命飞剑给到起手等级，
+## 签名法宝由 _apply_character() 按身份自带，这里只补一句提示。
+func apply_character_signature() -> void:
+	apply_start_weapon("shuriken")
+	var sig := String(_char.get("signature_weapon", ""))
+	if sig != "":
+		Juice.damage_number(get_parent(), global_position + Vector2(0, -156),
+			"签名法宝：%s" % Weapons.get_def(sig).get("name", sig),
+			{"color": Color(1.0, 0.85, 0.4), "scale": 1.4})
+
+
 ## 丢弃法宝（替换面板用）：同时卸下它的被动效果
 func drop_weapon(id: String) -> void:
 	for i in weapons.size():
@@ -453,9 +464,9 @@ func _apply_character() -> void:
 	mana_max = round(mana_max * float(_char.get("mana_max_mult", 1.0)))
 	health = max_health
 	mana = mana_max
-	var extra: String = str(_char.get("start_extra_weapon", ""))
-	if extra != "":
-		add_weapon(extra)
+	var sig: String = str(_char.get("signature_weapon", ""))
+	if sig != "":
+		add_weapon(sig)
 
 
 func character_name() -> String:

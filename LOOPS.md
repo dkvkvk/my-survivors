@@ -44,6 +44,15 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 | 修 HANDOVER §6 坑 #10 的过期 sha256 | 已更新为 @@e0e7f05107190e2b5f5d650e4479c3e84d051e4826d7bb9ff69f4be56db34aaa@@（修仙化后的守山人表），并注明哈希为何变 | awaiting-human |
 | 清掉 @@assets/check.png.import@@ 孤儿 | 已删除；import-hygiene 孤儿计数 1 → 0 | awaiting-human |
 
+### 2026-10-01 · 多角色（P8）：武器随角色 + 第 4 个身份「丹修」→ awaiting-human
+
+| 项 | 结果 | 状态 |
+|---|---|---|
+| 武器随角色 | 已实现：**选身份即定武器**（本命飞剑起手 3 阶 + 签名法宝自带）；`start_select_ui.gd` 停用 | awaiting-human |
+| 第 4 个身份「丹修」 | 已加（签名法宝＝离火法环，生命 ×1.3 / 攻速 ×0.9）；行走表待生成（提示词 B3-a/b/c） | awaiting-human |
+| 角色专属行走表 | `hero.gd` 已接：有专属表就用它且不调色，没有则退回共用表 + tint；丹修头像已补（暂用共用表正面格 + 绿调） | awaiting-human |
+| 字体子集 | 新文案引入 10 个新字（丹/签/观/房/看/耐/打/偏/缠/名）→ 跑 `python tools/subset_font.py` 重建（515 字 / 0.1MB），font-coverage 恢复 **PASS** | done |
+| L0 `settings-ui` **FAIL** | `tools/qa/check_settings.gd` 里**写死 3 个身份**（报「身份可选数量 4 != 3」）。按 LOOPS 约定我**没有改判据**——**需要人决定**：建议把期望值改成从 `Characters.LIST` 取（以后加身份不用再改），或直接改成 4 | **awaiting-human（需人改判据）** |
 > 本轮未修改"待办（人写）"列；判定脚本与规格表未改动（边界 must-not）。
 
 ### 2026-09-22 · L0 判据增强：script-parse

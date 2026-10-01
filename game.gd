@@ -53,8 +53,8 @@ func _ready():
 	$HUD.add_child(id_label)
 	# 掉落指示（优化）：法宝掉落/藏宝匣在视野外时，屏幕边缘画金色箭头
 	add_child(preload("res://drop_indicator.gd").new())
-	# 开局选法宝（P6）：弹 4 张卡并暂停游戏，选完才正式开打
-	%StartSelectUI.call_deferred("open", player)
+	# P8 武器随角色：不再弹"选法宝"面板，直接按身份发牌（本命飞剑到起手等级 + 签名法宝）
+	player.apply_character_signature()
 
 
 func _process(delta):

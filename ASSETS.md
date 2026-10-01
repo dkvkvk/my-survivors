@@ -10,7 +10,10 @@
 
 | 文件 | 尺寸 | 引用处 | 说明 |
 |---|---|---|---|
-| `assets/hero/ninja_sheet.png` | 64×64 | `hero.gd` | **4×4 方向表**，16px/格：列=下0 上1 左2 右3，行 0-3=行走帧。AI 生成（模型给的是 8×4 网格，接入时取第 1/3/5/7 列）。⚠️ 左向列由代码镜像右向列 |
+| `assets/hero/ninja_sheet.png` | 64×64 | `hero.gd` | **共用兜底表**（守山人行走表）：4×4、16px/格，列=下0 上1 左2 右3，行 0-3=行走帧。⚠️ 代码里**右向 = 镜像左向列（col2）**；col3 帧间不自洽，不用 |
+| `assets/hero/char_fu_sheet.png` | 64×64 | `hero.gd` | 符修专属表（**待生成**：XIANXIA_ART_PROMPTS 第八节 B1-a/b/c）。文件不存在时自动退回共用表 + 配色 tint |
+| `assets/hero/char_jian_sheet.png` | 64×64 | `hero.gd` | 剑修专属表（待生成 B2-a/b/c） |
+| `assets/hero/char_dan_sheet.png` | 64×64 | `hero.gd` | 丹修专属表（待生成 B3-a/b/c） |
 | `assets/hero/shadow.png` | 12×8 | `hero.gd` | 脚下阴影 |
 
 ### 敌人（每只两帧，代码按 `balance.gd` 的 sprites 路径加载）
