@@ -40,7 +40,7 @@ const LIST := [
 		"sheet": "res://assets/hero/char_fu_sheet.png",
 		"signature_weapon": "mine",
 		"health_mult": 0.75, "speed_mult": 1.0, "fire_rate_mult": 1.0, "mana_max_mult": 1.4,
-		"sprite_mul": Vector2(1.30, 1.12),  # 归一人物大小（见 LOOPS: 四人一致性）
+		"sprite_mul": Vector2(1.45, 1.12),  # 归一人物大小（见 LOOPS: 四人一致性）
 	},
 	{
 		"id": "jian_xiu",
@@ -62,7 +62,7 @@ const LIST := [
 		"sheet": "res://assets/hero/char_dan_sheet.png",
 		"signature_weapon": "aura",
 		"health_mult": 1.3, "speed_mult": 0.95, "fire_rate_mult": 0.9, "mana_max_mult": 1.0,
-		"sprite_mul": Vector2(0.84, 1.00),  # 归一人物大小（见 LOOPS: 四人一致性）
+		"sprite_mul": Vector2(0.88, 1.00),  # 归一人物大小（见 LOOPS: 四人一致性）
 	},
 ]
 

@@ -747,6 +747,62 @@ crisp pixels, clean readable silhouette, no text, no watermark, no border
 > `hero.gd` 已按贴图宽度自动算格子并归一缩放，两种尺寸都能用。
 > 原因：AI 立绘缩到 16px 会糊成色块（实测符修/剑修只剩大像素块）。
 
+#### B4. 守山人表重画（对齐 32px 格 · 3 张，2026-10-01 新增）
+
+> **为什么**：守山人一直用最早的 16px 格旧表，另外三个身份是 32px 格；
+> 尺寸已用 `sprite_mul` 拉齐，但**像素颗粒差一倍**（他在屏幕上是「大方块」）。
+> 重画后他与另外三人从尺寸到画风完全一套。
+> **造型要一致**（他已是玩家的熟面孔）：**玄青道袍 + 黑边 + 红发带 + 背后剑匣**。
+> 命名 `shou_shan_down.png` / `shou_shan_up.png` / `shou_shan_left.png`。
+> 交付后我先量一次朝向再拼（这三张也应该是「朝左」的侧面；不对我会镜像）。
+
+##### B4-a `shou_shan_down.png` —— 朝下（正面）
+
+```text
+pixel art sprite strip, one single row of 4 frames side by side, four equal cells, no gaps,
+no grid lines: a small Chinese mountain night-watch cultivator walking, facing DOWN the whole time (front view: face and both eyes visible, arms hanging at the sides).
+Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
+frame 4 = passing pose. Same body height, same horizontal position, same head position in all
+4 frames - only the legs and arms move.
+character: dark teal-blue robe with black trim, black hair in a topknot tied with a small red
+ribbon, a flat dark sword case strapped on his back, dark trousers, black shoes, pale round face.
+color palette: dark teal-blue (#1E4F5C) robe, black trim, cinnabar red (#B5352C) ribbon,
+skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
+clean readable silhouette, no text, no watermark, no border
+```
+
+##### B4-b `shou_shan_up.png` —— 朝上（背面）
+
+```text
+pixel art sprite strip, one single row of 4 frames side by side, four equal cells, no gaps,
+no grid lines: a small Chinese mountain night-watch cultivator walking, facing UP the whole time (back view: no face visible, you see the back of the head and the sword case on his back).
+Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
+frame 4 = passing pose. Same body height, same horizontal position, same head position in all
+4 frames - only the legs and arms move.
+character: dark teal-blue robe with black trim, black hair in a topknot tied with a small red
+ribbon, a flat dark sword case strapped on his back, dark trousers, black shoes, pale round face.
+color palette: dark teal-blue (#1E4F5C) robe, black trim, cinnabar red (#B5352C) ribbon,
+skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
+clean readable silhouette, no text, no watermark, no border
+```
+
+##### B4-c `shou_shan_left.png` —— 朝左（侧面）
+
+```text
+pixel art sprite strip, one single row of 4 frames side by side, four equal cells, no gaps,
+no grid lines: a small Chinese mountain night-watch cultivator walking, facing LEFT the whole time (profile view: face on the LEFT side of the head in all 4 frames).
+Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
+frame 4 = passing pose. Same body height, same horizontal position, same head position in all
+4 frames - only the legs and arms move.
+character: dark teal-blue robe with black trim, black hair in a topknot tied with a small red
+ribbon, a flat dark sword case strapped on his back, dark trousers, black shoes, pale round face.
+color palette: dark teal-blue (#1E4F5C) robe, black trim, cinnabar red (#B5352C) ribbon,
+skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
+solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
+clean readable silhouette, no text, no watermark, no border
+```
 #### 这条经验值得留着：不要一次要「整张 4×4 表」（2026-09-24 实测）
 
 | 表 | 机器分类结果 | 问题 |
