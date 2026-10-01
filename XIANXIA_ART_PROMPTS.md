@@ -728,196 +728,25 @@ solid magenta background (#FF00FF), pixel art, 16-bit retro game style,
 crisp pixels, clean readable silhouette, no text, no watermark, no border
 ```
 
-### B. 角色行走表（3 角色 × 3 方向 = 9 张 · 每张一列 4 帧）
+### B. 角色行走表 —— ✅ 已交付并接入（2026-10-01）
 
-> **规格**：一张图**只画一个方向、一列 4 帧**（每格 16×16）。我负责抠底、切帧、拼成 4×4 表。
-> **右向不用出图**：代码里「右向 = 镜像左向列」（已实测自洽），所以每个角色只要 下 / 上 / 左 三张。
-> **命名**：`<角色>_<方向>.png` —— 角色 `fu` / `jian` / `dan`，方向 `down` / `up` / `left`。
-> 　　例：`fu_left.png`、`jian_down.png`、`dan_up.png`（加 `_raw` 后缀也行）。
-> **交付后我拼到**：`assets/hero/char_fu_sheet.png` / `char_jian_sheet.png` / `char_dan_sheet.png`
-> 　　—— `characters.gd` 里的路径**已经填好**，文件一到就自动生效，不用改代码。
-> **验收**：L0 判据 `hero-columns` 会机器校验（列内身体质心极差 + 脸部朝向符号）；不合格我直接打回。
-> **没到位也不挡玩**：这些角色先靠配色区分（`tint`），玩法完整。
+> 9 张单列条（fu / jian / dan × down / up / left）已生成、接入，逐张验收通过：
+> **帧间自洽性极好**（各列身体质心极差 ≤ 0.6px），且三张的 down / up / left 朝向全部正确
+> （朝下正面、朝上背面、朝左真左侧面）。
+> 拼接管线：`python tools/assemble_char_strips.py`（抠底 → 切 4 帧 → 统一缩放 → 底边对齐 → 右向镜像左向列）。
+> 产物：`assets/hero/char_fu_sheet.png` / `char_jian_sheet.png` / `char_dan_sheet.png`；
+> 选卡头像 `assets/ui/portrait_*.png` 由各表 col0 row0 裁出（96×96）。
 
-#### 为什么不再要「整张 4×4 表」（2026-09-24 实测）
+#### 这条经验值得留着：不要一次要「整张 4×4 表」（2026-09-24 实测）
 
 | 表 | 机器分类结果 | 问题 |
 |---|---|---|
-| `char_fu_sheet` | 4 列 | 多列头部肤色都偏高（偏正面/侧面），帧间质心极差最大 15px |
-| `char_jian_sheet` | 8 列 | 只有 col0 正面、col6 左侧，**4 列重复朝右、没有背面列** |
+| `char_fu_sheet`（旧尝试） | 4 列 | 多列头部肤色都偏高（偏正面/侧面），帧间质心极差最大 15px |
+| `char_jian_sheet`（旧尝试） | 8 列 | 只有 col0 正面、col6 左侧，**4 列重复朝右、没有背面列** |
 | `ninja_sheet` | 11 列 | col0 正面、col4 左侧、4 列重复朝右、**没有背面列**、还有 5 条空列 |
 
-**结论**：模型会把「四个方向」画成「多个略微转头的同向姿势」。所以改成**一次只要一个方向**，由我拼表。
-（已交付的三张表没浪费：每张的「正面那一格」已抽成角色选卡头像 `assets/ui/portrait_*.png`。）
-
----
-
-#### B1. 符修（万宝楼掌柜的弟子）· 签名法宝「地火符阵」
-
-##### B1-a `fu_down.png` —— 朝下（正面）
-
-```text
-pixel art sprite strip, one single row of 4 frames side by side, exact 4 equal 16x16 cells,
-no gaps, no grid lines: a young Chinese talisman cultivator (xianxia) walking, facing DOWN the whole time (front view: face and both eyes visible, arms hanging at the sides).
-Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
-frame 4 = passing pose. Same body height, same horizontal position, same head position in all
-4 frames - only the legs and arms move.
-character: loose saffron-yellow robe with cinnabar-red trim, a bamboo tube of yellow talismans
-strapped on his back, two paper talismans pinched in one hand, black cloth shoes, hair in a small
-topknot tied with a red cord.
-color palette: saffron yellow (#E8B84A) robe, cinnabar red (#B5352C) trim, paper yellow (#FFD98A)
-talismans, skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
-solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
-clean readable silhouette, no text, no watermark, no border
-```
-
-##### B1-b `fu_up.png` —— 朝上（背面）
-
-```text
-pixel art sprite strip, one single row of 4 frames side by side, exact 4 equal 16x16 cells,
-no gaps, no grid lines: a young Chinese talisman cultivator (xianxia) walking, facing UP the whole time (back view: no face visible, you see the back of the head and the pack he carries).
-Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
-frame 4 = passing pose. Same body height, same horizontal position, same head position in all
-4 frames - only the legs and arms move.
-character: loose saffron-yellow robe with cinnabar-red trim, a bamboo tube of yellow talismans
-strapped on his back, two paper talismans pinched in one hand, black cloth shoes, hair in a small
-topknot tied with a red cord.
-color palette: saffron yellow (#E8B84A) robe, cinnabar red (#B5352C) trim, paper yellow (#FFD98A)
-talismans, skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
-solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
-clean readable silhouette, no text, no watermark, no border
-```
-
-##### B1-c `fu_left.png` —— 朝左（侧面）
-
-```text
-pixel art sprite strip, one single row of 4 frames side by side, exact 4 equal 16x16 cells,
-no gaps, no grid lines: a young Chinese talisman cultivator (xianxia) walking, facing LEFT the whole time (profile view: face on the LEFT side of the head in all 4 frames).
-Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
-frame 4 = passing pose. Same body height, same horizontal position, same head position in all
-4 frames - only the legs and arms move.
-character: loose saffron-yellow robe with cinnabar-red trim, a bamboo tube of yellow talismans
-strapped on his back, two paper talismans pinched in one hand, black cloth shoes, hair in a small
-topknot tied with a red cord.
-color palette: saffron yellow (#E8B84A) robe, cinnabar red (#B5352C) trim, paper yellow (#FFD98A)
-talismans, skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
-solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
-clean readable silhouette, no text, no watermark, no border
-```
-
----
-
-#### B2. 剑修（青冥山弃徒）· 签名法宝「周天剑环」
-
-##### B2-a `jian_down.png` —— 朝下（正面）
-
-```text
-pixel art sprite strip, one single row of 4 frames side by side, exact 4 equal 16x16 cells,
-no gaps, no grid lines: a lean Chinese sword cultivator (xianxia) walking, facing DOWN the whole time (front view: face and both eyes visible, arms hanging at the sides).
-Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
-frame 4 = passing pose. Same body height, same horizontal position, same head position in all
-4 frames - only the legs and arms move.
-character: moon-white and pale jade robe with black trim, a long plain sword strapped across his
-back, a white headband ribbon trailing behind his head, dark boots, hair tied high with a white cord.
-color palette: moon-white (#CFE8E0) robe, jade-cyan (#55E0C8) trim, steel grey (#8FA3B8) sword,
-skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
-solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
-clean readable silhouette, no text, no watermark, no border
-```
-
-##### B2-b `jian_up.png` —— 朝上（背面）
-
-```text
-pixel art sprite strip, one single row of 4 frames side by side, exact 4 equal 16x16 cells,
-no gaps, no grid lines: a lean Chinese sword cultivator (xianxia) walking, facing UP the whole time (back view: no face visible, you see the back of the head and the pack he carries).
-Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
-frame 4 = passing pose. Same body height, same horizontal position, same head position in all
-4 frames - only the legs and arms move.
-character: moon-white and pale jade robe with black trim, a long plain sword strapped across his
-back, a white headband ribbon trailing behind his head, dark boots, hair tied high with a white cord.
-color palette: moon-white (#CFE8E0) robe, jade-cyan (#55E0C8) trim, steel grey (#8FA3B8) sword,
-skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
-solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
-clean readable silhouette, no text, no watermark, no border
-```
-
-##### B2-c `jian_left.png` —— 朝左（侧面）
-
-```text
-pixel art sprite strip, one single row of 4 frames side by side, exact 4 equal 16x16 cells,
-no gaps, no grid lines: a lean Chinese sword cultivator (xianxia) walking, facing LEFT the whole time (profile view: face on the LEFT side of the head in all 4 frames).
-Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
-frame 4 = passing pose. Same body height, same horizontal position, same head position in all
-4 frames - only the legs and arms move.
-character: moon-white and pale jade robe with black trim, a long plain sword strapped across his
-back, a white headband ribbon trailing behind his head, dark boots, hair tied high with a white cord.
-color palette: moon-white (#CFE8E0) robe, jade-cyan (#55E0C8) trim, steel grey (#8FA3B8) sword,
-skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
-solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
-clean readable silhouette, no text, no watermark, no border
-```
-
----
-
-#### B3. 丹修（青冥观丹房看火的道人）· 签名法宝「离火法环」
-
-> 本轮新增的第 4 个身份：皮糙肉厚（生命 ×1.3）、出手偏慢（攻速 ×0.9），靠三昧真火近身清场。
-
-##### B3-a `dan_down.png` —— 朝下（正面）
-
-```text
-pixel art sprite strip, one single row of 4 frames side by side, exact 4 equal 16x16 cells,
-no gaps, no grid lines: a stocky middle-aged Chinese alchemy cultivator (xianxia) walking, facing DOWN the whole time (front view: face and both eyes visible, arms hanging at the sides).
-Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
-frame 4 = passing pose. Same body height, same horizontal position, same head position in all
-4 frames - only the legs and arms move.
-character: deep jade-green robe with a cinnabar-red sash, a small bronze pill furnace hanging at
-his waist, soot smudges on the sleeves, sleeves rolled up, plain black boots, hair in a topknot
-pinned with a wooden stick.
-color palette: jade green (#3E7A5E) robe, cinnabar red (#B5352C) sash, bronze (#C9962E) furnace,
-skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
-solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
-clean readable silhouette, no text, no watermark, no border
-```
-
-##### B3-b `dan_up.png` —— 朝上（背面）
-
-```text
-pixel art sprite strip, one single row of 4 frames side by side, exact 4 equal 16x16 cells,
-no gaps, no grid lines: a stocky middle-aged Chinese alchemy cultivator (xianxia) walking, facing UP the whole time (back view: no face visible, you see the back of the head and the pack he carries).
-Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
-frame 4 = passing pose. Same body height, same horizontal position, same head position in all
-4 frames - only the legs and arms move.
-character: deep jade-green robe with a cinnabar-red sash, a small bronze pill furnace hanging at
-his waist, soot smudges on the sleeves, sleeves rolled up, plain black boots, hair in a topknot
-pinned with a wooden stick.
-color palette: jade green (#3E7A5E) robe, cinnabar red (#B5352C) sash, bronze (#C9962E) furnace,
-skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
-solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
-clean readable silhouette, no text, no watermark, no border
-```
-
-##### B3-c `dan_left.png` —— 朝左（侧面）
-
-```text
-pixel art sprite strip, one single row of 4 frames side by side, exact 4 equal 16x16 cells,
-no gaps, no grid lines: a stocky middle-aged Chinese alchemy cultivator (xianxia) walking, facing LEFT the whole time (profile view: face on the LEFT side of the head in all 4 frames).
-Frame 1 = contact pose, frame 2 = passing pose, frame 3 = contact pose (opposite legs),
-frame 4 = passing pose. Same body height, same horizontal position, same head position in all
-4 frames - only the legs and arms move.
-character: deep jade-green robe with a cinnabar-red sash, a small bronze pill furnace hanging at
-his waist, soot smudges on the sleeves, sleeves rolled up, plain black boots, hair in a topknot
-pinned with a wooden stick.
-color palette: jade green (#3E7A5E) robe, cinnabar red (#B5352C) sash, bronze (#C9962E) furnace,
-skin tone (#E8C09A), dark ink-blue night (#0E1420) outline,
-solid magenta background (#FF00FF), pixel art, 16-bit retro game style, crisp pixels,
-clean readable silhouette, no text, no watermark, no border
-```
-
----
-
-> 拼表后我会顺手从 col0 row0 裁出 96×96 的选卡头像 `assets/ui/portrait_<id>.png`
-> （守山人/符修/剑修已有；丹修等它的表到了我再补，现在那张卡只是没有小头像）。
+**结论**：模型会把「四个方向」画成「多个略微转头的同向姿势」。
+**改成「一张图只画一个方向、一列 4 帧」后一次命中**——本次 9 张全对，以后加角色照这个做法。
 
 ### C. 主角表重画（1 张 · 可选，纯打磨）
 
