@@ -70,6 +70,15 @@ Godot 路径默认取 HANDOVER §0 的目录；换机器用环境变量覆盖：
 | 签名法宝起手强度 | `balance.gd` 新增 `BASE_WEAPON_LEVEL` 与 `SIGNATURE_LEVEL`：签名法宝 1 级 → 2 级；守山人本命飞剑 3 → 4 阶补偿 | awaiting-human |
 | 实测发牌 | 守山人［本命飞剑 Lv4］/ 剑修［本命飞剑 Lv3 + 周天剑环 Lv2］/ 丹修［本命飞剑 Lv3 + 离火法环 Lv2］ | awaiting-human |
 | L0 判定 | **verdict=pass 全绿**。过程中先被 `asset-contract` 抓到「头像必须 96×96」、被 `settings-ui` 抓到「名字压住徽章」，两处都是按判据修正，没有放宽判据 | awaiting-human |
+### 2026-10-01 · 人物大小归一（拉伸对齐）→ awaiting-human
+
+| 项 | 结果 | 状态 |
+|---|---|---|
+| 实测四人站立尺寸（折算 16px 格） | 守山人 7.0x12.0 / 符修 5.5x12.5 / 剑修 9.0x15.5 / 丹修 10.0x14.0 —— 最高比最矮高 29%、最宽比最窄宽 82% | awaiting-human |
+| 做法 | `characters.gd` 每个身份加 `sprite_mul`（x/y 拉伸系数，限幅 0.80~1.30）；`hero.gd` 在格子归一后再乘它。**只改渲染，不动原图** | awaiting-human |
+| 结果 | 屏上站立高度统一到约 92px：守山人 12x7.72=92.6 / 符修 25x3.70=92.5 / 剑修 31x2.97=92.1 / 丹修 28x3.30=92.4；宽度 47~55px | awaiting-human |
+| 遗留 | 守山人仍用 16px 格旧表，**像素颗粒比另外三张（32px 格）粗**；要连颗粒感统一需重画守山人三张单列条（提示词按第八节 B 组模板） | **awaiting-human（需人决定是否重画）** |
+| L0 判定 | **verdict=pass 全绿** | awaiting-human |
 > 本轮未修改"待办（人写）"列；判定脚本与规格表未改动（边界 must-not）。
 
 ### 2026-09-22 · L0 判据增强：script-parse
