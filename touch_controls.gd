@@ -260,16 +260,25 @@ func _bot_step(delta: float) -> void:
 		# 妖贴脸时优先脱身：反向拉满
 		if _player.global_position.distance_to(nearest.global_position) < 90.0:
 			direction = away
-	# 有法宝掉在附近就过去捡（真人会回身捡，600px 内都算"顺路"）
+	# 有法宝掉在附近就过去捡（真人会回身捡，600px 内都算「顺路」）
+	# 2026-10-01 修正两处，让自动测试更接近真人：
+	#   ① 挑**最近**的一个（原来取组里第一个，可能是远的，白跑一趟）
+	#   ② 妖贴脸时先逃命——不然它会为了捡东西笔直穿过妖群（真人不会），
+	#      会让测试数据把「机器人作死」误判成「游戏太难」
+	var nearest_drop: Node2D = null
+	var nearest_drop_d := 1e9
 	for drop in get_tree().get_nodes_in_group("weapon_drops"):
 		if not is_instance_valid(drop):
 			continue
-		var dpos: Vector2 = drop.global_position
-		if _player.global_position.distance_to(dpos) < 600.0:
-			direction = _player.global_position.direction_to(dpos)
-			if drop.has_method("can_touch_pickup") and drop.can_touch_pickup():
-				drop.touch_pickup()
-			break
+		var dd: float = _player.global_position.distance_to(drop.global_position)
+		if dd < 600.0 and dd < nearest_drop_d:
+			nearest_drop = drop
+			nearest_drop_d = dd
+	var mob_close: bool = nearest != null and _player.global_position.distance_to(nearest.global_position) < 150.0
+	if nearest_drop != null and not mob_close:
+		direction = _player.global_position.direction_to(nearest_drop.global_position)
+		if nearest_drop.has_method("can_touch_pickup") and nearest_drop.can_touch_pickup():
+			nearest_drop.touch_pickup()
 	# 神通：蓝够、不在冷却就放
 	for i in _player.skill_slots.size():
 		var id: String = str(_player.skill_slots[i])
@@ -289,6 +298,8 @@ func _bot_step(delta: float) -> void:
 		print("BOTPING t=%.0fs lv=%d kills=%d hp=%.0f/%.0f mobs=%d fa=%s" % [
 			t, _player.level, int(game.kill_count), _player.health, _player.max_health,
 			get_tree().get_nodes_in_group("mobs").size(), _weapons_text()])
+		print("BOTDROP t=%.0fs 累计掉落=%d 已拾取=%d 地上=%d" % [t, int(game.weapon_drops),
+			_player.weapons.size() - 1, get_tree().get_nodes_in_group("weapon_drops").size()])
 	if not _bot_done and (_player.health <= 0.0 or bool(game._run_ended)):
 		_bot_finish("win" if bool(game._run_ended) and _player.health > 0.0 else "died", t)
 

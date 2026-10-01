@@ -2,7 +2,8 @@ extends Node
 
 # Code adapted from KidsCanCode
 
-var num_players = 12
+var num_players = 20   # 12 -> 20（2026-10-01：高频爆量时 12 个不够，会开始丢音）
+const MAX_QUEUE := 24  # 队列上限：爆量时丢掉最旧的，避免堆一堆「迟到音」（听起来像卡带）
 var bus = "master"
 
 var available = []
@@ -68,10 +69,16 @@ func stop_music() -> void:
 
 func play(sound_path: String, allow_overlap: bool = false, pitch: float = 1.0, volume: float = 1.0):
 	if allow_overlap:
-		queue.append({"path": sound_path, "overlap": true, "pitch": pitch, "volume": volume})
+		_queue_push({"path": sound_path, "overlap": true, "pitch": pitch, "volume": volume})
 	else:
 		if not active_sounds.has(sound_path) and not _is_in_queue(sound_path):
-			queue.append({"path": sound_path, "overlap": false, "pitch": pitch, "volume": volume})
+			_queue_push({"path": sound_path, "overlap": false, "pitch": pitch, "volume": volume})
+
+
+func _queue_push(item: Dictionary) -> void:
+	queue.append(item)
+	while queue.size() > MAX_QUEUE:
+		queue.pop_front()
 
 func _is_in_queue(sound_path: String) -> bool:
 	for item in queue:
